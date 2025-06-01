@@ -1,0 +1,116 @@
+.navbar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 2rem 0;
+    background-color: #f5f0f0 !important;
+
+    .navbar-brand {
+        font-size: 2rem;
+        font-weight: 600;
+        color: #2c3e50;
+        transition: color 0.3s ease;
+        margin-right: 3rem;
+
+        &:hover {
+            color: #3498db;
+        }
+    }
+
+    .navbar-collapse {
+        font-size: 1.2rem;
+        margin-left: 5rem;
+    }
+
+    .nav-link {
+        color: #34495e;
+        font-weight: 500;
+        padding: 0.5rem 1.2rem;
+        transition: all 0.3s ease;
+        position: relative;
+
+        &:hover {
+            color: #3498db;
+        }
+
+        &::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background-color: #3498db;
+            transition: all 0.3s ease;
+        }
+
+        &:hover::after {
+            width: 100%;
+            left: 0;
+        }
+    }
+
+    .dropdown-menu {
+        border: none;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        padding: 0.5rem;
+    }
+
+    .dropdown-item {
+        color: #2c3e50;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background-color: #f8f9fa;
+            color: #3498db;
+            transform: translateX(5px);
+        }
+    }
+
+    .dropdown-divider {
+        margin: 0.5rem 0;
+        border-color: #e9ecef;
+    }
+
+    // Responsive adjustments
+    @media (max-width: 991.98px) {
+        .navbar-collapse {
+            background-color: #ffffff;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 1rem;
+        }
+
+        .nav-link {
+            padding: 0.75rem 1rem;
+            
+            &::after {
+                display: none;
+            }
+        }
+
+        .dropdown-menu {
+            box-shadow: none;
+            border: 1px solid #e9ecef;
+            margin-left: 1rem;
+        }
+    }
+}
+
+// Animation for dropdown
+.dropdown-menu {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+} 

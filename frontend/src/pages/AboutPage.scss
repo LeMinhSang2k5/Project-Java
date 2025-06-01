@@ -1,0 +1,116 @@
+// AboutPage.scss
+
+.about-page-container {
+    // font-family: 'Your-Chosen-Font', sans-serif; // Chọn font phù hợp
+    color: #333; // Màu chữ chính
+
+    .hero-section {
+        .display-4 {
+            color: #2c3e50; // Màu tiêu đề chính đậm hơn
+        }
+
+        .lead {
+            font-size: 1.1rem;
+            color: #555;
+        }
+    }
+
+    .section-title {
+        font-weight: 600;
+        color: #1a5ca3; // Một màu nhấn cho tiêu đề các section
+        position: relative;
+        padding-bottom: 0.5rem;
+        margin-bottom: 2rem; // Tạo khoảng cách với nội dung bên dưới
+
+        // &::after { // Đường gạch chân cách điệu cho tiêu đề (tùy chọn)
+        //     content: '';
+        //     position: absolute;
+        //     bottom: 0;
+        //     left: 50%;
+        //     transform: translateX(-50%);
+        //     width: 80px;
+        //     height: 3px;
+        //     background-color: #0d6efd; // Bootstrap primary color
+        // }
+    }
+
+    .section-intro,
+    .services-section,
+    .philosophy-section,
+    .cta-section {
+        p {
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+    }
+
+    .services-section {
+        .service-card {
+            border: none; // Bỏ viền mặc định của card
+            border-radius: 10px; // Bo góc mềm mại
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+
+            &:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+            }
+
+            .service-icon {
+
+                // Style cho icon nếu cần
+                svg {
+                    transition: transform 0.3s ease;
+                }
+            }
+
+            &:hover .service-icon svg {
+                transform: scale(1.1);
+            }
+
+            .card-title {
+                color: #343a40; // Dark color for title
+            }
+
+            .btn-outline-primary {
+
+                // Custom button style
+                &:hover {
+                    color: #fff;
+                }
+            }
+        }
+    }
+
+    .philosophy-section {
+        background-color: #f8f9fa; // Light background for contrast
+        border-radius: 10px;
+
+        .lead {
+            font-size: 1.2rem;
+            color: #495057;
+        }
+    }
+
+    .cta-section {
+        .btn-primary {
+            // Custom button style
+            padding: 0.8rem 2rem;
+            font-size: 1.1rem;
+        }
+    }
+}
+
+// Responsive adjustments if needed
+@media (max-width: 768px) {
+    .about-page-container {
+        .hero-section {
+            .display-4 {
+                font-size: 2.5rem; // Giảm kích thước tiêu đề trên mobile
+            }
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+        }
+    }
+}

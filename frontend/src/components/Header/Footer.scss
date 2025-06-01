@@ -1,0 +1,53 @@
+// Footer.scss
+.site-footer {
+    // Đảm bảo footer luôn ở dưới cùng nếu trang không đủ nội dung
+    // Điều này thường cần layout flex cho thẻ cha bao bọc Header, Content, Footer.
+    // Ví dụ trong App.js: display: flex; flex-direction: column; min-height: 100vh;
+    // Và phần content chính: flex-grow: 1;
+    // class `mt-auto` của Bootstrap cũng giúp trong nhiều trường hợp với flexbox.
+
+    .footer-heading {
+        margin-bottom: 1rem; // Tương đương mb-3 của Bootstrap
+        font-size: 1.1rem; // Kích thước tiêu đề footer
+        color: #f8f9fa; // Màu trắng sáng hơn cho tiêu đề
+    }
+
+    .footer-links {
+        .nav-link {
+            color: #adb5bd; // Màu xám nhạt cho các link
+            padding-top: 0.2rem;
+            padding-bottom: 0.2rem;
+            font-size: 0.9rem;
+
+            &:hover {
+                color: #f8f9fa; // Sáng hơn khi hover
+                text-decoration: underline;
+            }
+        }
+    }
+
+    .social-icons {
+        a {
+            transition: color 0.2s ease-in-out;
+
+            &:hover {
+                svg {
+                    // Đổi màu icon khi hover, ví dụ màu primary của Bootstrap
+                    color: #0d6efd;
+                }
+            }
+        }
+    }
+
+    .small {
+        font-size: 0.85rem;
+    }
+
+    .text-muted {
+        color: #adb5bd !important; // Đảm bảo màu text-muted dễ đọc trên nền tối
+    }
+
+    hr {
+        border-color: rgba(255, 255, 255, 0.15) !important; // Đường kẻ mờ hơn
+    }
+}
