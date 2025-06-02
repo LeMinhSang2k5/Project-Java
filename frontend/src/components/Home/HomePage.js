@@ -56,12 +56,12 @@ function HomePage() {
       </Container>
 
       {/* Quick Links Section */}
-            <section className="quick-links bg-primary text-white py-5">
+      <section className="quick-links bg-primary text-white py-5">
         <Container>
           <h2 className="text-center mb-4">Liên kết nhanh 🔗</h2>
           <Row className="justify-content-center">
             <Col md={3} className="text-center mb-3">
-              <Button variant="light" className="w-100 mb-2">Gửi Thuốc</Button>
+              <Button variant="light" className="w-100 mb-2"><a href='medical' class="medical">Gửi Thuốc</a></Button>
             </Col>
             <Col md={3} className="text-center mb-3">
               <Button variant="light" className="w-100 mb-2">Xem lịch tiêm chủng</Button>

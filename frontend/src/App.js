@@ -7,6 +7,7 @@ import Header from './components/Header/Header';
 import Footer from './components/Header/Footer';
 import Loader from './components/Pagination/Loader';
 import BlogPage from './pages/BlogPage';
+import Medical from './pages/Medical';
 import './App.scss';
 
 function App() {
@@ -18,7 +19,7 @@ function App() {
   }, []);
 
   if (isLoading) {
-    return <Loader/>;
+    return <Loader />;
   }
 
   return (
@@ -35,6 +36,7 @@ function App() {
               <Route path="/blog" element={<BlogPage />} />
               <Route path="/health-profile/new" element={<NewHealthProfile />} />
               <Route path="/health-profile/vaccination" element={<VaccinationHistory />} />
+              <Route path="/medical" element={<Medical />} />
             </Routes>
           </div>
         </div>

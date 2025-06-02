@@ -97,7 +97,9 @@ img {
 
   .quick-links {
     background: linear-gradient(135deg, #3498db, #2c3e50);
-
+    .medical{
+      text-decoration:none ;
+    }
     .btn {
       padding: 0.8rem;
       font-weight: 500;
