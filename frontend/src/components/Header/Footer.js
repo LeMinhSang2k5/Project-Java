@@ -7,7 +7,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Nav from 'react-bootstrap/Nav';
 import { NavLink } from 'react-router-dom';
-import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaEnvelope, FaPhone, FaMapMarkerAlt } from 'react-icons/fa'; // Thêm các icon bạn muốn
+import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaEnvelope, FaPhone, FaMapMarkerAlt, FaGithub } from 'react-icons/fa'; // Thêm các icon bạn muốn
 
 const Footer = () => {
     const currentYear = new Date().getFullYear();
@@ -57,6 +57,9 @@ const Footer = () => {
                     <Col md={6} lg={3}>
                         <h5 className="footer-heading">Theo dõi chúng tôi</h5>
                         <div className="social-icons mb-3">
+                            <a href="https://github.com/LeMinhSang2k5/Project-Java" target="_blank" rel="noopener noreferrer" className="text-light me-3">
+                                <FaGithub size={20}/>
+                            </a>
                             <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-light me-3">
                                 <FaFacebookF size={20} />
                             </a>
