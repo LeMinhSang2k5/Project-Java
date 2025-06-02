@@ -5,7 +5,7 @@ const BlogPage = () => {
     <div>
     <div className="blog-container">
       <div className="blog-card">
-         <img src={require("../assets/img/test.png")}   />
+         <img src={require("../assets/img/test.png")} alt="EduHealth có thể giảm tình trạng vắng mặt như thế nào với EHR tiên tiến" className="blog-image" />
         <div className="blog-card-content">
           <h3>EduHealth có thể giảm tình trạng vắng mặt như thế nào với EHR tiên tiến</h3>
           <p className="blog-meta">Bởi Y tế học đường • Ngày 28 tháng 10 năm 2024</p>
@@ -18,7 +18,7 @@ const BlogPage = () => {
     </div>
     <div className="blog-container ">
      <div class="blog-card">
-        <img src={require("../assets/img/test3.png")}   />
+        <img src={require("../assets/img/test3.png")} alt="Tương lai khỏe mạnh hơn: Tận dụng dữ liệu lớn trong phần mềm sức khỏe trường học" className="blog-image" />
         <div class="blog-card-content">
             <h3>Tương lai khỏe mạnh hơn: Tận dụng dữ liệu lớn trong phần mềm sức khỏe trường học </h3>
             <p class="blog-meta">Bởi Y tế học đường • Ngày 11 tháng 9 năm 2024</p>
@@ -32,7 +32,7 @@ const BlogPage = () => {
     </div>
     <div className="blog-container">
     <div className="blog-card">
-        <img src={require("../assets/img/test1.png")}   />
+        <img src={require("../assets/img/test1.png")} alt="Ngoài lớp học: Tác động của phần mềm hồ sơ sức khỏe điện tử đến sức khỏe cộng đồng trường học" className="blog-image" />
         <div className="blog-card-content">
           <h3>Ngoài lớp học: Tác động của phần mềm hồ sơ sức khỏe điện tử đến sức khỏe cộng đồng trường học</h3>
           <p className="blog-meta">Bởi Y tế học đường • Ngày 15 tháng 8 năm 2024</p>
