@@ -64,7 +64,7 @@ function HomePage() {
               <Button variant="light" className="w-100 mb-2"><a href='medical' class="medical">Gửi Thuốc</a></Button>
             </Col>
             <Col md={3} className="text-center mb-3">
-              <Button variant="light" className="w-100 mb-2">Xem lịch tiêm chủng</Button>
+              <Button variant="light" className="w-100 mb-2"><a href='report'>Xem lịch tiêm chủng</a></Button>
             </Col>
             <Col md={3} className="text-center mb-3">
               <Button variant="light" className="w-100 mb-2">Tư vấn sức khỏe</Button>

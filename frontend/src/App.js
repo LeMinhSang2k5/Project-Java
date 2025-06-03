@@ -9,6 +9,7 @@ import Loader from './components/Pagination/Loader';
 import BlogPage from './pages/BlogPage';
 import Medical from './pages/Medical';
 import './App.scss';
+import Report from './pages/Report';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -37,6 +38,7 @@ function App() {
               <Route path="/health-profile/new" element={<NewHealthProfile />} />
               <Route path="/health-profile/vaccination" element={<VaccinationHistory />} />
               <Route path="/medical" element={<Medical />} />
+              <Route path="/report" element={<Report />} />
             </Routes>
           </div>
         </div>

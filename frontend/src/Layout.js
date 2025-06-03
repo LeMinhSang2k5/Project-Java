@@ -9,6 +9,7 @@ import AboutPage from './pages/AboutPage';
 import NewHealthProfile from './components/HealthProfile/NewHealthProfile';
 import BlogPage from './pages/BlogPage';
 import Medical from './pages/Medical';
+import Report from './pages/Report';
 
 
 const Layout = (props) => {
@@ -21,6 +22,7 @@ const Layout = (props) => {
                     <Route path="/blog" element={<BlogPage />} />
                     <Route path="/health-profile/new" element={<NewHealthProfile />} />
                     <Route path="/medical" element={<Medical />} />
+                    <Route path="/report" element={<Report />} />
                 </Route>
             </Routes>
         </>
