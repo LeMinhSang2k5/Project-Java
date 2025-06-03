@@ -64,13 +64,13 @@ function HomePage() {
               <Button variant="light" className="w-100 mb-2"><a href='medical' class="medical">Gửi Thuốc</a></Button>
             </Col>
             <Col md={3} className="text-center mb-3">
-              <Button variant="light" className="w-100 mb-2"><a href='report'>Xem lịch tiêm chủng</a></Button>
+              <Button variant="light" className="w-100 mb-2"><a href='calendar'>Xem lịch tiêm chủng</a></Button>
             </Col>
             <Col md={3} className="text-center mb-3">
               <Button variant="light" className="w-100 mb-2">Tư vấn sức khỏe</Button>
             </Col>
             <Col md={3} className="text-center mb-3">
-              <Button variant="light" className="w-100 mb-2">Báo cáo sự cố</Button>
+              <Button variant="light" className="w-100 mb-2"><a href='report'>Báo cáo sự cố</a></Button>
             </Col>
           </Row>
         </Container>

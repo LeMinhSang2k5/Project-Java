@@ -10,6 +10,7 @@ import BlogPage from './pages/BlogPage';
 import Medical from './pages/Medical';
 import './App.scss';
 import Report from './pages/Report';
+import Calendar from './pages/Calendar';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -39,6 +40,7 @@ function App() {
               <Route path="/health-profile/vaccination" element={<VaccinationHistory />} />
               <Route path="/medical" element={<Medical />} />
               <Route path="/report" element={<Report />} />
+              <Route path="/calendar" element={<Calendar />} />
             </Routes>
           </div>
         </div>
