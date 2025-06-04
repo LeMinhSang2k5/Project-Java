@@ -1,4 +1,5 @@
 import './Calendar.scss';
+import './VaccinationSchedule.scss';
 
 const Calendar = () => {
     return (
