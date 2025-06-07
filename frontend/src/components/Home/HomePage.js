@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Row, Col, Card, Button, Carousel } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import './HomePage.scss';
 
 function HomePage() {
@@ -56,21 +56,21 @@ function HomePage() {
       </Container>
 
       {/* Quick Links Section */}
-            <section className="quick-links bg-primary text-white py-5">
+      <section className="quick-links bg-primary text-white py-5">
         <Container>
           <h2 className="text-center mb-4">Liên kết nhanh 🔗</h2>
           <Row className="justify-content-center">
             <Col md={3} className="text-center mb-3">
-              <Button variant="light" className="w-100 mb-2">Gửi Thuốc</Button>
+              <Button variant="light" className="w-100 mb-2"><a href='medical' class="medical">Gửi Thuốc</a></Button>
             </Col>
             <Col md={3} className="text-center mb-3">
-              <Button variant="light" className="w-100 mb-2">Xem lịch tiêm chủng</Button>
+              <Button variant="light" className="w-100 mb-2"><a href='calendar'>Xem lịch tiêm chủng</a></Button>
             </Col>
             <Col md={3} className="text-center mb-3">
               <Button variant="light" className="w-100 mb-2">Tư vấn sức khỏe</Button>
             </Col>
             <Col md={3} className="text-center mb-3">
-              <Button variant="light" className="w-100 mb-2">Báo cáo sự cố</Button>
+              <Button variant="light" className="w-100 mb-2"><a href='report'>Báo cáo sự cố</a></Button>
             </Col>
           </Row>
         </Container>
