@@ -3,30 +3,33 @@ import './VaccinationSchedule.scss';
 
 const Calendar = () => {
     return (
-              <div>
+        <div>
             <section className="vaccination-schedule">
-            <h2>🗓️ Lịch tiêm chủng</h2>
-            <form>
-                <label htmlFor="fullname">Họ và tên:</label>
-                <input type="text" id="fullname" name="fullname" required />
+                <h2>🗓️ Lịch tiêm chủng</h2>
+                <form>
+                    <label htmlFor="fullname">Họ và tên:</label>
+                    <input type="text" id="fullname" name="fullname" required />
 
-                <label htmlFor="dob">Ngày sinh:</label>
-                <input type="date" id="dob" name="dob" required />
+                    <label htmlFor="dob">Ngày sinh:</label>
+                    <input type="date" id="dob" name="dob" required />
 
-                <label htmlFor="vaccine">Loại vắc xin:</label>
-                <select id="vaccine" name="vaccine" required>
-                    <option value="">-- Chọn vắc xin --</option>
-                    <option value="covid">COVID-19</option>
-                    <option value="viemgan">Viêm gan B</option>
-                    <option value="cum">Cúm</option>
-                </select>
+                    <label htmlFor="vaccine">Loại vắc xin:</label>
+                    <select id="vaccine" name="vaccine" required>
+                        <option value="">-- Chọn vắc xin --</option>
+                        <option value="soi">Sởi</option>
+                        <option value="viemgan">Viêm gan B</option>
+                        <option value="cum">Cúm</option>
+                        <option value="bailiet">Bại liệt</option>
+                        <option value="piformod">Pfizer hoặc Moderna</option>
+                        <option value="ho">Ho</option>
+                    </select>
 
-                <label htmlFor="date">Ngày tiêm dự kiến:</label>
-                <input type="date" id="date" name="date" required />
+                    <label htmlFor="date">Ngày tiêm dự kiến:</label>
+                    <input type="date" id="date" name="date" required />
 
-                <button type="submit">Lưu lịch tiêm</button>
-            </form>
-        </section>
+                    <button type="submit">Lưu lịch tiêm</button>
+                </form>
+            </section>
             <div className="vaccination-schedule-container">
                 <h2>Bảng lịch tiêm chủng</h2>
                 <table>
@@ -150,7 +153,7 @@ const Calendar = () => {
                 </table>
             </div>
         </div>
-        
+
     );
 };
 
