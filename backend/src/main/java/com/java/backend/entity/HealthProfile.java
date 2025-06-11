@@ -1,40 +1,66 @@
 package com.java.backend.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
-import jakarta.persistence.MapsId;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import java.time.LocalDate;
+
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "health_profiles")
 public class HealthProfile {
     @Id
-    private Long id; // Sử dụng chung ID với Student
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id")
+    private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @MapsId // Đánh dấu rằng trường này là một phần của khóa chính và cũng là khóa ngoại
-    @JoinColumn(name = "id")
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "student_id", referencedColumnName = "id")
     private Student student;
 
-    @Lob // Dành cho các chuỗi văn bản dài
-    private String allergies; // Ví dụ: "Hải sản, phấn hoa"
+    @Column(name = "student_name")
+    private String studentName;
+
+    @Column(name = "class_name")
+    private String className;
+
+    @Column(name = "grade")
+    private String grade;
+
+    @Column(name = "gender")
+    private String gender;
+
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
+
+    @Column(name = "city")
+    private String city;
+
+    @Column(name = "district")
+    private String district;
 
     @Lob
-    private String chronicDiseases; // Ví dụ: "Hen suyễn"
+    @Column(name = "allergies")
+    private String allergies;
 
     @Lob
-    private String medicalHistory; // Tiền sử bệnh án
+    @Column(name = "chronic_diseases")
+    private String chronicDiseases;
 
     @Lob
-    private String vaccinationHistory; // Lịch sử tiêm chủng
+    @Column(name = "medical_history")
+    private String medicalHistory;
 
-    private String visionDetails; // Ví dụ: "Mắt trái: 8/10, Mắt phải: 7/10"
-    private String hearingDetails; // Ví dụ: "Bình thường"
+    @Lob
+    @Column(name = "vaccination_history")
+    private String vaccinationHistory;
 
+    @Column(name = "vision_details")
+    private String visionDetails;
+
+    @Column(name = "hearing_details")
+    private String hearingDetails;
+
+
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -97,5 +123,61 @@ public class HealthProfile {
 
     public void setHearingDetails(String hearingDetails) {
         this.hearingDetails = hearingDetails;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getDistrict() {
+        return district;
+    }
+
+    public void setDistrict(String district) {
+        this.district = district;
+    }
+
+    public String getGrade() {
+        return grade;
+    }
+
+    public void setGrade(String grade) {
+        this.grade = grade;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getStudentName() {
+        return studentName;
+    }
+
+    public void setStudentName(String studentName) {
+        this.studentName = studentName;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
     }
 }
