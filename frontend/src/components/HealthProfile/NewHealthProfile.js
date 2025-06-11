@@ -1,38 +1,36 @@
 import React, { useState } from 'react';
 import { Form, Button, Card, Container, Row, Col } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import api from '../../config/api';
 import './HealthProfile.scss';
+
+const VIETNAM_PROVINCES = [
+    "An Giang", "Bà Rịa - Vũng Tàu", "Bắc Giang", "Bắc Kạn", "Bạc Liêu", "Bắc Ninh", "Bến Tre", "Bình Định",
+    "Bình Dương", "Bình Phước", "Bình Thuận", "Cà Mau", "Cần Thơ", "Cao Bằng", "Đà Nẵng", "Đắk Lắk",
+    "Đắk Nông", "Điện Biên", "Đồng Nai", "Đồng Tháp", "Gia Lai", "Hà Giang", "Hà Nam", "Hà Nội",
+    "Hà Tĩnh", "Hải Dương", "Hải Phòng", "Hậu Giang", "Hòa Bình", "Hưng Yên", "Khánh Hòa", "Kiên Giang",
+    "Kon Tum", "Lai Châu", "Lâm Đồng", "Lạng Sơn", "Lào Cai", "Long An", "Nam Định", "Nghệ An",
+    "Ninh Bình", "Ninh Thuận", "Phú Thọ", "Phú Yên", "Quảng Bình", "Quảng Nam", "Quảng Ngãi", "Quảng Ninh",
+    "Quảng Trị", "Sóc Trăng", "Sơn La", "Tây Ninh", "Thái Bình", "Thái Nguyên", "Thanh Hóa", "Thừa Thiên Huế",
+    "Tiền Giang", "TP Hồ Chí Minh", "Trà Vinh", "Tuyên Quang", "Vĩnh Long", "Vĩnh Phúc", "Yên Bái"
+];
 
 const NewHealthProfile = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
-        // Thông tin học sinh
-        studentName: '',        // Họ và tên học sinh
-        dateOfBirth: '',       // Ngày sinh
-        gender: '',            // Giới tính
-        grade: '',             // Khối học
-        className: '',         // Lớp học
-        change: '',            // Những đính chính
-
-        // Thông tin gia đình
-        fatherName: '',        // Họ và tên bố
-        fatherAge: '',         // Tuổi bố
-        fatherOccupation: '',  // Nghề nghiệp bố
-        motherName: '',        // Họ và tên mẹ
-        motherAge: '',         // Tuổi mẹ
-        motherOccupation: '',  // Nghề nghiệp mẹ
-        phoneNumber: '',       // Số điện thoại liên hệ
-        address: '',           // Địa chỉ
-        city: '',             // Tỉnh/Thành phố
-        district: '',         // Quận/Huyện
-
-        // Thông tin sức khỏe
-        allergies: '',         // Dị ứng
-        chronicDiseases: '',   // Bệnh mãn tính
-        treatmentHistory: '',  // Tiền sử điều trị
-        vision: '',           // Thị lực
-        hearing: '',          // Thính lực
-        vaccinations: []      // Danh sách tiêm chủng
+        studentName: '',
+        dateOfBirth: '',
+        gender: '',
+        grade: '',
+        className: '',
+        city: '',
+        district: '',
+        allergies: '',
+        chronicDiseases: '',
+        medicalHistory: '',
+        visionDetails: '',
+        hearingDetails: '',
+        vaccinationHistory: ''
     });
 
     const handleChange = (e) => {
@@ -43,12 +41,33 @@ const NewHealthProfile = () => {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // TODO: Gửi dữ liệu lên server
-        console.log('Form submitted:', formData);
-        // Sau khi lưu thành công, chuyển hướng về trang chủ
-        navigate('/');
+        try {
+            // Validate required fields
+            if (!formData.studentName || !formData.dateOfBirth || !formData.gender || 
+                !formData.grade || !formData.className || !formData.city || !formData.district) {
+                alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
+                return;
+            }
+
+            const response = await api.post('/health-profiles', formData);
+            console.log('Health profile created:', response.data);
+            alert('Hồ sơ sức khỏe đã được tạo thành công!');
+            navigate('/');
+        } catch (error) {
+            console.error('Error creating health profile:', error);
+            if (error.response) {
+                console.error('Server error:', error.response.data);
+                alert(`Lỗi: ${error.response.data.message || 'Có lỗi xảy ra khi tạo hồ sơ sức khỏe'}`);
+            } else if (error.request) {
+                console.error('No response from server:', error.request);
+                alert('Không thể kết nối đến server. Vui lòng kiểm tra lại kết nối!');
+            } else {
+                console.error('Request error:', error.message);
+                alert('Có lỗi xảy ra khi gửi yêu cầu. Vui lòng thử lại!');
+            }
+        }
     };
 
     return (
@@ -69,37 +88,11 @@ const NewHealthProfile = () => {
                                 <Row>
                                     <Col md={6}>
                                         <Form.Group className="mb-3">
-                                            <Form.Label>Tỉnh, thành phố</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                name="city"
-                                                value={formData.city}
-                                                onChange={handleChange}
-                                                required
-                                            />
-                                        </Form.Group>
-                                    </Col>
-
-                                    <Col md={6}>
-                                        <Form.Group className="mb-3">
                                             <Form.Label>Họ và tên học sinh</Form.Label>
                                             <Form.Control
                                                 type="text"
                                                 name="studentName"
                                                 value={formData.studentName}
-                                                onChange={handleChange}
-                                                required
-                                            />
-                                        </Form.Group>
-                                    </Col>
-
-                                    <Col md={6}>
-                                        <Form.Group className="mb-3">
-                                            <Form.Label>Quận, Huyện</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                name="district"
-                                                value={formData.district}
                                                 onChange={handleChange}
                                                 required
                                             />
@@ -116,6 +109,22 @@ const NewHealthProfile = () => {
                                                 onChange={handleChange}
                                                 required
                                             />
+                                        </Form.Group>
+                                    </Col>
+
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3">
+                                            <Form.Label>Giới tính</Form.Label>
+                                            <Form.Select
+                                                name="gender"
+                                                value={formData.gender}
+                                                onChange={handleChange}
+                                                required
+                                            >
+                                                <option value="">Chọn giới tính</option>
+                                                <option value="male">Nam</option>
+                                                <option value="female">Nữ</option>
+                                            </Form.Select>
                                         </Form.Group>
                                     </Col>
 
@@ -147,134 +156,35 @@ const NewHealthProfile = () => {
 
                                     <Col md={6}>
                                         <Form.Group className="mb-3">
-                                            <Form.Label>Giới tính</Form.Label>
+                                            <Form.Label>Tỉnh/Thành phố</Form.Label>
                                             <Form.Select
-                                                name="gender"
-                                                value={formData.gender}
+                                                name="city"
+                                                value={formData.city}
                                                 onChange={handleChange}
                                                 required
                                             >
-                                                <option value="">Chọn giới tính</option>
-                                                <option value="male">Nam</option>
-                                                <option value="female">Nữ</option>
+                                                <option value="">Chọn tỉnh/thành phố</option>
+                                                {VIETNAM_PROVINCES.map((province, index) => (
+                                                    <option key={index} value={province}>
+                                                        {province}
+                                                    </option>
+                                                ))}
                                             </Form.Select>
                                         </Form.Group>
                                     </Col>
-                                </Row>
 
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Những đính chính (do thay đổi)</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        name="change"
-                                        value={formData.change}
-                                        onChange={handleChange}
-                                        required
-                                    >
-                                    </Form.Control>
-                                </Form.Group>
-                            </div>
-
-                            <div className="health-profile__section">
-                                <h3>Thông tin lý lịch gia đình</h3>
-                                <Row>
-                                    <Col md={4}>
+                                    <Col md={6}>
                                         <Form.Group className="mb-3">
-                                            <Form.Label>Họ và tên bố</Form.Label>
+                                            <Form.Label>Quận/Huyện</Form.Label>
                                             <Form.Control
                                                 type="text"
-                                                name="fatherName"
-                                                value={formData.fatherName}
+                                                name="district"
+                                                value={formData.district}
                                                 onChange={handleChange}
+                                                required
                                             />
                                         </Form.Group>
                                     </Col>
-                                    <Col md={4}>
-                                        <Form.Group className="mb-3">
-                                            <Form.Label>Tuồi</Form.Label>
-                                            <Form.Control
-                                                type="number"
-                                                name="fatherAge"
-                                                value={formData.fatherAge}
-                                                onChange={handleChange}
-                                            />
-                                        </Form.Group>
-                                    </Col>
-                                    <Col md={4}>
-                                        <Form.Group className="mb-3">
-                                            <Form.Label>Nghề nghiệp</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                name="fatherOccupation"
-                                                value={formData.fatherOccupation}
-                                                onChange={handleChange}
-                                            />
-                                        </Form.Group>
-                                    </Col>
-
-                                    <Col md={4}>
-                                        <Form.Group className="mb-3">
-                                            <Form.Label>Họ và tên mẹ</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                name="motherName"
-                                                value={formData.motherName}
-                                                onChange={handleChange}
-                                            />
-                                        </Form.Group>
-                                    </Col>
-                                    <Col md={4}>
-                                        <Form.Group className="mb-3">
-                                            <Form.Label>Tuồi</Form.Label>
-                                            <Form.Control
-                                                type="number"
-                                                name="motherAge"
-                                                value={formData.motherAge}
-                                                onChange={handleChange}
-                                            />
-                                        </Form.Group>
-                                    </Col>
-                                    <Col md={4}>
-                                        <Form.Group className="mb-3">
-                                            <Form.Label>Nghề nghiệp</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                name="motherOccupation"
-                                                value={formData.motherOccupation}
-                                                onChange={handleChange}
-                                            />
-                                        </Form.Group>
-                                    </Col>
-
-                                    <Form.Group className="mb-3">
-                                        <Form.Label>Địa chỉ sống hiện tại</Form.Label>
-                                        <Form.Control
-                                            type="text"
-                                            name="address"
-                                            value={formData.address}
-                                            onChange={handleChange}
-                                        />
-                                    </Form.Group>
-
-                                    <Form.Group className="mb-3">
-                                        <Form.Label>Địa chỉ sống hiện tại</Form.Label>
-                                        <Form.Control
-                                            type="text"
-                                            name="address"
-                                            value={formData.address}
-                                            onChange={handleChange}
-                                        />
-                                    </Form.Group>
-
-                                    <Form.Group className="mb-3">
-                                        <Form.Label>Số điện thoại liên hệ</Form.Label>
-                                        <Form.Control
-                                            type="text"
-                                            name="phoneNumber"
-                                            value={formData.phoneNumber}
-                                            onChange={handleChange}
-                                        />
-                                    </Form.Group>
                                 </Row>
                             </div>
 
@@ -309,10 +219,22 @@ const NewHealthProfile = () => {
                                     <Form.Control
                                         as="textarea"
                                         rows={3}
-                                        name="treatmentHistory"
-                                        value={formData.treatmentHistory}
+                                        name="medicalHistory"
+                                        value={formData.medicalHistory}
                                         onChange={handleChange}
                                         placeholder="Nhập tiền sử điều trị (nếu có)"
+                                    />
+                                </Form.Group>
+
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Lịch sử tiêm chủng</Form.Label>
+                                    <Form.Control
+                                        as="textarea"
+                                        rows={3}
+                                        name="vaccinationHistory"
+                                        value={formData.vaccinationHistory}
+                                        onChange={handleChange}
+                                        placeholder="Nhập lịch sử tiêm chủng (nếu có)"
                                     />
                                 </Form.Group>
                             </div>
@@ -325,8 +247,8 @@ const NewHealthProfile = () => {
                                             <Form.Label>Thị lực</Form.Label>
                                             <Form.Control
                                                 type="text"
-                                                name="vision"
-                                                value={formData.vision}
+                                                name="visionDetails"
+                                                value={formData.visionDetails}
                                                 onChange={handleChange}
                                                 placeholder="Ví dụ: 10/10"
                                             />
@@ -337,8 +259,8 @@ const NewHealthProfile = () => {
                                             <Form.Label>Thính lực</Form.Label>
                                             <Form.Control
                                                 type="text"
-                                                name="hearing"
-                                                value={formData.hearing}
+                                                name="hearingDetails"
+                                                value={formData.hearingDetails}
                                                 onChange={handleChange}
                                                 placeholder="Ví dụ: Bình thường"
                                             />
