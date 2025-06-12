@@ -1,0 +1,103 @@
+package com.java.backend.entity;
+
+import jakarta.persistence.*;
+import java.time.LocalDate;
+
+@Entity
+@Table(name = "blogs")
+public class Blog {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    @Column(nullable = false)
+    private String title; // Tiêu đề của trang blog
+
+    @Lob
+    @Column(nullable = false)
+    private String content; // Nội dung của trang blog
+
+    @Column(nullable = false)
+    private String author; // Tác giả của trang blog
+
+    @Column(nullable = false)
+    private String category; // Danh mục, ví dụ: "Giáo dục", "Sức khỏe"
+
+    @Column(length = 255)
+    private String thumbnail; // URL ảnh đại diện
+
+    @Column(name = "publish_date", nullable = false)
+    private LocalDate publishDate; // Ngày xuất bản (yyyy-MM-dd)
+
+    // Constructors
+    public Blog() {
+        // JPA requires a default constructor
+    }
+
+    public Blog(String title, String content, String author, String category, String thumbnail, LocalDate publishDate) {
+        this.title = title;
+        this.content = content;
+        this.author = author;
+        this.category = category;
+        this.thumbnail = thumbnail;
+        this.publishDate = publishDate;
+    }
+
+    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getThumbnail() {
+        return thumbnail;
+    }
+
+    public void setThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
+
+    public LocalDate getPublishDate() {
+        return publishDate;
+    }
+
+    public void setPublishDate(LocalDate publishDate) {
+        this.publishDate = publishDate;
+    }
+}
