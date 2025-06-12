@@ -3,7 +3,6 @@ package com.java.backend.controller;
 import com.java.backend.entity.HealthProfile;
 import com.java.backend.service.HealthProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -40,4 +39,4 @@ public class HealthProfileController {
     public void deleteHealthProfile(@PathVariable Long id) {
         healthProfileService.deleteHealthProfile(id);
     }
-} 
+}

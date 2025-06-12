@@ -3,9 +3,11 @@ package com.java.backend.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.java.backend.model.Blog;
+
+import com.java.backend.entity.Blog;
 import com.java.backend.service.BlogService;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/blogs")
@@ -21,7 +23,7 @@ public class BlogController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Blog> getBlogById(@PathVariable Long id) {
+    public ResponseEntity<Optional<Blog>> getBlogById(@PathVariable Long id) {
         return ResponseEntity.ok(blogService.getBlogById(id));
     }
 
@@ -32,7 +34,7 @@ public class BlogController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Blog> updateBlog(@PathVariable Long id, @RequestBody Blog blog) {
-        return ResponseEntity.ok(blogService.updateBlog(id, blog));
+        return ResponseEntity.ok(blogService.updateBlog(blog));
     }
 
     @DeleteMapping("/{id}")

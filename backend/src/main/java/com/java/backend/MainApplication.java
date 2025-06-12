@@ -9,9 +9,9 @@ import com.java.backend.enums.Gender;
 // @SpringBootApplication
 // public class BackendApplication {
 
-// 	public static void main(String[] args) {
-// 		SpringApplication.run(BackendApplication.class, args);
-// 	}
+// public static void main(String[] args) {
+// SpringApplication.run(BackendApplication.class, args);
+// }
 
 // }
 
@@ -39,11 +39,12 @@ public class MainApplication implements CommandLineRunner {
 		System.out.println("✅ App đang chạy...");
 
 		// Tạo và lưu 1 student test
-		Student student = new Student("Nguyen Van Linh", "linh123@gmail.com", LocalDate.of(2000, 1, 1), Gender.MALE,
+		Student student = new Student("Nguyen Van Linh", "linh123@gmail.com",
+				LocalDate.of(2000, 1, 1), Gender.MALE,
 				"12A5");
 
 		studentRepository.save(student);
 
-		System.out.println("🎉 Đã thêm sinh viên test vào DB!");
+		System.out.println("🎉 ");
 	}
 }

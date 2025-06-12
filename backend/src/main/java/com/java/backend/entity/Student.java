@@ -3,8 +3,6 @@ package com.java.backend.entity;
 import java.time.LocalDate;
 import java.util.Set;
 import com.java.backend.enums.Gender;
-import com.java.backend.enums.Role;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
