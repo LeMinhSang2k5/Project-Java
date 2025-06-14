@@ -12,6 +12,7 @@ import Medical from './pages/Medical';
 import Report from './pages/Report';
 import { FaCalendar } from 'react-icons/fa';
 import Calendar from './pages/Calendar';
+import AdminPage from './components/Admin/AdminPage';
 
 
 const Layout = (props) => {
@@ -26,6 +27,8 @@ const Layout = (props) => {
                     <Route path="/medical" element={<Medical />} />
                     <Route path="/report" element={<Report />} />
                     <Route path="/calendar" element={<Calendar />} />
+                    <Route path="/admin" element={<AdminPage />} />
+
                 </Route>
             </Routes>
         </>

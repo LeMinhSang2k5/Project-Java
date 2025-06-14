@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import HomePage from './components/Home/HomePage';
 import NewHealthProfile from './components/HealthProfile/NewHealthProfile';
 import VaccinationHistory from './components/HealthProfile/VaccinationHistory';
-import Header from './components/Header/Header';
-import Footer from './components/Header/Footer';
-import Loader from './components/Pagination/Loader';
 import BlogPage from './pages/BlogPage';
 import Medical from './pages/Medical';
-import './App.scss';
 import Report from './pages/Report';
 import Calendar from './pages/Calendar';
+import AdminPage from './components/Admin/AdminPage';
+import Loader from './components/Pagination/Loader';
+import AdminLayout from './components/Admin/AdminLayout';
+import './App.scss';
+import AddUser from './components/users/AddUser';
+import EditUser from './components/users/EditUser';
+import ViewUser from './components/users/ViewUser';
+import UserLayout from './components/users/UserLayout';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -26,29 +31,26 @@ function App() {
 
   return (
     <Router>
-      <div className="app-container">
-        <div className="header-container">
-          <Header />
-        </div>
+      <Routes>
+        {/* User Layout */}
+        <Route element={<UserLayout />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/health-profile/new" element={<NewHealthProfile />} />
+          <Route path="/health-profile/vaccination" element={<VaccinationHistory />} />
+          <Route path="/medical" element={<Medical />} />
+          <Route path="/report" element={<Report />} />
+          <Route path="/calendar" element={<Calendar />} />
+        </Route>
 
-        <div className="main-container">
-          <div className="app-content">
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/blog" element={<BlogPage />} />
-              <Route path="/health-profile/new" element={<NewHealthProfile />} />
-              <Route path="/health-profile/vaccination" element={<VaccinationHistory />} />
-              <Route path="/medical" element={<Medical />} />
-              <Route path="/report" element={<Report />} />
-              <Route path="/calendar" element={<Calendar />} />
-            </Routes>
-          </div>
-        </div>
-
-        <div className="footer-container">
-          <Footer />
-        </div>
-      </div>
+        {/* Admin Layout */}
+        <Route element={<AdminLayout />}>
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/adduser" element={<AddUser />} />
+          <Route path="/edituser/:id" element={<EditUser />} />
+          <Route path="/viewuser/:id" element={<ViewUser />} />
+        </Route>
+      </Routes>
     </Router>
   );
 }

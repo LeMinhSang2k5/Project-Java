@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useParams } from 'react-router-dom';
-import AdminNavbar from '../components/Admin/AdminNavbar';
 
 export default function AdminPage() {
 
@@ -25,16 +24,16 @@ export default function AdminPage() {
 
     return (
         <div>
-            <AdminNavbar />
             <div classNameName="container">
                 <div classNameName="py-4">
                     <table className="table boder shadow">
                         <thead>
                             <tr>
                                 <th scope="col">#</th>
-                                <th scope="col">Name</th>
-                                <th scope="col">username</th>
+                                <th scope="col">FullName</th>
                                 <th scope="col">email</th>
+                                <th scope="col">Password</th>
+                                <th scope="col">Role</th>
                                 <th scope="col">Actions</th>
                             </tr>
                         </thead>
@@ -42,9 +41,10 @@ export default function AdminPage() {
                             {users.map((user, index) => (
                                 <tr key={index}>
                                     <th scope="row">{index + 1}</th>
-                                    <td>{user.name}</td>
-                                    <td>{user.username}</td>
+                                    <td>{user.fullName}</td>
                                     <td>{user.email}</td>
+                                    <td>{user.password}</td>
+                                    <td>{user.role}</td>
 
                                     <td>
                                         <Link className="btn btn-primary mx-2" to={`/viewuser/${user.id}`}>View</Link>
