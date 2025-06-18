@@ -16,6 +16,7 @@ import AddUser from './components/users/AddUser';
 import EditUser from './components/users/EditUser';
 import ViewUser from './components/users/ViewUser';
 import UserLayout from './components/users/UserLayout';
+import Login from './pages/Login/Login';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -50,6 +51,8 @@ function App() {
           <Route path="/edituser/:id" element={<EditUser />} />
           <Route path="/viewuser/:id" element={<ViewUser />} />
         </Route>
+
+        <Route path="/login" element={<Login />} />
       </Routes>
     </Router>
   );
