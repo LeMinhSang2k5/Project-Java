@@ -5,9 +5,11 @@ import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
+import Button from 'react-bootstrap/Button';
 
 const Header = () => {
+    const navigate = useNavigate();
     return (
         <Navbar expand="lg" className="bg-body-tertiary">
             <Container>
@@ -38,6 +40,11 @@ const Header = () => {
                             <NavDropdown.Item as={NavLink} to="/health-profile/hearing">Thính lực</NavDropdown.Item>
                             <NavDropdown.Item as={NavLink} to="/health-profile/vaccination">Tiêm chủng</NavDropdown.Item>
                         </NavDropdown>
+                    </Nav>
+                    <Nav>
+                        <Button variant="outline-primary" className="nav-link" style={{marginLeft: 8, border: '1px solid #007bff'}} onClick={() => navigate('/login')}>
+                            Đăng nhập
+                        </Button>
                     </Nav>
                 </Navbar.Collapse>
             </Container>

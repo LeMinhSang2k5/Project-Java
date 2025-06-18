@@ -9,7 +9,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import com.java.backend.enums.Role;
+import lombok.Data;
 
+@Data
 @Entity
 @Table(name = "users")
 public class User {
