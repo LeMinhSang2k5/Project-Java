@@ -17,6 +17,9 @@ import EditUser from './components/users/EditUser';
 import ViewUser from './components/users/ViewUser';
 import UserLayout from './components/users/UserLayout';
 import Login from './pages/Login/Login';
+import MedicalSupply from './components/MedicationManagement/MedicalSupply';
+import CreateBlog from './pages/CreateBlog';
+
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -42,6 +45,8 @@ function App() {
           <Route path="/medical" element={<Medical />} />
           <Route path="/report" element={<Report />} />
           <Route path="/calendar" element={<Calendar />} />
+          <Route path="/medicalsupply" element={<MedicalSupply />} />
+          <Route path="/createblog" element={<CreateBlog />} />
         </Route>
 
         {/* Admin Layout */}
