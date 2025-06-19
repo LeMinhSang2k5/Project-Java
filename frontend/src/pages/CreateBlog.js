@@ -1,105 +1,93 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./CreateBlog.scss";
 
 const CreateBlog = () => {
     const navigate = useNavigate();
-    const [formData, setFormData] = useState({
+    const [form, setForm] = useState({
         title: "",
         content: "",
         author: "",
         category: "",
-        thumbnail: null,
+        thumbnail: "",
+        publishDate: ""
     });
+    const [message, setMessage] = useState("");
 
     const handleChange = (e) => {
-        const { name, value, files } = e.target;
-        if (name === "thumbnail") {
-            setFormData({ ...formData, thumbnail: files[0] });
-        } else {
-            setFormData({ ...formData, [name]: value });
-        }
+        const { name, value } = e.target;
+        setForm({ ...form, [name]: value });
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const data = new FormData();
-        data.append("title", formData.title);
-        data.append("content", formData.content);
-        data.append("author", formData.author);
-        data.append("category", formData.category);
-        if (formData.thumbnail) {
-            data.append("thumbnail", formData.thumbnail);
-        }
-
+        setMessage("");
         try {
             const response = await fetch("http://localhost:8080/api/blogs", {
                 method: "POST",
-                body: data,
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    ...form,
+                    publishDate: form.publishDate // yyyy-MM-dd
+                })
             });
             if (response.ok) {
-                alert("Đăng bài thành công!");
-                navigate("/blog"); // Chuyển hướng về trang blog sau khi đăng thành công
+                setMessage("Đăng bài thành công!");
+                setTimeout(() => navigate("/blog"), 1200);
             } else {
-                alert("Đăng bài thất bại!");
+                setMessage("Đăng bài thất bại!");
             }
         } catch (error) {
-            console.error("Error:", error);
-            alert("Có lỗi xảy ra!");
+            setMessage("Có lỗi xảy ra!");
         }
     };
 
     return (
-        <div className="create-blog-container">
-            <h1>Tạo Bài Viết Mới</h1>
-            <form onSubmit={handleSubmit} className="blog-form">
-                <div className="form-group">
-                    <label htmlFor="title">Tiêu đề</label>
+        <div style={{ maxWidth: 600, margin: "0 auto", padding: 24, background: "#f8f9fa", borderRadius: 8 }}>
+            <h2>Tạo Bài Viết Mới</h2>
+            <form onSubmit={handleSubmit}>
+                <div className="mb-3">
+                    <label className="form-label">Tiêu đề</label>
                     <input
                         type="text"
-                        id="title"
+                        className="form-control"
                         name="title"
-                        required
-                        value={formData.title}
+                        value={form.title}
                         onChange={handleChange}
-                        placeholder="Nhập tiêu đề bài viết"
+                        required
                     />
                 </div>
-
-                <div className="form-group">
-                    <label htmlFor="content">Nội dung</label>
+                <div className="mb-3">
+                    <label className="form-label">Nội dung</label>
                     <textarea
-                        id="content"
+                        className="form-control"
                         name="content"
-                        required
-                        value={formData.content}
+                        value={form.content}
                         onChange={handleChange}
-                        placeholder="Nhập nội dung bài viết"
-                        rows="10"
+                        rows="8"
+                        required
                     ></textarea>
                 </div>
-
-                <div className="form-group">
-                    <label htmlFor="author">Tác giả</label>
+                <div className="mb-3">
+                    <label className="form-label">Tác giả</label>
                     <input
                         type="text"
-                        id="author"
+                        className="form-control"
                         name="author"
-                        required
-                        value={formData.author}
+                        value={form.author}
                         onChange={handleChange}
-                        placeholder="Nhập tên tác giả"
+                        required
                     />
                 </div>
-
-                <div className="form-group">
-                    <label htmlFor="category">Danh mục</label>
+                <div className="mb-3">
+                    <label className="form-label">Danh mục</label>
                     <select
-                        id="category"
+                        className="form-select"
                         name="category"
-                        required
-                        value={formData.category}
+                        value={form.category}
                         onChange={handleChange}
+                        required
                     >
                         <option value="">-- Chọn danh mục --</option>
                         <option value="Giáo dục">Giáo dục</option>
@@ -108,26 +96,31 @@ const CreateBlog = () => {
                         <option value="Công nghệ">Công nghệ</option>
                     </select>
                 </div>
-
-                <div className="form-group">
-                    <label htmlFor="thumbnail">Ảnh Thumbnail</label>
+                <div className="mb-3">
+                    <label className="form-label">Ảnh Thumbnail (URL)</label>
                     <input
-                        type="file"
-                        id="thumbnail"
+                        type="text"
+                        className="form-control"
                         name="thumbnail"
-                        accept="image/*"
+                        value={form.thumbnail}
                         onChange={handleChange}
-                        className="file-input"
+                        placeholder="Nhập URL ảnh đại diện"
                     />
                 </div>
-
-                <div className="form-actions">
-                    <button type="submit" className="submit-btn">Đăng bài</button>
-                    <button type="button" className="cancel-btn" onClick={() => navigate("/blog")}>
-                        Hủy
-                    </button>
+                <div className="mb-3">
+                    <label className="form-label">Ngày xuất bản</label>
+                    <input
+                        type="date"
+                        className="form-control"
+                        name="publishDate"
+                        value={form.publishDate}
+                        onChange={handleChange}
+                        required
+                    />
                 </div>
+                <button type="submit" className="btn btn-success w-100">Đăng bài</button>
             </form>
+            {message && <div className="alert alert-info mt-3">{message}</div>}
         </div>
     );
 };
