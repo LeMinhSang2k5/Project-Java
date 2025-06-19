@@ -1,7 +1,14 @@
 package com.java.backend.entity;
 
-import jakarta.persistence.*;
 import java.time.LocalDate;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "blogs")
@@ -24,7 +31,7 @@ public class Blog {
     @Column(nullable = false)
     private String category; // Danh mục, ví dụ: "Giáo dục", "Sức khỏe"
 
-    @Column(length = 255)
+    @Column(name = "thumbnail", nullable = true)
     private String thumbnail; // URL ảnh đại diện
 
     @Column(name = "publish_date", nullable = false)

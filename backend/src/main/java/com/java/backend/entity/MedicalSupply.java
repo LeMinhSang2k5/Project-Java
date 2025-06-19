@@ -22,7 +22,7 @@ public class MedicalSupply {
 
     private String unit; // Ví dụ: "viên", "hộp", "ml"
 
-    private Integer lowStockThreshold; // Ngưỡng cảnh báo sắp hết hàng
+    private String category; // Thuốc, vật tư y tế
 
     // Getters and Setters
     public Long getId() {
@@ -57,11 +57,11 @@ public class MedicalSupply {
         this.unit = unit;
     }
 
-    public Integer getLowStockThreshold() {
-        return lowStockThreshold;
+    public String getCategory() {
+        return category;
     }
 
-    public void setLowStockThreshold(Integer lowStockThreshold) {
-        this.lowStockThreshold = lowStockThreshold;
+    public void setCategory(String category) {
+        this.category = category;
     }
 }
