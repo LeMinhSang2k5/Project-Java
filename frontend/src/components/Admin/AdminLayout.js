@@ -1,22 +1,20 @@
-import React from 'react'
-import { Link, Outlet } from 'react-router-dom'
+import React from 'react';
+import { Outlet } from 'react-router-dom';
+import Sidebar from './Sidebar';
+import './Admin.scss';
 
-export default function AdminLayout() {
+const AdminLayout = () => {
     return (
-        <div>
-            <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
-                <div className="container-fluid">
-                    <Link className="navbar-brand" to="/">CRUD</Link>
-                    <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                        <span className="navbar-toggler-icon"></span>
-                    </button>
-                    <Link className="btn btn-outline-dark" to="/admin/adduser">Add User</Link>
+        <div className="admin-layout">
+            <Sidebar />
+            <div className="admin-content">
+                <div className="content-header">
+                    <h2>Quản lý hệ thống</h2>
                 </div>
-            </nav>
-
-            <div className="container mt-4">
                 <Outlet />
             </div>
         </div>
-    )
-}
+    );
+};
+
+export default AdminLayout;

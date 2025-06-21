@@ -1,40 +1,52 @@
 import {
     Routes,
-    Route
+    Route,
+    BrowserRouter
 } from 'react-router-dom';
 
-import App from "./App";
 import HomePage from "./components/Home/HomePage";
-import AboutPage from './pages/AboutPage';
-import NewHealthProfile from './components/HealthProfile/NewHealthProfile';
+import NewHealthProfile from './pages/HealthProfile/NewHealthProfile';
 import BlogPage from './pages/BlogPage';
 import Medical from './pages/Medical';
 import Report from './pages/Report';
-import { FaCalendar } from 'react-icons/fa';
 import Calendar from './pages/Calendar';
-import AdminPage from './components/Admin/AdminPage';
-import MedicalSupply from './components/MedicationManagement/MedicalSupply';
+import MedicalSupply from './pages/MedicationManagement/MedicalSupply';
 import CreateBlog from './pages/CreateBlog';
+import UserLayout from './components/User/UserLayout';
+import AdminLayout from './components/Admin/AdminLayout';
+import ManageUser from './components/Admin/User/ManageUser';
+import ManageBlog from './components/Admin/Blog/ManageBlog';
+import Login from './pages/Login/Login';
+import VaccinationHistory from './pages/HealthProfile/VaccinationHistory';
+import AdminDashboard from './components/Admin/AdminDashboard';
 
 const Layout = (props) => {
     return (
-        <>
+        <BrowserRouter>
             <Routes>
-                <Route path="/" element={<App />}>
-                    <Route index element={<HomePage />} />
-                    <Route path="/about" element={<AboutPage />} />
+                {/* User Layout */}
+                <Route element={<UserLayout />}>
+                    <Route path="/" element={<HomePage />} />
                     <Route path="/blog" element={<BlogPage />} />
                     <Route path="/health-profile/new" element={<NewHealthProfile />} />
+                    <Route path="/health-profile/vaccination" element={<VaccinationHistory />} />
                     <Route path="/medical" element={<Medical />} />
                     <Route path="/report" element={<Report />} />
                     <Route path="/calendar" element={<Calendar />} />
-                    <Route path="/admin" element={<AdminPage />} />
                     <Route path="/medicalsupply" element={<MedicalSupply />} />
                     <Route path="/createblog" element={<CreateBlog />} />
-
                 </Route>
+
+                {/* Admin Layout */}
+                <Route element={<AdminLayout />}>
+                    <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/manage-user" element={<ManageUser />} />
+                    <Route path="/manage-blog" element={<ManageBlog />} />
+                </Route>
+
+                <Route path="/login" element={<Login />} />
             </Routes>
-        </>
+        </BrowserRouter>
     )
 }
 

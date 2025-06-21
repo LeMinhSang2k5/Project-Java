@@ -33,7 +33,7 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
-    @Column(nullable = false)
+    @Column()
     private boolean isActive = true;
 
     public User() {

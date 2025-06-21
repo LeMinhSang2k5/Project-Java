@@ -36,15 +36,7 @@ public class MainApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) {
-		System.out.println("✅ App đang chạy...");
+		System.out.println("-------------APP RUNNINGGGGGG--------------");
 
-		// Tạo và lưu 1 student test
-		Student student = new Student("Nguyen Van Linh", "linh123@gmail.com",
-				LocalDate.of(2000, 1, 1), Gender.MALE,
-				"12A5");
-
-		studentRepository.save(student);
-
-		System.out.println("🎉 ");
 	}
 }
