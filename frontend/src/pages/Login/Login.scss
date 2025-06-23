@@ -1,8 +1,23 @@
 .login-container {
-    align-items: center;
-    justify-content: center;
+    width: 100vw;
+    min-height: 100vh;
     padding: 2rem 0;
     background: #fff;
+    background-image: url('../../assets/img/bglogin.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: fixed;
+    z-index: -1;
+}
+
+.login-content {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 2rem;
 }
 
 .login-card {
@@ -10,51 +25,20 @@
     border: none;
     border-radius: 10px;
     width: 500px;
-    height: 550px;
+    min-height: 400px;
+    float: right;
 }
 
 .login-card .card-body {
-    width: 500px;
-    height: 550px;
     padding: 2.5rem 2.5rem 2rem 2.5rem;
 }
 
 .login-tabs {
-    display: flex;
-    justify-content: center;
+    font-size: 2.25rem;
+    font-weight: 500;
+    color: #000000;
     margin-bottom: 2rem;
     border-bottom: 2px solid #eee;
-}
-
-.login-tab {
-    font-size: 1.25rem;
-    font-weight: 500;
-    color: #888;
-    margin: 0 2.5rem;
-    padding-bottom: 0.5rem;
-    cursor: pointer;
-    border: none;
-    background: none;
-    outline: none;
-    position: relative;
-    transition: color 0.2s;
-}
-
-.login-tab.active {
-    color: #c00;
-    font-weight: 600;
-}
-
-.login-tab.active::after {
-    content: '';
-    display: block;
-    height: 3px;
-    background: #c00;
-    border-radius: 2px;
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -2px;
 }
 
 .form-label {
@@ -85,7 +69,12 @@
     display: flex;
     align-items: center;
     margin-bottom: 1.25rem;
-    justify-content: space-between;
+    position: relative;
+}
+
+.password-row .form-control {
+    padding-right: 4rem;
+    margin-bottom: 0;
 }
 
 .show-password {
@@ -93,7 +82,10 @@
     font-size: 1rem;
     cursor: pointer;
     user-select: none;
-    margin-left: 0.5rem;
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 .forgot-link {
