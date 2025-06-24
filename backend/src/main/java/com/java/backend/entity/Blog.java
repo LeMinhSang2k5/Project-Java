@@ -1,6 +1,9 @@
 package com.java.backend.entity;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -22,7 +25,7 @@ public class Blog {
     private String title; // Tiêu đề của trang blog
 
     @Lob
-    @Column(nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String content; // Nội dung của trang blog
 
     @Column(nullable = false)
@@ -31,24 +34,35 @@ public class Blog {
     @Column(nullable = false)
     private String category; // Danh mục, ví dụ: "Giáo dục", "Sức khỏe"
 
-    @Column(name = "thumbnail", nullable = true)
+    @Column(name = "thumbnail")
     private String thumbnail; // URL ảnh đại diện
 
     @Column(name = "publish_date", nullable = false)
     private LocalDate publishDate; // Ngày xuất bản (yyyy-MM-dd)
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt; // Ngày tạo bài viết
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt; // Ngày cập nhật gần nhất
 
     // Constructors
     public Blog() {
         // JPA requires a default constructor
     }
 
-    public Blog(String title, String content, String author, String category, String thumbnail, LocalDate publishDate) {
+    public Blog(String title, String content, String author, String category, String thumbnail, LocalDate publishDate,
+            LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.title = title;
         this.content = content;
         this.author = author;
         this.category = category;
         this.thumbnail = thumbnail;
         this.publishDate = publishDate;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     // Getters and Setters
@@ -106,5 +120,21 @@ public class Blog {
 
     public void setPublishDate(LocalDate publishDate) {
         this.publishDate = publishDate;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

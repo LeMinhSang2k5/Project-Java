@@ -9,7 +9,7 @@ const AdminLayout = () => {
             <Sidebar />
             <div className="admin-content">
                 <div className="content-header">
-                    <h2>Quản lý hệ thống</h2>
+                    <h2>Đây là header</h2>
                 </div>
                 <Outlet />
             </div>

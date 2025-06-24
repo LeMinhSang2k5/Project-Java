@@ -1,0 +1,110 @@
+.about-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: 'Roboto', sans-serif;
+    color: #333;
+
+    .about-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 2rem 0;
+        background: linear-gradient(to right, #f8f9fa, #e9ecef);
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+        .university-logo {
+            width: 150px;
+            height: auto;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #004d99;
+            margin-bottom: 0.5rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            color: #666;
+            font-weight: normal;
+        }
+    }
+
+    .about-content {
+        .about-section {
+            margin-bottom: 2.5rem;
+            padding: 1.5rem;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+
+            &:hover {
+                transform: translateY(-5px);
+            }
+
+            h3 {
+                color: #004d99;
+                font-size: 1.8rem;
+                margin-bottom: 1rem;
+                padding-bottom: 0.5rem;
+                border-bottom: 2px solid #e0e0e0;
+            }
+
+            p {
+                line-height: 1.6;
+                color: #555;
+                text-align: justify;
+            }
+
+            ul {
+                list-style-type: none;
+                padding-left: 0;
+
+                li {
+                    margin-bottom: 0.8rem;
+                    padding-left: 1.5rem;
+                    position: relative;
+
+                    &:before {
+                        content: "•";
+                        color: #004d99;
+                        font-weight: bold;
+                        position: absolute;
+                        left: 0;
+                    }
+                }
+            }
+
+            strong {
+                color: #004d99;
+            }
+        }
+    }
+
+    @media (max-width: 768px) {
+        padding: 1rem;
+
+        .about-header {
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.2rem;
+            }
+        }
+
+        .about-content {
+            .about-section {
+                padding: 1rem;
+
+                h3 {
+                    font-size: 1.5rem;
+                }
+            }
+        }
+    }
+}

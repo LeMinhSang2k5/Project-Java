@@ -3,7 +3,7 @@ import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Login.scss";
-
+import { toast } from "react-toastify";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,22 +29,24 @@ const Login = () => {
       localStorage.setItem("token", response.data.token || "dummy-token");
       localStorage.setItem("user", JSON.stringify(response.data));
 
-      // Chuyển hướng dựa vào role
-      const role = response.data.role;
-      if (role === "ADMIN") {
-        navigate("/");
-      } else if (role === "SCHOOL_NURSE") {
-        navigate("/school-nurse/dashboard");
-      } else if (role === "MANAGER") {
-        navigate("/manager/dashboard");
-      } else if (role === "PARENT") {
-        navigate("/parent/dashboard");
-      } else {
-        navigate("/");
+        // Chuyển hướng dựa vào role
+        const role = response.data.role;
+        if (role === "ADMIN") {
+          navigate("/admin");
+        } else if (role === "SCHOOL_NURSE") {
+          navigate("/school-nurse/dashboard");
+        } else if (role === "MANAGER") {
+          navigate("/manager/dashboard");
+        } else if (role === "PARENT") {
+          navigate("/parent/dashboard");
+        } else {
+          navigate("/");
+        }
+
+        toast.success(`Đăng nhập ${email} thành công`);
+      } catch (err) {
+        setError("Email hoặc mật khẩu không đúng");
       }
-    } catch (err) {
-      setError("Email hoặc mật khẩu không đúng");
-    }
   };
 
   return (
