@@ -43,7 +43,12 @@ public class BlogController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Blog> updateBlog(@PathVariable Long id, @RequestBody Blog blog) {
-        return ResponseEntity.ok(blogService.updateBlog(blog));
+        try {
+            Blog updatedBlog = blogService.updateBlog(id, blog);
+            return ResponseEntity.ok(updatedBlog);
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Error updating blog: " + e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")

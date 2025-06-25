@@ -1,52 +1,138 @@
-import { Pagination } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
 import './BlogPage.scss';
+import { Pagination } from 'react-bootstrap';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+
 const BlogPage = () => {
+  const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const blogsPerPage = 6; // Hiển thị 6 blogs mỗi trang (2 hàng x 3 cột)
+
+  const fetchBlogs = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('http://localhost:8080/api/blogs');
+      setBlogs(response.data);
+      setError(null);
+    } catch (error) {
+      console.error('Error fetching blogs:', error);
+      setError('Không thể tải danh sách bài viết. Vui lòng thử lại sau.');
+      toast.error('Có lỗi xảy ra khi tải danh sách bài viết');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Gọi fetchBlogs khi component được mount
+  useEffect(() => {
+    fetchBlogs();
+
+    // Thiết lập interval để tự động cập nhật mỗi 30 giây
+    const interval = setInterval(fetchBlogs, 30000);
+
+    // Cleanup interval khi component unmount
+    return () => clearInterval(interval);
+  }, []);
+
+  // Tính toán số trang
+  const totalPages = Math.ceil(blogs.length / blogsPerPage);
+
+  // Lấy blogs cho trang hiện tại
+  const indexOfLastBlog = currentPage * blogsPerPage;
+  const indexOfFirstBlog = indexOfLastBlog - blogsPerPage;
+  const currentBlogs = blogs.slice(indexOfFirstBlog, indexOfLastBlog);
+
+  // Xử lý khi chuyển trang
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo(0, 0); // Cuộn lên đầu trang khi chuyển trang
+  };
+
+  if (loading) {
     return (
-    <div>
-    <div className="blog-container">
-      <div className="blog-card">
-         <img src={require("../assets/img/test.png")} alt="EduHealth có thể giảm tình trạng vắng mặt như thế nào với EHR tiên tiến" className="blog-image" />
-        <div className="blog-card-content">
-          <h3>EduHealth có thể giảm tình trạng vắng mặt như thế nào với EHR tiên tiến</h3>
-          <p className="blog-meta">Bởi Y tế học đường • Ngày 28 tháng 10 năm 2024</p>
-          <p className="blog-excerpt">
-            EduHealth có thể giảm tình trạng vắng mặt của học sinh là một thách thức trên toàn thế giới mà các trường học phải đối mặt liên tục. Thách thức này ảnh hưởng đến sức khỏe tổng thể của trẻ em về thành tích học tập và sự tham gia trong lớp học. Một số trường hợp vắng mặt là không thể tránh khỏi do các vấn đề sức khỏe, chúng ta không thể tránh khỏi. Tuy nhiên, chúng ta có thể giảm thiểu những trường hợp khác bằng...
-          </p>
-          <a href="https://www.eduhealthsystem.com/blog/how-eduhealth-can-reduce-absenteeism-with-advanced-ehr/" className="read-more-btn">Đọc thêm</a>
-        </div>
+      <div className="blogs-page-container">
+        <div className="loading-spinner">Đang tải bài viết...</div>
       </div>
-    </div>
-    <div className="blog-container ">
-     <div class="blog-card">
-        <img src={require("../assets/img/test3.png")} alt="Tương lai khỏe mạnh hơn: Tận dụng dữ liệu lớn trong phần mềm sức khỏe trường học" className="blog-image" />
-        <div class="blog-card-content">
-            <h3>Tương lai khỏe mạnh hơn: Tận dụng dữ liệu lớn trong phần mềm sức khỏe trường học </h3>
-            <p class="blog-meta">Bởi Y tế học đường • Ngày 11 tháng 9 năm 2024</p>
-            <p class="blog-excerpt">
-                Tương lai khỏe mạnh hơn: Tận dụng dữ liệu lớn trong phần mềm sức khỏe trường học Từ tư vấn tâm lý đến theo dõi vắc-xin, các chương trình sức khỏe trường học đã đi một chặng đường dài. Bây giờ, phần mềm sức khỏe trường học đã sẵn sàng khám phá tiềm năng của dữ liệu lớn.
-                 Dữ liệu lớn là thuật ngữ chung cho cả dữ liệu có cấu trúc và không có cấu trúc…
-            </p>
-            <a href="https://www.eduhealthsystem.com/blog/a-healthier-future-leveraging-big-data-in-school-health-software/" class="read-more-btn">Đọc thêm</a>
-        </div>
-    </div>
-    </div>
-    <div className="blog-container">
-    <div className="blog-card">
-        <img src={require("../assets/img/test1.png")} alt="Ngoài lớp học: Tác động của phần mềm hồ sơ sức khỏe điện tử đến sức khỏe cộng đồng trường học" className="blog-image" />
-        <div className="blog-card-content">
-          <h3>Ngoài lớp học: Tác động của phần mềm hồ sơ sức khỏe điện tử đến sức khỏe cộng đồng trường học</h3>
-          <p className="blog-meta">Bởi Y tế học đường • Ngày 15 tháng 8 năm 2024</p>
-          <p className="blog-excerpt">
-            Ngoài lớp học: Tác động của phần mềm hồ sơ sức khỏe điện tử đến sức khỏe cộng đồng trường học Giới thiệu & Sự phát triển của Quản lý sức khỏe tại trường học Sự phát triển của quản lý sức khỏe tại trường học và sức khỏe của học sinh đã chứng kiến ​​vai trò quan trọng của phần mềm Hồ sơ sức khỏe điện tử (EHR).
-             EHR đã trở thành một công cụ thiết yếu…
-          </p>
-          <a href="https://www.eduhealthsystem.com/blog/impact-of-ehr-software-on-school-community-health/" className="read-more-btn">Đọc thêm</a>
-        </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="blogs-page-container">
+        <div className="error-message">{error}</div>
+        <button onClick={fetchBlogs} className="retry-button">
+          Thử lại
+        </button>
       </div>
+    );
+  }
+
+  return (
+    <div className="blogs-page-container">
+      <div className="blogs-grid">
+        {currentBlogs.map((blog) => (
+          <div key={blog.id} className="blog-container">
+            <div className="blog-card">
+              <img 
+                src={blog.thumbnail || '/default-blog-image.jpg'} 
+                alt={blog.title}
+                className="blog-image" 
+                onError={(e) => {
+                  e.target.src = '/default-blog-image.jpg';
+                }}
+              />
+              <div className="blog-card-content">
+                <h3>{blog.title}</h3>
+                <p className="blog-meta">
+                  Bởi {blog.author} • {new Date(blog.publishDate).toLocaleDateString('vi-VN')}
+                </p>
+                <p className="blog-excerpt">{blog.content}</p>
+                <a href={`/blog/${blog.id}`}>Đọc thêm</a>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
-      <Pagination count={10} shape="rounded" />
-</div>
+      
+      {totalPages > 1 && (
+        <div className="pagination-container">
+          <Pagination>
+            <Pagination.First 
+              onClick={() => handlePageChange(1)} 
+              disabled={currentPage === 1}
+            />
+            <Pagination.Prev 
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            />
+            
+            {[...Array(totalPages)].map((_, index) => (
+              <Pagination.Item
+                key={index + 1}
+                active={index + 1 === currentPage}
+                onClick={() => handlePageChange(index + 1)}
+              >
+                {index + 1}
+              </Pagination.Item>
+            ))}
+            
+            <Pagination.Next 
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            />
+            <Pagination.Last 
+              onClick={() => handlePageChange(totalPages)}
+              disabled={currentPage === totalPages}
+            />
+          </Pagination>
+        </div>
+      )}
+    </div>
   );
 };
+
 export default BlogPage;
 

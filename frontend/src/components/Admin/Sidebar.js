@@ -20,7 +20,7 @@ const Sidebar = () => {
                 </Link>
                 <Link to="/manage-blog" className="menu-item">
                     <FaBlog className="menu-icon" />
-                    <span>Quản lý bài viết</span>
+                    <span>Quản lý Blog</span>
                 </Link>
                 <Link to="/manage-medical-supply" className="menu-item">
                     <FaMedkit className="menu-icon" />
