@@ -1,5 +1,6 @@
 package com.java.backend.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -7,12 +8,19 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import com.java.backend.enums.Role;
 import lombok.Data;
 
 @Data
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "users")
 public class User {
 
@@ -35,6 +43,10 @@ public class User {
 
     @Column()
     private boolean isActive = true;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private HealthProfile healthProfile;
 
     public User() {
         // Default constructor required by JPA
@@ -94,6 +106,13 @@ public class User {
 
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    public void setHealthProfile(HealthProfile healthProfile) {
+        this.healthProfile = healthProfile;
+        if (healthProfile != null) {
+            healthProfile.setUser(this);
+        }
     }
 
 }
