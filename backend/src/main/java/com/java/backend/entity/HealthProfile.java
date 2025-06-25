@@ -12,9 +12,9 @@ public class HealthProfile {
     @Column(name = "id")
     private Long id;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "student_id", referencedColumnName = "id")
-    private Student student;
+    @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
 
     @Column(name = "student_name")
     private String studentName;
@@ -59,6 +59,9 @@ public class HealthProfile {
     @Column(name = "hearing_details")
     private String hearingDetails;
 
+    public HealthProfile() {
+        // Default constructor required by JPA
+    }
 
     // Getters and Setters
     public Long getId() {
@@ -69,12 +72,12 @@ public class HealthProfile {
         this.id = id;
     }
 
-    public Student getStudent() {
-        return student;
+    public User getUser() {
+        return user;
     }
 
-    public void setStudent(Student student) {
-        this.student = student;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getAllergies() {

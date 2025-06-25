@@ -3,6 +3,7 @@ package com.java.backend.controller;
 import com.java.backend.entity.HealthProfile;
 import com.java.backend.service.HealthProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,8 +32,13 @@ public class HealthProfileController {
     }
 
     @PutMapping("/{id}")
-    public HealthProfile updateHealthProfile(@PathVariable Long id, @RequestBody HealthProfile healthProfile) {
-        return healthProfileService.updateHealthProfile(healthProfile);
+    public ResponseEntity<HealthProfile> updateHealthProfile(@PathVariable Long id,
+            @RequestBody HealthProfile healthProfile) {
+        if (!id.equals(healthProfile.getId())) {
+            return ResponseEntity.badRequest().build(); // Trả lỗi nếu id không khớp
+        }
+        HealthProfile updated = healthProfileService.updateHealthProfile(healthProfile);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
