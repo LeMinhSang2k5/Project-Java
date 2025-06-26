@@ -6,8 +6,6 @@ import com.java.backend.repository.BlogRepository;
 import com.java.backend.entity.Blog;
 import java.util.List;
 import java.util.Optional;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.transaction.annotation.Transactional;

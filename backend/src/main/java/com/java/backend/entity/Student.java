@@ -3,6 +3,7 @@ package com.java.backend.entity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.java.backend.enums.Gender;
 import com.java.backend.enums.Role;
 
@@ -17,6 +18,10 @@ public class Student extends User {
 
     @Column(nullable = false)
     private String studentClass;
+
+    @OneToOne(mappedBy = "student", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private HealthProfile healthProfile;
 
     public Student() {
     }
@@ -50,5 +55,16 @@ public class Student extends User {
 
     public void setGender(Gender gender) {
         this.gender = gender;
+    }
+
+    public HealthProfile getHealthProfile() {
+        return healthProfile;
+    }
+
+    public void setHealthProfile(HealthProfile healthProfile) {
+        this.healthProfile = healthProfile;
+        if (healthProfile != null) {
+            healthProfile.setStudent(this);
+        }
     }
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Button, Card, Container, Row, Col } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import api from '../../config/api';
@@ -32,7 +32,36 @@ const NewHealthProfile = () => {
         hearingDetails: '',
         vaccinationHistory: ''
     });
+    const [student, setStudent] = useState(null);
 
+   useEffect(() => {
+    const studentId = localStorage.getItem('studentId');
+    if (studentId) {
+        api.get(`/health-profiles/student/${studentId}`)
+            .then(res => {
+                if (res.data) {
+                    setFormData({
+                        studentName: res.data.studentName || '',
+                        dateOfBirth: res.data.dateOfBirth || '',
+                        gender: res.data.gender || '',
+                        grade: res.data.grade || '',
+                        className: res.data.className || '',
+                        city: res.data.city || '',
+                        district: res.data.district || '',
+                        allergies: res.data.allergies || '',
+                        chronicDiseases: res.data.chronicDiseases || '',
+                        medicalHistory: res.data.medicalHistory || '',
+                        visionDetails: res.data.visionDetails || '',
+                        hearingDetails: res.data.hearingDetails || '',
+                        vaccinationHistory: res.data.vaccinationHistory || ''
+                    });
+                }
+            })
+            .catch(() => {
+                // Nếu chưa có health profile thì giữ form rỗng hoặc lấy info từ student như cũ
+            });
+    }
+}, []);
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prevState => ({
@@ -50,8 +79,20 @@ const NewHealthProfile = () => {
                 alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
                 return;
             }
+            const studentId = localStorage.getItem('studentId');
+            if (!studentId) {
+                alert('Bạn chưa đăng nhập bằng tài khoản học sinh!');
+                return;
+            }
 
-            const response = await api.post('/health-profiles', formData);
+            const dataToSend = {
+                ...formData,
+                student: {
+                    id: Number(studentId)
+                }
+            };
+
+            const response = await api.post('/health-profiles', dataToSend);
             console.log('Health profile created:', response.data);
             alert('Hồ sơ sức khỏe đã được tạo thành công!');
             navigate('/');
@@ -95,6 +136,7 @@ const NewHealthProfile = () => {
                                                 value={formData.studentName}
                                                 onChange={handleChange}
                                                 required
+                                              
                                             />
                                         </Form.Group>
                                     </Col>
@@ -108,6 +150,7 @@ const NewHealthProfile = () => {
                                                 value={formData.dateOfBirth}
                                                 onChange={handleChange}
                                                 required
+                                                
                                             />
                                         </Form.Group>
                                     </Col>
@@ -122,22 +165,10 @@ const NewHealthProfile = () => {
                                                 required
                                             >
                                                 <option value="">Chọn giới tính</option>
-                                                <option value="male">Nam</option>
-                                                <option value="female">Nữ</option>
+                                                <option value="MALE">Nam</option>
+                                                <option value="FEMALE">Nữ</option>
+                                                <option value="OTHER">Khác</option>
                                             </Form.Select>
-                                        </Form.Group>
-                                    </Col>
-
-                                    <Col md={6}>
-                                        <Form.Group className="mb-3">
-                                            <Form.Label>Khối học</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                name="grade"
-                                                value={formData.grade}
-                                                onChange={handleChange}
-                                                required
-                                            />
                                         </Form.Group>
                                     </Col>
 
@@ -148,6 +179,20 @@ const NewHealthProfile = () => {
                                                 type="text"
                                                 name="className"
                                                 value={formData.className}
+                                                onChange={handleChange}
+                                                required
+                                                
+                                            />
+                                        </Form.Group>
+                                    </Col>
+
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3">
+                                            <Form.Label>Khối học</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                name="grade"
+                                                value={formData.grade}
                                                 onChange={handleChange}
                                                 required
                                             />
@@ -282,4 +327,4 @@ const NewHealthProfile = () => {
     );
 };
 
-export default NewHealthProfile; 
+export default NewHealthProfile;

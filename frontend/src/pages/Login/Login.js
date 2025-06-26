@@ -28,7 +28,9 @@ const Login = () => {
       // Lưu token vào localStorage
       localStorage.setItem("token", response.data.token || "dummy-token");
       localStorage.setItem("user", JSON.stringify(response.data));
-
+        if (response.data.role === "STUDENT") {
+  localStorage.setItem("studentId", response.data.id);
+}
         // Chuyển hướng dựa vào role
         const role = response.data.role;
         if (role === "ADMIN") {
