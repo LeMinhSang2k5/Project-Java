@@ -104,11 +104,4 @@ public class User {
         isActive = active;
     }
 
-    public void setHealthProfile(HealthProfile healthProfile) {
-        this.healthProfile = healthProfile;
-        if (healthProfile != null) {
-            healthProfile.setUser(this);
-        }
-    }
-
 }
