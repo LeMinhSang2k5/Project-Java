@@ -23,6 +23,8 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import BlogDetail from './pages/BlogDetail';
 import ModalUpdateBlog from './components/Admin/Blog/ModalUpdateBlog';
+import ManageHealthProfile from './components/Admin/HealthProfile/ManageHealthProfile';
+import ParentPage from './pages/Parent/ParentPage';
 
 
 function App() {
@@ -54,6 +56,7 @@ function App() {
                 <Route path="/medicalsupply" element={<MedicalSupply />} />
                 <Route path="/createblog" element={<CreateBlog />} />
                 <Route path="/blog/:id" element={<BlogDetail />} />
+                <Route path="/parent" element={<ParentPage />} />
             </Route>
 
             {/* Admin Layout */}
@@ -61,6 +64,7 @@ function App() {
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/manage-user" element={<ManageUser />} />
                 <Route path="/manage-blog" element={<ManageBlog />} />
+                <Route path="/manage-health-profile" element={<ManageHealthProfile />} />
             </Route>
 
             <Route path="/login" element={<Login />} />

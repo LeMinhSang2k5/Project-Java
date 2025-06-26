@@ -6,21 +6,12 @@ import com.java.backend.repository.BlogRepository;
 import com.java.backend.entity.Blog;
 import java.util.List;
 import java.util.Optional;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import org.springframework.transaction.annotation.Transactional;
-import java.util.stream.Collectors;
 
 @Service
 public class BlogService {
 
     @Autowired
     private BlogRepository blogRepository;
-
-    @PersistenceContext
-    private EntityManager entityManager;
 
     // Lấy tất cả các blog
     public List<Blog> getAllBlogs() {
@@ -32,45 +23,17 @@ public class BlogService {
         return blogRepository.findById(id);
     }
 
-    private Long findSmallestAvailableId() {
-        List<Long> existingIds = blogRepository.findAll().stream()
-                .map(Blog::getId)
-                .sorted()
-                .collect(Collectors.toList());
-
-        Long smallestId = 1L;
-        for (Long existingId : existingIds) {
-            if (existingId.equals(smallestId)) {
-                smallestId++;
-            } else if (existingId > smallestId) {
-                break;
-            }
-        }
-        return smallestId;
-    }
-
-    @Transactional
+    // Tạo blog mới (đơn giản hóa)
     public Blog createBlog(Blog blog) {
-        // Tìm ID nhỏ nhất chưa được sử dụng
-        Long newId = findSmallestAvailableId();
+        try {
+            // Đặt ID về null để JPA tự động tạo ID
+            blog.setId(null);
 
-        // Reset sequence nếu cần
-        entityManager.createNativeQuery(
-                "ALTER TABLE blogs AUTO_INCREMENT = ?")
-                .setParameter(1, newId)
-                .executeUpdate();
-
-        // Đặt ID mới cho blog
-        blog.setId(null); // Để cho phép JPA tạo ID mới
-        Blog savedBlog = blogRepository.save(blog);
-
-        // Nếu ID được tạo lớn hơn mong đợi, thử lại với ID mong muốn
-        if (savedBlog.getId() > newId) {
-            blog.setId(newId);
-            savedBlog = blogRepository.save(blog);
+            // Lưu blog với ID tự động
+            return blogRepository.save(blog);
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi tạo blog: " + e.getMessage(), e);
         }
-
-        return savedBlog;
     }
 
     public Blog updateBlog(Long id, Blog blogDetails) {

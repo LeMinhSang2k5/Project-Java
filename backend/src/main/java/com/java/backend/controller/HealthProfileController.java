@@ -31,6 +31,15 @@ public class HealthProfileController {
         return healthProfileService.getHealthProfileById(id);
     }
 
+    @GetMapping("/student/{studentId}")
+    public ResponseEntity<HealthProfile> getByStudentId(@PathVariable Long studentId) {
+        HealthProfile profile = healthProfileService.findByStudentId(studentId);
+        if (profile == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(profile);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<HealthProfile> updateHealthProfile(@PathVariable Long id,
             @RequestBody HealthProfile healthProfile) {

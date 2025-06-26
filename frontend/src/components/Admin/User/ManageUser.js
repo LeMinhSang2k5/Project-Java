@@ -3,8 +3,9 @@ import api from '../../../config/api';
 import ModalCreateUser from './ModalCreateUser';
 import ModalEditUser from './ModalEditUser';
 import ModalDeleteUser from './ModalDeleteUser';
+import ModalImportExcel from './ModalImportExcel';
 import Button from 'react-bootstrap/Button';
-import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaFileExcel } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Form from 'react-bootstrap/Form';
@@ -36,6 +37,7 @@ const ManageUser = () => {
   const [showCreate, setShowCreate] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  const [showImportExcel, setShowImportExcel] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedRole, setSelectedRole] = useState('');
 
@@ -71,6 +73,10 @@ const ManageUser = () => {
     toast.success('Xóa người dùng thành công!');
   };
 
+  const handleUserImported = () => {
+    fetchUsers();
+  };
+
   // Lọc users theo role được chọn
   const filteredUsers = selectedRole
     ? users.filter((user) => user.role === selectedRole)
@@ -81,24 +87,21 @@ const ManageUser = () => {
 
   return (
     <div>
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="colored"
-      />
-
       <h2>Quản lý người dùng</h2>
-      <div className="mb-3 d-flex align-items-center">
-        <Button variant="success" onClick={() => setShowCreate(true)} className="me-3">
-          <FaPlus className="me-2" /> Thêm người dùng
-        </Button>
+      <div className="mb-3 d-flex align-items-center justify-content-between">
+        <div className="d-flex align-items-center">
+          <Button variant="success" onClick={() => setShowCreate(true)} className="me-2">
+            <FaPlus className="me-2" /> Thêm người dùng
+          </Button>
+          <Button 
+            variant="info" 
+            onClick={() => setShowImportExcel(true)} 
+            className="me-3"
+            title="Nhập danh sách học sinh từ file Excel"
+          >
+            <FaFileExcel className="me-2" /> Nhập từ Excel
+          </Button>
+        </div>
         <Form.Select
           style={{ maxWidth: 220 }}
           value={selectedRole}
@@ -115,6 +118,7 @@ const ManageUser = () => {
             <th>ID</th>
             <th>Email</th>
             <th>Họ tên</th>
+            {(selectedRole === 'STUDENT' || !selectedRole) && <th>Mã số SV</th>}
             <th>Vai trò</th>
             <th>Hành động</th>
           </tr>
@@ -125,6 +129,9 @@ const ManageUser = () => {
               <td>{user.id}</td>
               <td>{user.email}</td>
               <td>{user.fullName}</td>
+              {(selectedRole === 'STUDENT' || !selectedRole) && (
+                <td>{user.role === 'STUDENT' ? (user.code || '-') : '-'}</td>
+              )}
               <td>{getRoleName(user.role)}</td>
               <td>
                 <Button
@@ -150,14 +157,12 @@ const ManageUser = () => {
       </table>
 
       {/* Modal Thêm */}
-   
-<ModalCreateUser
-  show={showCreate}
-  onClose={() => setShowCreate(false)}
-  onUserAdded={handleUserAdded}
-  selectedRole={selectedRole} // truyền role đang chọn
-/>
-
+      <ModalCreateUser
+        show={showCreate}
+        onClose={() => setShowCreate(false)}
+        onUserAdded={handleUserAdded}
+        selectedRole={selectedRole}
+      />
 
       {/* Modal Sửa */}
       <ModalEditUser
@@ -173,6 +178,13 @@ const ManageUser = () => {
         onClose={() => setShowDelete(false)}
         user={selectedUser}
         onUserDeleted={handleUserDeleted}
+      />
+
+      {/* Modal Nhập Excel */}
+      <ModalImportExcel
+        show={showImportExcel}
+        onClose={() => setShowImportExcel(false)}
+        onUsersImported={handleUserImported}
       />
     </div>
   );

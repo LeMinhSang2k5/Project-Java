@@ -13,8 +13,8 @@ public class HealthProfile {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private User user;
+    @JoinColumn(name = "student_id")
+    private Student student;
 
     @Column(name = "student_name")
     private String studentName;
@@ -72,12 +72,12 @@ public class HealthProfile {
         this.id = id;
     }
 
-    public User getUser() {
-        return user;
+    public Student getStudent() {
+        return student;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setStudent(Student student) {
+        this.student = student;
     }
 
     public String getAllergies() {

@@ -1,11 +1,11 @@
-import { DNA } from 'react-loader-spinner';
+import { Dna } from 'react-loader-spinner';
 import './Loader.scss';
 
 const Loader = () => {
   return (
     <div className="loading-overlay">
       <div className="loading-content">
-        <DNA
+        <Dna
             visible={true}
             height="200"
             width="200"

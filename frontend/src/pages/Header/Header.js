@@ -48,7 +48,7 @@ const Header = () => {
                         <NavLink to="/" className="nav-link">Trang chủ</NavLink>
                         <NavLink to="/about" className="nav-link">Giới thiệu</NavLink>
                         
-                        <NavDropdown title="Tài liệu & Hướng dẫn" id="health-docs-dropdown">
+                        <NavDropdown className="me-2" title="Tài liệu & Hướng dẫn" id="health-docs-dropdown">
                             <NavDropdown.Item as={NavLink} to="/docs/general">Sức khỏe học đường</NavDropdown.Item>
                             <NavDropdown.Item as={NavLink} to="/docs/nutrition">Dinh dưỡng học đường</NavDropdown.Item>
                             <NavDropdown.Item as={NavLink} to="/docs/prevention">Phòng chống dịch bệnh</NavDropdown.Item>
@@ -56,7 +56,7 @@ const Header = () => {
 
                         <NavLink to="/blog" className="nav-link">Blog chia sẻ</NavLink>
                         
-                        <NavDropdown title="Hồ sơ sức khỏe" id="health-profile-dropdown">
+                        <NavDropdown className="me-2" title="Hồ sơ sức khỏe" id="health-profile-dropdown">
                             <NavDropdown.Item as={NavLink} to="/health-profile/new">Khai báo hồ sơ mới</NavDropdown.Item>
                             <NavDropdown.Item as={NavLink} to="/health-profile/allergies">Dị ứng</NavDropdown.Item>
                             <NavDropdown.Item as={NavLink} to="/health-profile/chronic">Bệnh mãn tính</NavDropdown.Item>

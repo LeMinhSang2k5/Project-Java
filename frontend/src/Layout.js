@@ -20,6 +20,7 @@ import Login from './pages/Login/Login';
 import VaccinationHistory from './pages/HealthProfile/VaccinationHistory';
 import AdminDashboard from './components/Admin/AdminDashboard';
 import ManageHealthProfile from './components/Admin/HealthProfile/ManageHealthProfile';
+import ParentPage from './pages/Parent/ParentPage';
 
 const Layout = (props) => {
     return (
@@ -36,6 +37,7 @@ const Layout = (props) => {
                     <Route path="/calendar" element={<Calendar />} />
                     <Route path="/medicalsupply" element={<MedicalSupply />} />
                     <Route path="/createblog" element={<CreateBlog />} />
+                    <Route path="/parent" element={<ParentPage />} />
                 </Route>
 
                 {/* Admin Layout */}
