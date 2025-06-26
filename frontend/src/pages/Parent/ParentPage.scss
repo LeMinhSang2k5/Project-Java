@@ -1,0 +1,42 @@
+.parent-page {
+  h2 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .parent-sidebar {
+    min-height: 100vh;
+    border-right: 1px solid #eee;
+    background: #fafbfc;
+    padding-top: 1rem;
+    .card {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      border-radius: 8px;
+    }
+    .list-group-item {
+      cursor: pointer;
+      font-weight: 500;
+      &:hover, &.active {
+        background: #e3f0ff;
+        color: #007bff;
+      }
+    }
+  }
+  .parent-content {
+    padding: 2rem 1rem 1rem 1rem;
+  }
+  .card {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    border-radius: 8px;
+  }
+  .table {
+    margin-top: 1rem;
+    th, td {
+      text-align: center;
+      vertical-align: middle;
+    }
+  }
+  .alert {
+    margin-bottom: 1.5rem;
+  }
+} 
