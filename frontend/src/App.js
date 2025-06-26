@@ -24,6 +24,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import BlogDetail from './pages/BlogDetail';
 import ModalUpdateBlog from './components/Admin/Blog/ModalUpdateBlog';
 import ManageHealthProfile from './components/Admin/HealthProfile/ManageHealthProfile';
+import ParentPage from './pages/Parent/ParentPage';
 
 
 function App() {
@@ -55,6 +56,7 @@ function App() {
                 <Route path="/medicalsupply" element={<MedicalSupply />} />
                 <Route path="/createblog" element={<CreateBlog />} />
                 <Route path="/blog/:id" element={<BlogDetail />} />
+                <Route path="/parent" element={<ParentPage />} />
             </Route>
 
             {/* Admin Layout */}
