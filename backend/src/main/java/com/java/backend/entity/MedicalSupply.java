@@ -1,5 +1,11 @@
 package com.java.backend.entity;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,11 +26,25 @@ public class MedicalSupply {
     @Column(nullable = false)
     private Integer quantity; // Số lượng tồn kho
 
-    private String unit; // Ví dụ: "viên", "hộp", "ml"
-
+    @Column(nullable = false)
     private String category; // Thuốc, vật tư y tế
 
-    // Getters and Setters
+    @Column(nullable = true)
+    private LocalDate expiryDate; // Ngày hạn sử dụng
+
+    @CreationTimestamp
+    @Column(name = "stock_in_date", nullable = true, updatable = false)
+    private LocalDateTime stockInDate; // Ngày nhập kho
+
+    @UpdateTimestamp
+    @Column(name = "stock_out_date", nullable = true)
+    private LocalDateTime stockOutDate; // Ngày xuất kho
+
+    // Constructors
+    public MedicalSupply() {
+        // JPA requires a default constructor
+    }
+
     public Long getId() {
         return id;
     }
@@ -49,19 +69,35 @@ public class MedicalSupply {
         this.quantity = quantity;
     }
 
-    public String getUnit() {
-        return unit;
-    }
-
-    public void setUnit(String unit) {
-        this.unit = unit;
-    }
-
     public String getCategory() {
         return category;
     }
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    public LocalDate getExpiryDate() {
+        return expiryDate;
+    }
+
+    public void setExpiryDate(LocalDate expiryDate) {
+        this.expiryDate = expiryDate;
+    }
+
+    public LocalDateTime getStockInDate() {
+        return stockInDate;
+    }
+
+    public void setStockInDate(LocalDateTime stockInDate) {
+        this.stockInDate = stockInDate;
+    }
+
+    public LocalDateTime getStockOutDate() {
+        return stockOutDate;
+    }
+
+    public void setStockOutDate(LocalDateTime stockOutDate) {
+        this.stockOutDate = stockOutDate;
     }
 }
