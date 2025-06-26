@@ -13,6 +13,7 @@ const defaultForm = {
   isActive: true,
   dateOfBirth: '',
   gender: 'MALE',
+  code: '',
   studentClass: '',
   phoneNumber: '',
   department: ''
@@ -35,12 +36,11 @@ function ModalCreateUser({ show, onClose, onUserAdded }) {
     switch (role) {
       case "STUDENT":
         return "/students";
+      // Tạm thời tất cả role khác đều dùng /user endpoint
       case "PARENT":
-        return "/parents";
       case "MANAGER":
-        return "/managers";
       case "SCHOOL_NURSE":
-        return "/nurses";
+      case "ADMIN":
       default:
         return "/user";
     }
@@ -53,14 +53,49 @@ function ModalCreateUser({ show, onClose, onUserAdded }) {
       const endpoint = getEndpointByRole(form.role);
       const response = await api.post(endpoint, form);
       if (response.data) {
-        toast.success(`Thêm ${form.email} thành công`);
+        // Toast thông báo chi tiết theo role
+        const roleNames = {
+          'STUDENT': 'học sinh',
+          'PARENT': 'phụ huynh', 
+          'SCHOOL_NURSE': 'nhân viên y tế',
+          'MANAGER': 'quản lý',
+          'ADMIN': 'quản trị viên'
+        };
+        
+        const roleName = roleNames[form.role] || 'người dùng';
+        toast.success(
+          `✅ Thêm ${roleName} "${form.fullName}" thành công!`, 
+          {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          }
+        );
+        
+        // Reset form và đóng modal
         setForm({ ...defaultForm });
         onUserAdded && onUserAdded();
         onClose();
       }
     } catch (err) {
       console.error('Error:', err.response?.data);
-      toast.error(err.response?.data?.message || 'Lỗi khi thêm user');
+      
+      // Toast lỗi chi tiết
+      const errorMessage = err.response?.data?.message || 'Có lỗi xảy ra khi thêm người dùng';
+      toast.error(
+        `❌ ${errorMessage}`, 
+        {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        }
+      );
     } finally {
       setLoading(false);
     }
@@ -72,6 +107,17 @@ function ModalCreateUser({ show, onClose, onUserAdded }) {
       case "STUDENT":
         return (
           <>
+            <Form.Group className="mb-3">
+              <Form.Label>Mã số sinh viên *</Form.Label>
+              <Form.Control
+                type="text"
+                name="code"
+                value={form.code}
+                onChange={handleChange}
+                placeholder="Ví dụ: SV2024001"
+                required
+              />
+            </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Ngày sinh</Form.Label>
               <Form.Control
@@ -87,7 +133,6 @@ function ModalCreateUser({ show, onClose, onUserAdded }) {
               <Form.Select name="gender" value={form.gender} onChange={handleChange}>
                 <option value="MALE">Nam</option>
                 <option value="FEMALE">Nữ</option>
-                <option value="OTHER">Khác</option>
               </Form.Select>
             </Form.Group>
             <Form.Group className="mb-3">
@@ -121,7 +166,6 @@ function ModalCreateUser({ show, onClose, onUserAdded }) {
               <Form.Select name="gender" value={form.gender} onChange={handleChange}>
                 <option value="MALE">Nam</option>
                 <option value="FEMALE">Nữ</option>
-                <option value="OTHER">Khác</option>
               </Form.Select>
             </Form.Group>
           </>
@@ -144,7 +188,6 @@ function ModalCreateUser({ show, onClose, onUserAdded }) {
               <Form.Select name="gender" value={form.gender} onChange={handleChange}>
                 <option value="MALE">Nam</option>
                 <option value="FEMALE">Nữ</option>
-                <option value="OTHER">Khác</option>
               </Form.Select>
             </Form.Group>
             <Form.Group className="mb-3">

@@ -13,11 +13,38 @@ function ModalDeleteUser({ show, onClose, user, onUserDeleted }) {
     setLoading(true);
     try {
       await api.delete(`/user/${user.id}`);
+      
+      // Toast thành công
+      toast.success(
+        `✅ Đã xóa người dùng "${user.fullName || user.email}" thành công!`, 
+        {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        }
+      );
+      
       onUserDeleted();
       onClose();
     } catch (err) {
       console.error('Error:', err.response?.data);
-      toast.error(err.response?.data?.message || 'Lỗi khi xóa người dùng');
+      
+      // Toast lỗi chi tiết
+      const errorMessage = err.response?.data?.message || 'Có lỗi xảy ra khi xóa người dùng';
+      toast.error(
+        `❌ ${errorMessage}`, 
+        {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        }
+      );
     } finally {
       setLoading(false);
     }

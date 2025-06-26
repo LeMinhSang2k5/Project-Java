@@ -1,0 +1,29 @@
+.nurse-dashboard {
+  .stat-card {
+    transition: transform 0.2s ease-in-out;
+    
+    &:hover {
+      transform: translateY(-2px);
+    }
+    
+    .stat-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+  }
+  
+  .table {
+    tbody tr {
+      transition: background-color 0.2s ease;
+      
+      &:hover {
+        background-color: rgba(13, 110, 253, 0.05);
+      }
+    }
+  }
+} 

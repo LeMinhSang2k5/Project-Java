@@ -14,6 +14,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import com.java.backend.enums.Role;
 import lombok.Data;
@@ -22,6 +23,7 @@ import lombok.Data;
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "users")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class User {
 
     @Id
@@ -108,11 +110,15 @@ public class User {
         isActive = active;
     }
 
-    public void setHealthProfile(HealthProfile healthProfile) {
-        this.healthProfile = healthProfile;
-        if (healthProfile != null) {
-            healthProfile.setUser(this);
-        }
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", fullName='" + fullName + '\'' +
+                ", role=" + role +
+                ", isActive=" + isActive +
+                '}';
     }
-
 }

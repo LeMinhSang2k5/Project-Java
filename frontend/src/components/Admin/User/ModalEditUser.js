@@ -38,11 +38,38 @@ function ModalEditUser({ show, onClose, user, onUserUpdated }) {
       if (form.role !== user.role) updatedFields.role = form.role;
 
       await api.put(`/user/${user.id}`, updatedFields);
+      
+      // Toast thành công
+      toast.success(
+        `✅ Cập nhật thông tin "${form.fullName}" thành công!`, 
+        {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        }
+      );
+      
       onUserUpdated();
       onClose();
     } catch (err) {
       console.error('Error:', err.response?.data);
-      toast.error(err.response?.data?.message || 'Lỗi khi cập nhật người dùng');
+      
+      // Toast lỗi chi tiết
+      const errorMessage = err.response?.data?.message || 'Có lỗi xảy ra khi cập nhật người dùng';
+      toast.error(
+        `❌ ${errorMessage}`, 
+        {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        }
+      );
     } finally {
       setLoading(false);
     }
