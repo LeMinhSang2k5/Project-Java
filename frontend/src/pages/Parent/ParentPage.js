@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Tabs, Tab, Card, Button, Container, Table, Alert, Spinner, Row, Col, ListGroup } from 'react-bootstrap';
+import {Card, Button, Container, Table, Alert, Spinner, Row, Col, ListGroup } from 'react-bootstrap';
 import NewHealthProfile from '../HealthProfile/NewHealthProfile';
 import api from '../../config/api';
 import './ParentPage.scss';

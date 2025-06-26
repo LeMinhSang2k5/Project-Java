@@ -24,31 +24,35 @@ const Login = () => {
       );
 
       console.log("Login successful:", response.data);
-      
+
       // Lưu token vào localStorage
       localStorage.setItem("token", response.data.token || "dummy-token");
       localStorage.setItem("user", JSON.stringify(response.data));
-        if (response.data.role === "STUDENT") {
-  localStorage.setItem("studentId", response.data.id);
-}
-        // Chuyển hướng dựa vào role
-        const role = response.data.role;
-        if (role === "ADMIN") {
-          navigate("/admin");
-        } else if (role === "SCHOOL_NURSE") {
-          navigate("/school-nurse/dashboard");
-        } else if (role === "MANAGER") {
-          navigate("/manager/dashboard");
-        } else if (role === "PARENT") {
-          navigate("/parent/dashboard");
-        } else {
-          navigate("/");
-        }
-
-        toast.success(`Đăng nhập ${email} thành công`);
-      } catch (err) {
-        setError("Email hoặc mật khẩu không đúng");
+      if (response.data.role === "STUDENT") {
+        localStorage.setItem("studentId", response.data.id);
       }
+
+      if (response.data.role === "PARENT") {
+        localStorage.setItem("parentId", response.data.id);
+      }
+      // Chuyển hướng dựa vào role
+      const role = response.data.role;
+      if (role === "ADMIN") {
+        navigate("/admin");
+      } else if (role === "SCHOOL_NURSE") {
+        navigate("/school-nurse/dashboard");
+      } else if (role === "MANAGER") {
+        navigate("/manager/dashboard");
+      } else if (role === "PARENT") {
+        navigate("/parent");
+      } else {
+        navigate("/");
+      }
+
+      toast.success(`Đăng nhập ${email} thành công`);
+    } catch (err) {
+      setError("Email hoặc mật khẩu không đúng");
+    }
   };
 
   return (
@@ -60,9 +64,7 @@ const Login = () => {
             <Card className="login-card">
               <Card.Body>
                 {/* Tabs */}
-                <h1 className="login-tabs">
-                    Đăng nhập
-                </h1>
+                <h1 className="login-tabs">Đăng nhập</h1>
                 {activeTab === "login" && (
                   <>
                     {error && <div className="alert alert-danger">{error}</div>}
