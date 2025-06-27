@@ -1,5 +1,6 @@
 package com.java.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.java.backend.enums.Gender;
 import com.java.backend.enums.Role;
 
@@ -7,6 +8,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -17,6 +19,10 @@ public class Parent extends User {
 
     @Column(nullable = false)
     private String phoneNumber;
+
+    @OneToOne(mappedBy = "parent")
+    @JsonIgnore // Tránh vòng lặp khi trả JSON
+    private Student student;
 
     public Parent() {
     }

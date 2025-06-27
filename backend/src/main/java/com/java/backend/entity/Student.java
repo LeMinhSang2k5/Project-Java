@@ -27,6 +27,10 @@ public class Student extends User {
     @Column(name = "student_class", nullable = false)
     private String studentClass;
 
+    @OneToOne
+    @JoinColumn(name = "parent_id")
+    private Parent parent;
+
     @OneToOne(mappedBy = "student", cascade = CascadeType.ALL)
     @JsonIgnore
     private HealthProfile healthProfile;

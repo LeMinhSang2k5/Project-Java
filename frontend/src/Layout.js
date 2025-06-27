@@ -48,6 +48,11 @@ const Layout = (props) => {
                     <Route path="/manage-health-profile" element={<ManageHealthProfile />} />
                 </Route>
 
+                {/* Nurse Layout */}
+                <Route element={<NurseLayout />}>
+                    <Route path="/nurse" element={<NurseDashboard />} />
+                </Route>
+
                 <Route path="/login" element={<Login />} />
             </Routes>
         </BrowserRouter>

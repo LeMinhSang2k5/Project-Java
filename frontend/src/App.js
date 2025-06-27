@@ -25,6 +25,9 @@ import BlogDetail from './pages/BlogDetail';
 import ModalUpdateBlog from './components/Admin/Blog/ModalUpdateBlog';
 import ManageHealthProfile from './components/Admin/HealthProfile/ManageHealthProfile';
 import ParentPage from './pages/Parent/ParentPage';
+import NurseLayout from './components/Nurse/NurseLayout';
+import NurseDashboard from './components/Nurse/NurseDashboard';
+import ManageMedicalSupply from './components/Admin/MedicalSupply/ManageMedicalSupply';
 
 
 function App() {
@@ -65,6 +68,14 @@ function App() {
                 <Route path="/manage-user" element={<ManageUser />} />
                 <Route path="/manage-blog" element={<ManageBlog />} />
                 <Route path="/manage-health-profile" element={<ManageHealthProfile />} />
+                <Route path="/update-blog/:id" element={<ModalUpdateBlog />} />
+                <Route path="/manage-medical-supply" element={<ManageMedicalSupply />} />
+            </Route>
+
+            {/* Nurse Layout */}
+            <Route element={<NurseLayout />}>
+                <Route path="/nurse" element={<NurseDashboard />} />
+                
             </Route>
 
             <Route path="/login" element={<Login />} />

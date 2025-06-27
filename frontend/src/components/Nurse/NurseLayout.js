@@ -9,11 +9,11 @@ const NurseLayout = () => {
     <div className="d-flex">
       <NurseSidebar />
       <div className="flex-grow-1">
-        <Header />
+      
         <main className="container-fluid py-4" style={{ minHeight: 'calc(100vh - 120px)' }}>
           <Outlet />
         </main>
-        <Footer />
+   
       </div>
     </div>
   );
