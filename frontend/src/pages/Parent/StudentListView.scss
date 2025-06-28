@@ -1,0 +1,28 @@
+.student-list-page {
+    .table {
+      th {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+        font-weight: 600;
+      }
+      
+      td {
+        vertical-align: middle;
+      }
+    }
+    
+    .badge {
+      font-size: 0.8rem;
+    }
+    
+    .btn-sm {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.875rem;
+    }
+    
+    .text-center {
+      .fas {
+        color: #6c757d;
+      }
+    }
+  } 

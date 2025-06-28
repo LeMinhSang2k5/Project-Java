@@ -52,6 +52,8 @@ function App() {
                 <Route path="/about" element={<About />} />
                 <Route path="/blog" element={<BlogPage />} />
                 <Route path="/health-profile/new" element={<NewHealthProfile />} />
+                <Route path="/new-health-profile/:studentId" element={<NewHealthProfile />} />
+                <Route path="/health-profile/:studentId" element={<NewHealthProfile />} />
                 <Route path="/health-profile/vaccination" element={<VaccinationHistory />} />
                 <Route path="/medical" element={<Medical />} />
                 <Route path="/report" element={<Report />} />

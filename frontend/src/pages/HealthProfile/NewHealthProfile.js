@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Button, Card, Container, Row, Col, Alert } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../config/api';
 import './HealthProfile.scss';
 
@@ -17,6 +17,7 @@ const VIETNAM_PROVINCES = [
 
 const NewHealthProfile = () => {
     const navigate = useNavigate();
+    const { studentId: urlStudentId } = useParams();
     const [formData, setFormData] = useState({
         studentName: '',
         dateOfBirth: '',
@@ -36,6 +37,62 @@ const NewHealthProfile = () => {
     const [studentId, setStudentId] = useState(null);
 
 useEffect(() => {
+    if (urlStudentId) {
+        setStudentId(urlStudentId);
+        
+        // Đầu tiên, thử lấy health profile
+        api.get(`/health-profiles/student/${urlStudentId}`)
+            .then(res => {
+                if (res.data) {
+                    // Nếu có health profile, sử dụng dữ liệu từ health profile
+                    setFormData({
+                        studentName: res.data.studentName || '',
+                        dateOfBirth: res.data.dateOfBirth || '',
+                        gender: res.data.gender || '',
+                        grade: res.data.grade || '',
+                        className: res.data.className || '',
+                        city: res.data.city || '',
+                        district: res.data.district || '',
+                        allergies: res.data.allergies || '',
+                        chronicDiseases: res.data.chronicDiseases || '',
+                        medicalHistory: res.data.medicalHistory || '',
+                        visionDetails: res.data.visionDetails || '',
+                        hearingDetails: res.data.hearingDetails || '',
+                        vaccinationHistory: res.data.vaccinationHistory || ''
+                    });
+                    setAlertMsg("Hồ sơ sức khỏe đã tồn tại. Bạn có thể cập nhật thông tin.");
+                } else {
+                    // Nếu không có health profile, lấy thông tin từ student để làm mẫu
+                    return api.get(`/students/${urlStudentId}`);
+                }
+            })
+            .then(studentRes => {
+                if (studentRes && studentRes.data) {
+                    const student = studentRes.data;
+                    setFormData(prev => ({
+                        ...prev,
+                        studentName: student.fullName || '',
+                        dateOfBirth: student.dateOfBirth || '',
+                        gender: student.gender || '',
+                        grade: student.grade || '',
+                        className: student.studentClass || '',
+                        city: student.city || '',
+                        district: student.district || ''
+                    }));
+                    setAlertMsg("Chưa có hồ sơ sức khỏe cho học sinh này. Vui lòng tạo mới!");
+                }
+            })
+            .catch(err => {
+                console.error('Error loading data:', err);
+                if (err.response && err.response.status === 404) {
+                    setAlertMsg("Chưa có hồ sơ sức khỏe cho học sinh này. Vui lòng tạo mới!");
+                } else {
+                    setAlertMsg("Có lỗi khi tải thông tin học sinh.");
+                }
+            });
+        return;
+    }
+
     const studentIdFromStorage = localStorage.getItem('studentId');
     if (studentIdFromStorage) {
         setStudentId(studentIdFromStorage);
@@ -69,7 +126,6 @@ useEffect(() => {
             });
         return;
     }
-
 
     const parentId = localStorage.getItem('parentId');
     if (parentId) {
@@ -106,7 +162,7 @@ useEffect(() => {
                 }
             });
     }
-}, []);
+}, [urlStudentId]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -137,9 +193,47 @@ useEffect(() => {
                 }
             };
 
-            await api.post('/health-profiles', dataToSend);
-            window.alert('Hồ sơ sức khỏe đã được tạo thành công!');
-            navigate('/');
+            // Kiểm tra xem hồ sơ đã tồn tại chưa để quyết định tạo mới hay cập nhật
+            try {
+                const existingProfile = await api.get(`/health-profiles/student/${studentId}`);
+                console.log('Existing profile found:', existingProfile.data);
+                
+                if (existingProfile.data) {
+                    // Cập nhật hồ sơ hiện có
+                    const updateData = {
+                        ...formData,
+                        id: existingProfile.data.id, // Thêm ID của health profile
+                        student: {
+                            id: Number(studentId)
+                        }
+                    };
+
+                    const updateResponse = await api.put(`/health-profiles/${existingProfile.data.id}`, updateData);
+                    console.log('Update response:', updateResponse.data);
+                    window.alert('Hồ sơ sức khỏe đã được cập nhật thành công!');
+                    
+                    // Refresh dữ liệu sau khi cập nhật thành công
+                    await refreshHealthProfileData();
+                } else {
+                    // Tạo mới hồ sơ
+                    const createResponse = await api.post('/health-profiles', dataToSend);
+                    console.log('Create response:', createResponse.data);
+                    window.alert('Hồ sơ sức khỏe đã được tạo thành công!');
+                }
+            } catch (error) {
+                console.error('Error in health profile operation:', error);
+                if (error.response && error.response.status === 404) {
+                    // Không tìm thấy hồ sơ, tạo mới
+                    const createResponse = await api.post('/health-profiles', dataToSend);
+                    console.log('Create response:', createResponse.data);
+                    window.alert('Hồ sơ sức khỏe đã được tạo thành công!');
+                } else {
+                    throw error;
+                }
+            }
+            
+            // Chuyển về trang parent sau khi hoàn thành
+            navigate('/parent');
         } catch (error) {
             if (error.response) {
                 window.alert(`Lỗi: ${error.response.data.message || 'Có lỗi xảy ra khi tạo hồ sơ sức khỏe'}`);
@@ -148,6 +242,35 @@ useEffect(() => {
             } else {
                 window.alert('Có lỗi xảy ra khi gửi yêu cầu. Vui lòng thử lại!');
             }
+        }
+    };
+
+    // Function để refresh dữ liệu health profile
+    const refreshHealthProfileData = async () => {
+        if (!studentId) return;
+        
+        try {
+            const response = await api.get(`/health-profiles/student/${studentId}`);
+            if (response.data) {
+                setFormData({
+                    studentName: response.data.studentName || '',
+                    dateOfBirth: response.data.dateOfBirth || '',
+                    gender: response.data.gender || '',
+                    grade: response.data.grade || '',
+                    className: response.data.className || '',
+                    city: response.data.city || '',
+                    district: response.data.district || '',
+                    allergies: response.data.allergies || '',
+                    chronicDiseases: response.data.chronicDiseases || '',
+                    medicalHistory: response.data.medicalHistory || '',
+                    visionDetails: response.data.visionDetails || '',
+                    hearingDetails: response.data.hearingDetails || '',
+                    vaccinationHistory: response.data.vaccinationHistory || ''
+                });
+                console.log('Health profile data refreshed:', response.data);
+            }
+        } catch (error) {
+            console.error('Error refreshing health profile data:', error);
         }
     };
 

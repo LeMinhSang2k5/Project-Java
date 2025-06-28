@@ -10,7 +10,7 @@ import com.java.backend.entity.Parent;
 import com.java.backend.entity.Student;
 import com.java.backend.enums.Role;
 import com.java.backend.repository.ParentRepository;
-import com.java.backend.repository.StudentRepository; // Thêm dòng này
+import com.java.backend.repository.StudentRepository;
 import com.java.backend.repository.HealthProfileRepository;
 
 @Service
@@ -18,7 +18,7 @@ public class ParentService {
     @Autowired
     private ParentRepository parentRepository;
     @Autowired
-    private StudentRepository studentRepository; // Sửa: inject StudentRepository thay vì StudentService
+    private StudentRepository studentRepository;
 
     @Autowired
     private HealthProfileRepository healthProfileRepository;
@@ -37,6 +37,11 @@ public class ParentService {
                 .orElseThrow(() -> new RuntimeException("Parent not found with id: " + id));
     }
 
+    public Parent getParentByEmail(String email) {
+        return parentRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Parent not found with email: " + email));
+    }
+
     public Parent updateParent(Parent parent) {
         return parentRepository.save(parent);
     }
@@ -45,10 +50,10 @@ public class ParentService {
         parentRepository.deleteById(id);
     }
 
-    public Student getStudentOfParent(Long parentId) {
+    public List<Student> getStudentsOfParent(Long parentId) {
         Parent parent = parentRepository.findById(parentId)
                 .orElseThrow(() -> new RuntimeException("Parent not found with id: " + parentId));
-        return parent.getStudent();
+        return parent.getStudents();
     }
 
     public void linkStudentToParent(Long parentId, Long studentId) {
@@ -56,15 +61,13 @@ public class ParentService {
                 .orElseThrow(() -> new RuntimeException("Parent not found"));
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
-        parent.setStudent(student);
+        
         student.setParent(parent);
-        parentRepository.save(parent); // Ưu tiên lưu parent để cập nhật quan hệ
-        studentRepository.save(student); // Lưu student để cập nhật quan hệ hai chiều
+        studentRepository.save(student);
     }
 
     public HealthProfile findByStudentId(Long studentId) {
         return healthProfileRepository.findByStudent_Id(studentId)
                 .orElseThrow(() -> new RuntimeException("Health profile not found for student ID: " + studentId));
     }
-
 }

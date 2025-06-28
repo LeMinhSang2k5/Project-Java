@@ -3,10 +3,11 @@ package com.java.backend.entity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import com.java.backend.enums.Gender;
 import com.java.backend.enums.Role;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "students")
@@ -27,12 +28,21 @@ public class Student extends User {
     @Column(name = "student_class", nullable = false)
     private String studentClass;
 
-    @OneToOne
-    @JoinColumn(name = "parent_id")
+    @Column(name = "city")
+    private String city;
+
+    @Column(name = "district")
+    private String district;
+
+    @Column(name = "grade")
+    private String grade;
+
+    @ManyToOne
+    @JoinColumn(name = "parent_id", nullable = true)
     private Parent parent;
 
     @OneToOne(mappedBy = "student", cascade = CascadeType.ALL)
-    @JsonIgnore
+    @JsonManagedReference
     private HealthProfile healthProfile;
 
     public Student() {
@@ -90,6 +100,30 @@ public class Student extends User {
         this.gender = gender;
     }
 
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getDistrict() {
+        return district;
+    }
+
+    public void setDistrict(String district) {
+        this.district = district;
+    }
+
+    public String getGrade() {
+        return grade;
+    }
+
+    public void setGrade(String grade) {
+        this.grade = grade;
+    }
+
     public HealthProfile getHealthProfile() {
         return healthProfile;
     }
@@ -107,9 +141,6 @@ public class Student extends User {
 
     public void setParent(Parent parent) {
         this.parent = parent;
-        if (parent != null) {
-            parent.setStudent(this);
-        }
     }
 
 }

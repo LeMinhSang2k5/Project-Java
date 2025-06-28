@@ -8,8 +8,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.List;
 
 @Entity
 @Table(name = "parents")
@@ -20,9 +21,9 @@ public class Parent extends User {
     @Column(nullable = false)
     private String phoneNumber;
 
-    @OneToOne(mappedBy = "parent")
+    @OneToMany(mappedBy = "parent")
     @JsonIgnore // Tránh vòng lặp khi trả JSON
-    private Student student;
+    private List<Student> students;
 
     public Parent() {
     }
@@ -49,11 +50,11 @@ public class Parent extends User {
         this.gender = gender;
     }
 
-    public Student getStudent() {
-        return student;
+    public List<Student> getStudents() {
+        return students;
     }
 
-    public void setStudent(Student student) {
-        this.student = student;
+    public void setStudents(List<Student> students) {
+        this.students = students;
     }
 }

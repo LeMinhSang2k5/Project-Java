@@ -1,8 +1,6 @@
 package com.java.backend.controller;
 
 import com.java.backend.entity.HealthProfile;
-import com.java.backend.entity.Parent;
-import com.java.backend.entity.Student;
 import com.java.backend.service.HealthProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,32 +17,10 @@ public class HealthProfileController {
     @Autowired
     private HealthProfileService healthProfileService;
 
-    @Autowired
-    private com.java.backend.service.ParentService parentService;
-
     // Tạo health profile trực tiếp
     @PostMapping
     public ResponseEntity<HealthProfile> createHealthProfile(@RequestBody HealthProfile healthProfile) {
         HealthProfile saved = healthProfileService.saveHealthProfile(healthProfile);
-        return ResponseEntity.ok(saved);
-    }
-
-    // Tạo health profile qua parent
-    @PostMapping("/by-parent/{parentId}")
-    public ResponseEntity<?> createHealthProfileByParent(
-            @PathVariable Long parentId,
-            @RequestBody HealthProfile healthProfileData) {
-        Parent parent = parentService.getParentById(parentId);
-        if (parent == null) {
-            return ResponseEntity.badRequest().body("Không tìm thấy phụ huynh.");
-        }
-        Student student = parent.getStudent();
-        if (student == null) {
-            return ResponseEntity.badRequest().body("Phụ huynh chưa gán học sinh.");
-        }
-        healthProfileData.setStudent(student);
-        student.setHealthProfile(healthProfileData);
-        HealthProfile saved = healthProfileService.saveHealthProfile(healthProfileData);
         return ResponseEntity.ok(saved);
     }
 
@@ -59,23 +35,25 @@ public class HealthProfileController {
         return profile.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/by-parent/{parentId}/student")
-    public ResponseEntity<Long> getStudentIdByParent(@PathVariable Long parentId) {
-        Parent parent = parentService.getParentById(parentId);
-        if (parent == null || parent.getStudent() == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(parent.getStudent().getId());
-    }
-
     @PutMapping("/{id}")
-    public ResponseEntity<HealthProfile> updateHealthProfile(@PathVariable Long id,
+    public ResponseEntity<?> updateHealthProfile(@PathVariable Long id,
             @RequestBody HealthProfile healthProfile) {
-        if (!id.equals(healthProfile.getId())) {
-            return ResponseEntity.badRequest().build();
+        try {
+            // Đảm bảo ID khớp
+            healthProfile.setId(id);
+            
+            // Validate student ID if provided
+            if (healthProfile.getStudent() != null && healthProfile.getStudent().getId() != null) {
+                System.out.println("Updating health profile for student ID: " + healthProfile.getStudent().getId());
+            }
+            
+            // Gọi service để cập nhật - service sẽ xử lý logic cập nhật đúng cách
+            HealthProfile updated = healthProfileService.updateHealthProfile(healthProfile);
+            System.out.println("Controller: Health profile updated successfully with ID: " + updated.getId());
+            return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi khi cập nhật hồ sơ sức khỏe: " + e.getMessage());
         }
-        HealthProfile updated = healthProfileService.updateHealthProfile(healthProfile);
-        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")

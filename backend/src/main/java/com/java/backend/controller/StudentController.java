@@ -23,12 +23,6 @@ public class StudentController {
     @PostMapping
     public ResponseEntity<?> createStudent(@RequestBody Map<String, Object> requestData) {
         try {
-            // Debug logging
-            System.out.println("=== DEBUG Request Data ===");
-            System.out.println("Raw request data: " + requestData);
-            System.out.println("===========================");
-
-            // Extract data từ Map
             String email = (String) requestData.get("email");
             String password = (String) requestData.get("password");
             String fullName = (String) requestData.get("fullName");
@@ -36,6 +30,16 @@ public class StudentController {
             String studentClass = (String) requestData.get("studentClass");
             String genderStr = (String) requestData.get("gender");
             String dateOfBirthStr = (String) requestData.get("dateOfBirth");
+            
+            // Extract parentId
+            Long parentId = null;
+            if (requestData.get("parentId") != null) {
+                if (requestData.get("parentId") instanceof Integer) {
+                    parentId = ((Integer) requestData.get("parentId")).longValue();
+                } else if (requestData.get("parentId") instanceof Long) {
+                    parentId = (Long) requestData.get("parentId");
+                }
+            }
 
             // Parse gender
             Gender gender = null;
@@ -56,14 +60,6 @@ public class StudentController {
                     dateOfBirth = LocalDate.of(2010, 1, 1); // default
                 }
             }
-
-            System.out.println("Parsed - Email: " + email);
-            System.out.println("Parsed - FullName: " + fullName);
-            System.out.println("Parsed - Password: " + password);
-            System.out.println("Parsed - Code: " + code);
-            System.out.println("Parsed - StudentClass: " + studentClass);
-            System.out.println("Parsed - Gender: " + gender);
-            System.out.println("Parsed - DateOfBirth: " + dateOfBirth);
 
             // Validation
             if (email == null || email.trim().isEmpty()) {
@@ -90,6 +86,12 @@ public class StudentController {
             // Tạo Student object
             Student student = studentService.createStudent(email, password, fullName, studentClass, code, gender,
                     dateOfBirth);
+            
+            // Liên kết với parent nếu có
+            if (parentId != null) {
+                studentService.linkStudentToParent(student.getId(), parentId);
+            }
+            
             Student saved = studentService.saveStudent(student);
             return ResponseEntity.ok(saved);
         } catch (Exception e) {
@@ -154,6 +156,19 @@ public class StudentController {
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("message", "Lỗi khi xóa học sinh: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(error);
+        }
+    }
+
+    // Endpoint để lấy danh sách học sinh theo parent ID
+    @GetMapping("/by-parent/{parentId}")
+    public ResponseEntity<?> getStudentsByParent(@PathVariable Long parentId) {
+        try {
+            List<Student> students = studentService.getStudentsByParent(parentId);
+            return ResponseEntity.ok(students);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Lỗi khi lấy danh sách học sinh: " + e.getMessage());
             return ResponseEntity.internalServerError().body(error);
         }
     }

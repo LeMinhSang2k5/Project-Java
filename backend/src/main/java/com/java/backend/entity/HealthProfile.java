@@ -3,9 +3,12 @@ package com.java.backend.entity;
 import java.time.LocalDate;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "health_profiles")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class HealthProfile {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -14,6 +17,7 @@ public class HealthProfile {
 
     @OneToOne
     @JoinColumn(name = "student_id", unique = true)
+    @JsonBackReference
     private Student student;
 
     @Column(name = "student_name")

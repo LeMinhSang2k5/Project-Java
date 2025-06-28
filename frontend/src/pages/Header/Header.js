@@ -36,6 +36,25 @@ const Header = () => {
         navigate('/');
     };
 
+    const handleLogin = () => {
+        if (user.role === 'PARENT') {
+            navigate('/parent');
+        }
+        if (user.role === 'STUDENT') {
+            navigate('/student');
+        }
+        if (user.role === 'SCHOOL_NURSE') {
+            navigate('/school-nurse');
+        }
+        if (user.role === 'MANAGER') {
+            navigate('/manager');
+        }
+        if (user.role === 'ADMIN') {
+            navigate('/admin');
+        }
+    };
+    
+
     return (
         <Navbar expand="lg" className="bg-body-tertiary">
             <Container>
@@ -56,16 +75,7 @@ const Header = () => {
 
                         <NavLink to="/blog" className="nav-link">Blog chia sẻ</NavLink>
                         
-                        <NavDropdown className="me-2" title="Hồ sơ sức khỏe" id="health-profile-dropdown">
-                            <NavDropdown.Item as={NavLink} to="/health-profile/new">Khai báo hồ sơ mới</NavDropdown.Item>
-                            <NavDropdown.Item as={NavLink} to="/health-profile/allergies">Dị ứng</NavDropdown.Item>
-                            <NavDropdown.Item as={NavLink} to="/health-profile/chronic">Bệnh mãn tính</NavDropdown.Item>
-                            <NavDropdown.Item as={NavLink} to="/health-profile/treatment">Tiền sử điều trị</NavDropdown.Item>
-                            <NavDropdown.Divider />
-                            <NavDropdown.Item as={NavLink} to="/health-profile/vision">Thị lực</NavDropdown.Item>
-                            <NavDropdown.Item as={NavLink} to="/health-profile/hearing">Thính lực</NavDropdown.Item>
-                            <NavDropdown.Item as={NavLink} to="/health-profile/vaccination">Tiêm chủng</NavDropdown.Item>
-                        </NavDropdown>
+
                     </Nav>
                     <Nav>
                         {user ? (
@@ -76,7 +86,7 @@ const Header = () => {
                                     <small className="text-muted">Vai trò: {user.role}</small>
                                 </NavDropdown.Item>
                                 <NavDropdown.Divider />
-                                <NavDropdown.Item onClick={() => navigate('/profile')}>
+                                <NavDropdown.Item onClick={handleLogin}>
                                     Thông tin cá nhân
                                 </NavDropdown.Item>
                                 <NavDropdown.Item onClick={handleLogout}>
