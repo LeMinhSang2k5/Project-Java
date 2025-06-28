@@ -13,7 +13,7 @@ public class HealthProfile {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "student_id")
+    @JoinColumn(name = "student_id", unique = true)
     private Student student;
 
     @Column(name = "student_name")

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Button, Card, Container, Row, Col } from 'react-bootstrap';
+import { Form, Button, Card, Container, Row, Col, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import api from '../../config/api';
 import './HealthProfile.scss';
@@ -32,12 +32,14 @@ const NewHealthProfile = () => {
         hearingDetails: '',
         vaccinationHistory: ''
     });
-    const [student, setStudent] = useState(null);
+    const [alertMsg, setAlertMsg] = useState(null);
+    const [studentId, setStudentId] = useState(null);
 
-   useEffect(() => {
-    const studentId = localStorage.getItem('studentId');
-    if (studentId) {
-        api.get(`/health-profiles/student/${studentId}`)
+useEffect(() => {
+    const studentIdFromStorage = localStorage.getItem('studentId');
+    if (studentIdFromStorage) {
+        setStudentId(studentIdFromStorage);
+        api.get(`/health-profiles/student/${studentIdFromStorage}`)
             .then(res => {
                 if (res.data) {
                     setFormData({
@@ -55,13 +57,57 @@ const NewHealthProfile = () => {
                         hearingDetails: res.data.hearingDetails || '',
                         vaccinationHistory: res.data.vaccinationHistory || ''
                     });
+                    setAlertMsg(null);
                 }
             })
-            .catch(() => {
-                // Nếu chưa có health profile thì giữ form rỗng hoặc lấy info từ student như cũ
+            .catch((err) => {
+                if (err.response && err.response.status === 404) {
+                    setAlertMsg("Chưa có hồ sơ sức khỏe cho học sinh này. Vui lòng tạo mới!");
+                } else {
+                    setAlertMsg("Có lỗi khi tải hồ sơ sức khỏe.");
+                }
+            });
+        return;
+    }
+
+
+    const parentId = localStorage.getItem('parentId');
+    if (parentId) {
+        api.get(`/health-profiles/by-parent/${parentId}/student`)
+            .then(res => {
+                setStudentId(res.data);
+                return api.get(`/health-profiles/student/${res.data}`);
+            })
+            .then(res => {
+                if (res.data) {
+                    setFormData({
+                        studentName: res.data.studentName || '',
+                        dateOfBirth: res.data.dateOfBirth || '',
+                        gender: res.data.gender || '',
+                        grade: res.data.grade || '',
+                        className: res.data.className || '',
+                        city: res.data.city || '',
+                        district: res.data.district || '',
+                        allergies: res.data.allergies || '',
+                        chronicDiseases: res.data.chronicDiseases || '',
+                        medicalHistory: res.data.medicalHistory || '',
+                        visionDetails: res.data.visionDetails || '',
+                        hearingDetails: res.data.hearingDetails || '',
+                        vaccinationHistory: res.data.vaccinationHistory || ''
+                    });
+                    setAlertMsg(null);
+                }
+            })
+            .catch((err) => {
+                if (err.response && err.response.status === 404) {
+                    setAlertMsg("Chưa có hồ sơ sức khỏe cho học sinh này. Vui lòng tạo mới!");
+                } else {
+                    setAlertMsg("Có lỗi khi tải hồ sơ sức khỏe.");
+                }
             });
     }
 }, []);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prevState => ({
@@ -73,17 +119,16 @@ const NewHealthProfile = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            // Validate required fields
-            if (!formData.studentName || !formData.dateOfBirth || !formData.gender || 
+
+            if (!formData.studentName || !formData.dateOfBirth || !formData.gender ||
                 !formData.grade || !formData.className || !formData.city || !formData.district) {
-                alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
+                window.alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
                 return;
             }
-            const studentId = localStorage.getItem('studentId');
             if (!studentId) {
-                alert('Bạn chưa đăng nhập bằng tài khoản học sinh!');
-                return;
-            }
+    window.alert('Không tìm thấy học sinh cho phụ huynh này!');
+    return;
+}
 
             const dataToSend = {
                 ...formData,
@@ -92,21 +137,16 @@ const NewHealthProfile = () => {
                 }
             };
 
-            const response = await api.post('/health-profiles', dataToSend);
-            console.log('Health profile created:', response.data);
-            alert('Hồ sơ sức khỏe đã được tạo thành công!');
+            await api.post('/health-profiles', dataToSend);
+            window.alert('Hồ sơ sức khỏe đã được tạo thành công!');
             navigate('/');
         } catch (error) {
-            console.error('Error creating health profile:', error);
             if (error.response) {
-                console.error('Server error:', error.response.data);
-                alert(`Lỗi: ${error.response.data.message || 'Có lỗi xảy ra khi tạo hồ sơ sức khỏe'}`);
+                window.alert(`Lỗi: ${error.response.data.message || 'Có lỗi xảy ra khi tạo hồ sơ sức khỏe'}`);
             } else if (error.request) {
-                console.error('No response from server:', error.request);
-                alert('Không thể kết nối đến server. Vui lòng kiểm tra lại kết nối!');
+                window.alert('Không thể kết nối đến server. Vui lòng kiểm tra lại kết nối!');
             } else {
-                console.error('Request error:', error.message);
-                alert('Có lỗi xảy ra khi gửi yêu cầu. Vui lòng thử lại!');
+                window.alert('Có lỗi xảy ra khi gửi yêu cầu. Vui lòng thử lại!');
             }
         }
     };
@@ -121,6 +161,7 @@ const NewHealthProfile = () => {
             </div>
 
             <Container>
+                {alertMsg && <Alert variant="info">{alertMsg}</Alert>}
                 <Card className="health-profile__card">
                     <Card.Body>
                         <Form onSubmit={handleSubmit} className="health-profile__form">
@@ -136,7 +177,6 @@ const NewHealthProfile = () => {
                                                 value={formData.studentName}
                                                 onChange={handleChange}
                                                 required
-                                              
                                             />
                                         </Form.Group>
                                     </Col>
@@ -150,7 +190,6 @@ const NewHealthProfile = () => {
                                                 value={formData.dateOfBirth}
                                                 onChange={handleChange}
                                                 required
-                                                
                                             />
                                         </Form.Group>
                                     </Col>
@@ -181,7 +220,6 @@ const NewHealthProfile = () => {
                                                 value={formData.className}
                                                 onChange={handleChange}
                                                 required
-                                                
                                             />
                                         </Form.Group>
                                     </Col>

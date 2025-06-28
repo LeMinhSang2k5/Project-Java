@@ -36,13 +36,16 @@ function ModalCreateUser({ show, onClose, onUserAdded }) {
     switch (role) {
       case "STUDENT":
         return "/students";
-      // Tạm thời tất cả role khác đều dùng /user endpoint
       case "PARENT":
+        return "parent";
       case "MANAGER":
+        return "manager";
       case "SCHOOL_NURSE":
+        return "nurse";
       case "ADMIN":
+        return "admin";
       default:
-        return "/user";
+        return "user";
     }
   };
 
@@ -51,7 +54,39 @@ function ModalCreateUser({ show, onClose, onUserAdded }) {
     setLoading(true);
     try {
       const endpoint = getEndpointByRole(form.role);
-      const response = await api.post(endpoint, form);
+
+      // Chỉ gửi các trường cần thiết theo từng role
+      let payload = {
+        email: form.email,
+        password: form.password,
+        fullName: form.fullName,
+        gender: form.gender
+      };
+
+      if (form.role === "STUDENT") {
+        payload = {
+          ...payload,
+          code: form.code,
+          studentClass: form.studentClass,
+          dateOfBirth: form.dateOfBirth
+        };
+      }
+      if (form.role === "PARENT" || form.role === "MANAGER" || form.role === "SCHOOL_NURSE") {
+        payload = {
+          ...payload,
+          phoneNumber: form.phoneNumber
+        };
+      }
+      if (form.role === "SCHOOL_NURSE") {
+        payload = {
+          ...payload,
+          department: form.department
+        };
+      }
+
+      // Không gửi trường role, isActive, ...
+      const response = await api.post(endpoint, payload);
+
       if (response.data) {
         // Toast thông báo chi tiết theo role
         const roleNames = {
@@ -82,8 +117,6 @@ function ModalCreateUser({ show, onClose, onUserAdded }) {
       }
     } catch (err) {
       console.error('Error:', err.response?.data);
-      
-      // Toast lỗi chi tiết
       const errorMessage = err.response?.data?.message || 'Có lỗi xảy ra khi thêm người dùng';
       toast.error(
         `❌ ${errorMessage}`, 

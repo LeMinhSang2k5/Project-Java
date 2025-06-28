@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface HealthProfileRepository extends JpaRepository<HealthProfile, Long> {
     // Spring Data JPA automatically provides basic CRUD operations
-    Optional<HealthProfile> findByStudentId(Long studentId);
+    Optional<HealthProfile> findByStudent_Id(Long studentId);
     // You can add custom query methods here if needed
 }

@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class Student extends User {
 
     @Column(name = "code", unique = true, nullable = false)
-    private String code; // Mã số sinh viên
+    private String code;
 
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
@@ -51,7 +51,7 @@ public class Student extends User {
     // Constructor với password mặc định cho import Excel
     public Student(String fullName, String email, String code, LocalDate dateOfBirth, Gender gender,
             String studentClass) {
-        super(email, "defaultPassword123", fullName, Role.STUDENT); // Password mặc định
+        super(email, "defaultPassword123", fullName, Role.STUDENT);
         this.code = code;
         this.dateOfBirth = dateOfBirth;
         this.gender = gender;
@@ -100,4 +100,16 @@ public class Student extends User {
             healthProfile.setStudent(this);
         }
     }
+
+    public Parent getParent() {
+        return parent;
+    }
+
+    public void setParent(Parent parent) {
+        this.parent = parent;
+        if (parent != null) {
+            parent.setStudent(this);
+        }
+    }
+
 }

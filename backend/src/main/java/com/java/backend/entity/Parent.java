@@ -27,8 +27,8 @@ public class Parent extends User {
     public Parent() {
     }
 
-    public Parent(String fullName, String email, Gender gender, String phoneNumber) {
-        super(email, null, fullName, Role.MANAGER);
+    public Parent(String fullName, String email, String password, Gender gender, String phoneNumber) {
+        super(email, password, fullName, Role.PARENT);
         this.gender = gender;
         this.phoneNumber = phoneNumber;
     }
@@ -47,5 +47,13 @@ public class Parent extends User {
 
     public void setGender(Gender gender) {
         this.gender = gender;
+    }
+
+    public Student getStudent() {
+        return student;
+    }
+
+    public void setStudent(Student student) {
+        this.student = student;
     }
 }

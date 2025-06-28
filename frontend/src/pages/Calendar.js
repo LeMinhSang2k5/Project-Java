@@ -457,17 +457,17 @@ const Table17_19Tuoi = () => {
                 <div className="note_tabs">
                 <h1 className="space">Chú Thích:</h1>
                 <div className="note">
-                    <div class="circle1"></div>
-                    <div class="">Tiêm chủng mở rộng</div>
+                    <div className="circle1"></div>
+                    <div className="">Tiêm chủng mở rộng</div>
                 </div>
                 <div className="note">
-                    < div class="circle2"></div>
-                    <div class="">Vắc xin có phí</div>
+                    < div className="circle2"></div>
+                    <div className="">Vắc xin có phí</div>
                 </div>
                 </div>
             </div>
-            <div class="btn_submit">
-                <button class="btn"><p className="pbtn">Xem lịch tiêm chủng</p></button>
+            <div className="btn_submit">
+                <button className="btn"><p className="pbtn">Xem lịch tiêm chủng</p></button>
             </div>
 
         </div>
@@ -801,21 +801,21 @@ ngừa VGA và VGB
                 <div className="note_tabs">
                 <h1 className="space">Chú Thích:</h1>
                 <div className="note">
-                    <div class="circle1"></div>
-                    <div class="">Khuyến cáo cho nhóm nguy cơ</div>
+                    <div className="circle1"></div>
+                    <div className="">Khuyến cáo cho nhóm nguy cơ</div>
                 </div>
                 <div className="note">
-                    < div class="circle2"></div>
-                    <div class="">Khuyến cáo theo tuổi cho nhóm chưa tiêm đủ</div>
+                    < div className="circle2"></div>
+                    <div className="">Khuyến cáo theo tuổi cho nhóm chưa tiêm đủ</div>
                 </div>
                 <div className="note">
-                    < div class="circle3"></div>
-                    <div class="">Khuyến cáo sau khi bị phơi nhiễm</div>
+                    < div className="circle3"></div>
+                    <div className="">Khuyến cáo sau khi bị phơi nhiễm</div>
                 </div>
                 </div>
             </div>
-            <div class="btn_submit">
-                <button class="btn"><p className="pbtn">Xem lịch tiêm chủng</p></button>
+            <div className="btn_submit">
+                <button className="btn"><p className="pbtn">Xem lịch tiêm chủng</p></button>
             </div>
 
         </div>
@@ -1056,8 +1056,8 @@ const TableLichTongQuat = () => {
 
                </table>
             </div>
-            <div class="btn_submit">
-                <button class="btn"><p className="pbtn">Xem lịch tiêm chủng</p></button>
+            <div className="btn_submit">
+                <button className="btn"><p className="pbtn">Xem lịch tiêm chủng</p></button>
             </div>
 
         </div>
@@ -1143,8 +1143,8 @@ Bạch hầu, Uốn ván</div>
                 </tr>
                </table>
             </div>
-            <div class="btn_submit">
-                <button class="btn"><p className="pbtn">Xem lịch tiêm chủng</p></button>
+            <div className="btn_submit">
+                <button className="btn"><p className="pbtn">Xem lịch tiêm chủng</p></button>
             </div>
 
         </div>

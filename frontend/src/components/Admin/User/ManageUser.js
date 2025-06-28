@@ -60,7 +60,6 @@ const ManageUser = () => {
 
   const handleUserAdded = () => {
     fetchUsers();
-    toast.success('Thêm người dùng thành công!');
   };
 
   const handleUserUpdated = () => {

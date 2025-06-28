@@ -15,6 +15,8 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+       localStorage.removeItem("parentId");
+      localStorage.removeItem("studentId");
       const response = await axios.post(
         "http://localhost:8080/api/auth/login",
         {

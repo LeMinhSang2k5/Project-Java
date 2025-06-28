@@ -1,7 +1,7 @@
 import './Report.scss'
 const Report = () => {
     return (
-        <div class="health-report">
+        <div className="health-report">
             <h2>Báo cáo sự cố sức khỏe 📝</h2>
             <form>
                 <label htmlFor="fullname">Họ và tên:</label>

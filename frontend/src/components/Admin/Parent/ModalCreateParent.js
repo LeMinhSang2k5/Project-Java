@@ -8,7 +8,6 @@ const ModalCreateParent = ({ show, onClose, onParentAdded }) => {
     email: "",
     password: "",
     fullName: "",
-    role: "PARENT",
     gender: "MALE",
     phoneNumber: ""
   });
@@ -20,7 +19,7 @@ const ModalCreateParent = ({ show, onClose, onParentAdded }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post("/parents", parent);
+      await api.post("/parent", parent);
       toast.success("Thêm phụ huynh thành công!");
       onParentAdded && onParentAdded();
       onClose();
@@ -28,7 +27,6 @@ const ModalCreateParent = ({ show, onClose, onParentAdded }) => {
         email: "",
         password: "",
         fullName: "",
-        role: "PARENT",
         gender: "MALE",
         phoneNumber: ""
       });

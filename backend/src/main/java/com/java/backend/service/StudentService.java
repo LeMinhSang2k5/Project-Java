@@ -67,7 +67,9 @@ public class StudentService {
             }
 
             // Kiểm tra email đã tồn tại trong bảng users (vì Student extends User)
-            if (userRepository.findByEmail(student.getEmail()).isPresent()) {
+            if (userRepository.findByEmail(student.getEmail())
+                    .filter(u -> !u.getId().equals(student.getId()))
+                    .isPresent()) {
                 throw new RuntimeException("Email đã tồn tại trong hệ thống");
             }
 

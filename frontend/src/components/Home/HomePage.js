@@ -61,7 +61,7 @@ function HomePage() {
           <h2 className="text-center mb-4">Liên kết nhanh 🔗</h2>
           <Row className="justify-content-center">
             <Col md={3} className="text-center mb-3">
-              <Button variant="light" className="w-100 mb-2"><a href='medical' class="medical">Gửi Thuốc</a></Button>
+              <Button variant="light" className="w-100 mb-2"><a href='medical' className="medical">Gửi Thuốc</a></Button>
             </Col>
             <Col md={3} className="text-center mb-3">
               <Button variant="light" className="w-100 mb-2"><a href='calendar'>Xem lịch tiêm chủng</a></Button>

@@ -8,6 +8,7 @@ import com.java.backend.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class HealthProfileService {
@@ -49,11 +50,11 @@ public class HealthProfileService {
         return healthProfileRepository.save(healthProfile);
     }
 
-    public HealthProfile findByStudentId(Long studentId) {
-        return healthProfileRepository.findByStudentId(studentId).orElse(null);
-    }
-
     public void deleteHealthProfile(Long id) {
         healthProfileRepository.deleteById(id);
+    }
+
+    public Optional<HealthProfile> findByStudentId(Long studentId) {
+        return healthProfileRepository.findByStudent_Id(studentId);
     }
 }
