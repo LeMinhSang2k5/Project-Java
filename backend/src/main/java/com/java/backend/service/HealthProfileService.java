@@ -4,6 +4,7 @@ import com.java.backend.entity.HealthProfile;
 import com.java.backend.entity.Student;
 import com.java.backend.repository.HealthProfileRepository;
 import com.java.backend.repository.StudentRepository;
+import com.java.backend.enums.Gender;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,12 @@ public class HealthProfileService {
         // Tìm student từ database
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
+
+        // Đồng bộ thông tin từ HealthProfile vào Student
+        syncStudentInfoFromHealthProfile(student, healthProfile);
+        
+        // Lưu student trước
+        studentRepository.save(student);
 
         // Gán đúng quan hệ hai chiều
         healthProfile.setStudent(student);
@@ -116,6 +123,10 @@ public class HealthProfileService {
                         .orElseThrow(() -> new RuntimeException("Student not found with ID: " + healthProfile.getStudent().getId()));
                 existingProfile.setStudent(student);
                 System.out.println("Updated student relationship: " + student.getId());
+                
+                // Đồng bộ thông tin từ HealthProfile vào Student
+                syncStudentInfoFromHealthProfile(student, existingProfile);
+                studentRepository.save(student);
             }
             
             // Lưu vào database
@@ -139,5 +150,47 @@ public class HealthProfileService {
 
     public Optional<HealthProfile> findByStudentId(Long studentId) {
         return healthProfileRepository.findByStudent_Id(studentId);
+    }
+    
+    /**
+     * Đồng bộ thông tin từ HealthProfile vào Student
+     */
+    private void syncStudentInfoFromHealthProfile(Student student, HealthProfile healthProfile) {
+        // Cập nhật thông tin cơ bản của student từ health profile
+        if (healthProfile.getStudentName() != null && !healthProfile.getStudentName().trim().isEmpty()) {
+            student.setFullName(healthProfile.getStudentName());
+        }
+        
+        if (healthProfile.getDateOfBirth() != null) {
+            student.setDateOfBirth(healthProfile.getDateOfBirth());
+        }
+        
+        if (healthProfile.getGender() != null && !healthProfile.getGender().trim().isEmpty()) {
+            try {
+                Gender gender = Gender.valueOf(healthProfile.getGender().toUpperCase());
+                student.setGender(gender);
+            } catch (IllegalArgumentException e) {
+                // Nếu không parse được enum, giữ nguyên giá trị hiện tại
+                System.out.println("Invalid gender value: " + healthProfile.getGender());
+            }
+        }
+        
+        if (healthProfile.getClassName() != null && !healthProfile.getClassName().trim().isEmpty()) {
+            student.setStudentClass(healthProfile.getClassName());
+        }
+        
+        if (healthProfile.getCity() != null && !healthProfile.getCity().trim().isEmpty()) {
+            student.setCity(healthProfile.getCity());
+        }
+        
+        if (healthProfile.getDistrict() != null && !healthProfile.getDistrict().trim().isEmpty()) {
+            student.setDistrict(healthProfile.getDistrict());
+        }
+        
+        if (healthProfile.getGrade() != null && !healthProfile.getGrade().trim().isEmpty()) {
+            student.setGrade(healthProfile.getGrade());
+        }
+        
+        System.out.println("Student info synchronized from health profile");
     }
 }

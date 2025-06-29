@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Badge, Alert, Spinner, ListGroup } from 'react-bootstrap';
+import { Card, Row, Col, Badge, Alert, Spinner, ListGroup, Table } from 'react-bootstrap';
 import api from '../../config/api';
 import './StudentPage.scss';
 
@@ -9,10 +9,18 @@ const StudentPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [key, setKey] = useState('personal');
+    const [medicalRequests, setMedicalRequests] = useState([]);
+    const [loadingMedical, setLoadingMedical] = useState(false);
 
     useEffect(() => {
         fetchStudentProfile();
     }, []);
+
+    useEffect(() => {
+        if (key === 'medication') {
+            fetchMedicalRequests();
+        }
+    }, [key]);
 
     const fetchStudentProfile = async () => {
         try {
@@ -63,6 +71,21 @@ const StudentPage = () => {
         }
     };
 
+    const fetchMedicalRequests = async () => {
+        try {
+            setLoadingMedical(true);
+            const studentId = localStorage.getItem('studentId');
+            if (studentId) {
+                const response = await api.get(`/medical/student/${studentId}`);
+                setMedicalRequests(response.data);
+            }
+        } catch (error) {
+            console.error('Error fetching medical requests:', error);
+        } finally {
+            setLoadingMedical(false);
+        }
+    };
+
     const formatDate = (dateString) => {
         if (!dateString) return 'Chưa cập nhật';
         try {
@@ -71,6 +94,18 @@ const StudentPage = () => {
         } catch (error) {
             return dateString;
         }
+    };
+
+    const getStatusBadge = (status) => {
+        const statusConfig = {
+            'PENDING': { variant: 'warning', text: 'Chờ duyệt' },
+            'APPROVED': { variant: 'success', text: 'Đã duyệt' },
+            'REJECTED': { variant: 'danger', text: 'Từ chối' },
+            'COMPLETED': { variant: 'info', text: 'Đã hoàn thành' }
+        };
+        
+        const config = statusConfig[status] || { variant: 'secondary', text: status };
+        return <Badge bg={config.variant}>{config.text}</Badge>;
     };
 
     const renderPersonalInfo = () => (
@@ -264,14 +299,44 @@ const StudentPage = () => {
                 <h5 className="mb-0">Yêu cầu thuốc từ phụ huynh</h5>
             </Card.Header>
             <Card.Body>
-                <Alert variant="info">
-                    <Alert.Heading>Thông báo</Alert.Heading>
-                    <p>Hiện tại chưa có yêu cầu thuốc nào từ phụ huynh.</p>
-                    <hr />
-                    <p className="mb-0">
-                        Khi phụ huynh gửi yêu cầu thuốc, thông tin sẽ được hiển thị tại đây.
-                    </p>
-                </Alert>
+                {loadingMedical ? (
+                    <div className="text-center py-4">
+                        <Spinner animation="border" />
+                        <p className="mt-2">Đang tải thông tin...</p>
+                    </div>
+                ) : medicalRequests.length === 0 ? (
+                    <Alert variant="info">
+                        <Alert.Heading>Thông báo</Alert.Heading>
+                        <p>Hiện tại chưa có yêu cầu thuốc nào từ phụ huynh.</p>
+                        <hr />
+                        <p className="mb-0">
+                            Khi phụ huynh gửi yêu cầu thuốc, thông tin sẽ được hiển thị tại đây.
+                        </p>
+                    </Alert>
+                ) : (
+                    <Table striped bordered hover responsive>
+                        <thead>
+                            <tr>
+                                <th>Tên thuốc</th>
+                                <th>Liều lượng</th>
+                                <th>Ghi chú</th>
+                                <th>Ngày gửi</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {medicalRequests.map((request) => (
+                                <tr key={request.id}>
+                                    <td>{request.medicalName}</td>
+                                    <td>{request.dosage}</td>
+                                    <td>{request.note || 'Không có'}</td>
+                                    <td>{formatDate(request.requestDate)}</td>
+                                    <td>{getStatusBadge(request.status)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </Table>
+                )}
             </Card.Body>
         </Card>
     );

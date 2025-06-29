@@ -40,45 +40,46 @@ useEffect(() => {
     if (urlStudentId) {
         setStudentId(urlStudentId);
         
-        // Đầu tiên, thử lấy health profile
-        api.get(`/health-profiles/student/${urlStudentId}`)
-            .then(res => {
-                if (res.data) {
-                    // Nếu có health profile, sử dụng dữ liệu từ health profile
-                    setFormData({
-                        studentName: res.data.studentName || '',
-                        dateOfBirth: res.data.dateOfBirth || '',
-                        gender: res.data.gender || '',
-                        grade: res.data.grade || '',
-                        className: res.data.className || '',
-                        city: res.data.city || '',
-                        district: res.data.district || '',
-                        allergies: res.data.allergies || '',
-                        chronicDiseases: res.data.chronicDiseases || '',
-                        medicalHistory: res.data.medicalHistory || '',
-                        visionDetails: res.data.visionDetails || '',
-                        hearingDetails: res.data.hearingDetails || '',
-                        vaccinationHistory: res.data.vaccinationHistory || ''
-                    });
-                    setAlertMsg("Hồ sơ sức khỏe đã tồn tại. Bạn có thể cập nhật thông tin.");
-                } else {
-                    // Nếu không có health profile, lấy thông tin từ student để làm mẫu
-                    return api.get(`/students/${urlStudentId}`);
-                }
-            })
+        // Lấy thông tin student trước
+        api.get(`/students/${urlStudentId}`)
             .then(studentRes => {
-                if (studentRes && studentRes.data) {
-                    const student = studentRes.data;
+                const student = studentRes.data;
+                // Điền thông tin cơ bản từ student
+                setFormData(prev => ({
+                    ...prev,
+                    studentName: student.fullName || '',
+                    dateOfBirth: student.dateOfBirth || '',
+                    gender: student.gender || '',
+                    grade: student.grade || '',
+                    className: student.studentClass || '',
+                    city: student.city || '',
+                    district: student.district || ''
+                }));
+                
+                // Sau đó kiểm tra xem có health profile không
+                return api.get(`/health-profiles/student/${urlStudentId}`);
+            })
+            .then(healthRes => {
+                if (healthRes && healthRes.data) {
+                    // Nếu có health profile, cập nhật với dữ liệu từ health profile
                     setFormData(prev => ({
                         ...prev,
-                        studentName: student.fullName || '',
-                        dateOfBirth: student.dateOfBirth || '',
-                        gender: student.gender || '',
-                        grade: student.grade || '',
-                        className: student.studentClass || '',
-                        city: student.city || '',
-                        district: student.district || ''
+                        studentName: healthRes.data.studentName || prev.studentName,
+                        dateOfBirth: healthRes.data.dateOfBirth || prev.dateOfBirth,
+                        gender: healthRes.data.gender || prev.gender,
+                        grade: healthRes.data.grade || prev.grade,
+                        className: healthRes.data.className || prev.className,
+                        city: healthRes.data.city || prev.city,
+                        district: healthRes.data.district || prev.district,
+                        allergies: healthRes.data.allergies || '',
+                        chronicDiseases: healthRes.data.chronicDiseases || '',
+                        medicalHistory: healthRes.data.medicalHistory || '',
+                        visionDetails: healthRes.data.visionDetails || '',
+                        hearingDetails: healthRes.data.hearingDetails || '',
+                        vaccinationHistory: healthRes.data.vaccinationHistory || ''
                     }));
+                    setAlertMsg("Hồ sơ sức khỏe đã tồn tại. Bạn có thể cập nhật thông tin.");
+                } else {
                     setAlertMsg("Chưa có hồ sơ sức khỏe cho học sinh này. Vui lòng tạo mới!");
                 }
             })
@@ -96,25 +97,48 @@ useEffect(() => {
     const studentIdFromStorage = localStorage.getItem('studentId');
     if (studentIdFromStorage) {
         setStudentId(studentIdFromStorage);
-        api.get(`/health-profiles/student/${studentIdFromStorage}`)
-            .then(res => {
-                if (res.data) {
-                    setFormData({
-                        studentName: res.data.studentName || '',
-                        dateOfBirth: res.data.dateOfBirth || '',
-                        gender: res.data.gender || '',
-                        grade: res.data.grade || '',
-                        className: res.data.className || '',
-                        city: res.data.city || '',
-                        district: res.data.district || '',
-                        allergies: res.data.allergies || '',
-                        chronicDiseases: res.data.chronicDiseases || '',
-                        medicalHistory: res.data.medicalHistory || '',
-                        visionDetails: res.data.visionDetails || '',
-                        hearingDetails: res.data.hearingDetails || '',
-                        vaccinationHistory: res.data.vaccinationHistory || ''
-                    });
+        
+        // Lấy thông tin student trước
+        api.get(`/students/${studentIdFromStorage}`)
+            .then(studentRes => {
+                const student = studentRes.data;
+                // Điền thông tin cơ bản từ student
+                setFormData(prev => ({
+                    ...prev,
+                    studentName: student.fullName || '',
+                    dateOfBirth: student.dateOfBirth || '',
+                    gender: student.gender || '',
+                    grade: student.grade || '',
+                    className: student.studentClass || '',
+                    city: student.city || '',
+                    district: student.district || ''
+                }));
+                
+                // Sau đó kiểm tra xem có health profile không
+                return api.get(`/health-profiles/student/${studentIdFromStorage}`);
+            })
+            .then(healthRes => {
+                if (healthRes && healthRes.data) {
+                    // Nếu có health profile, cập nhật với dữ liệu từ health profile
+                    setFormData(prev => ({
+                        ...prev,
+                        studentName: healthRes.data.studentName || prev.studentName,
+                        dateOfBirth: healthRes.data.dateOfBirth || prev.dateOfBirth,
+                        gender: healthRes.data.gender || prev.gender,
+                        grade: healthRes.data.grade || prev.grade,
+                        className: healthRes.data.className || prev.className,
+                        city: healthRes.data.city || prev.city,
+                        district: healthRes.data.district || prev.district,
+                        allergies: healthRes.data.allergies || '',
+                        chronicDiseases: healthRes.data.chronicDiseases || '',
+                        medicalHistory: healthRes.data.medicalHistory || '',
+                        visionDetails: healthRes.data.visionDetails || '',
+                        hearingDetails: healthRes.data.hearingDetails || '',
+                        vaccinationHistory: healthRes.data.vaccinationHistory || ''
+                    }));
                     setAlertMsg(null);
+                } else {
+                    setAlertMsg("Chưa có hồ sơ sức khỏe cho học sinh này. Vui lòng tạo mới!");
                 }
             })
             .catch((err) => {
@@ -132,26 +156,49 @@ useEffect(() => {
         api.get(`/health-profiles/by-parent/${parentId}/student`)
             .then(res => {
                 setStudentId(res.data);
-                return api.get(`/health-profiles/student/${res.data}`);
+                
+                // Lấy thông tin student trước
+                return api.get(`/students/${res.data}`);
             })
-            .then(res => {
-                if (res.data) {
-                    setFormData({
-                        studentName: res.data.studentName || '',
-                        dateOfBirth: res.data.dateOfBirth || '',
-                        gender: res.data.gender || '',
-                        grade: res.data.grade || '',
-                        className: res.data.className || '',
-                        city: res.data.city || '',
-                        district: res.data.district || '',
-                        allergies: res.data.allergies || '',
-                        chronicDiseases: res.data.chronicDiseases || '',
-                        medicalHistory: res.data.medicalHistory || '',
-                        visionDetails: res.data.visionDetails || '',
-                        hearingDetails: res.data.hearingDetails || '',
-                        vaccinationHistory: res.data.vaccinationHistory || ''
-                    });
+            .then(studentRes => {
+                const student = studentRes.data;
+                // Điền thông tin cơ bản từ student
+                setFormData(prev => ({
+                    ...prev,
+                    studentName: student.fullName || '',
+                    dateOfBirth: student.dateOfBirth || '',
+                    gender: student.gender || '',
+                    grade: student.grade || '',
+                    className: student.studentClass || '',
+                    city: student.city || '',
+                    district: student.district || ''
+                }));
+                
+                // Sau đó kiểm tra xem có health profile không
+                return api.get(`/health-profiles/student/${student.id}`);
+            })
+            .then(healthRes => {
+                if (healthRes && healthRes.data) {
+                    // Nếu có health profile, cập nhật với dữ liệu từ health profile
+                    setFormData(prev => ({
+                        ...prev,
+                        studentName: healthRes.data.studentName || prev.studentName,
+                        dateOfBirth: healthRes.data.dateOfBirth || prev.dateOfBirth,
+                        gender: healthRes.data.gender || prev.gender,
+                        grade: healthRes.data.grade || prev.grade,
+                        className: healthRes.data.className || prev.className,
+                        city: healthRes.data.city || prev.city,
+                        district: healthRes.data.district || prev.district,
+                        allergies: healthRes.data.allergies || '',
+                        chronicDiseases: healthRes.data.chronicDiseases || '',
+                        medicalHistory: healthRes.data.medicalHistory || '',
+                        visionDetails: healthRes.data.visionDetails || '',
+                        hearingDetails: healthRes.data.hearingDetails || '',
+                        vaccinationHistory: healthRes.data.vaccinationHistory || ''
+                    }));
                     setAlertMsg(null);
+                } else {
+                    setAlertMsg("Chưa có hồ sơ sức khỏe cho học sinh này. Vui lòng tạo mới!");
                 }
             })
             .catch((err) => {
@@ -250,24 +297,68 @@ useEffect(() => {
         if (!studentId) return;
         
         try {
-            const response = await api.get(`/health-profiles/student/${studentId}`);
-            if (response.data) {
-                setFormData({
-                    studentName: response.data.studentName || '',
-                    dateOfBirth: response.data.dateOfBirth || '',
-                    gender: response.data.gender || '',
-                    grade: response.data.grade || '',
-                    className: response.data.className || '',
-                    city: response.data.city || '',
-                    district: response.data.district || '',
-                    allergies: response.data.allergies || '',
-                    chronicDiseases: response.data.chronicDiseases || '',
-                    medicalHistory: response.data.medicalHistory || '',
-                    visionDetails: response.data.visionDetails || '',
-                    hearingDetails: response.data.hearingDetails || '',
-                    vaccinationHistory: response.data.vaccinationHistory || ''
-                });
-                console.log('Health profile data refreshed:', response.data);
+            // Lấy thông tin student trước
+            const studentResponse = await api.get(`/students/${studentId}`);
+            const student = studentResponse.data;
+            
+            // Điền thông tin cơ bản từ student
+            const baseData = {
+                studentName: student.fullName || '',
+                dateOfBirth: student.dateOfBirth || '',
+                gender: student.gender || '',
+                grade: student.grade || '',
+                className: student.studentClass || '',
+                city: student.city || '',
+                district: student.district || ''
+            };
+            
+            // Sau đó lấy thông tin từ health profile nếu có
+            try {
+                const healthResponse = await api.get(`/health-profiles/student/${studentId}`);
+                if (healthResponse.data) {
+                    setFormData({
+                        ...baseData,
+                        studentName: healthResponse.data.studentName || baseData.studentName,
+                        dateOfBirth: healthResponse.data.dateOfBirth || baseData.dateOfBirth,
+                        gender: healthResponse.data.gender || baseData.gender,
+                        grade: healthResponse.data.grade || baseData.grade,
+                        className: healthResponse.data.className || baseData.className,
+                        city: healthResponse.data.city || baseData.city,
+                        district: healthResponse.data.district || baseData.district,
+                        allergies: healthResponse.data.allergies || '',
+                        chronicDiseases: healthResponse.data.chronicDiseases || '',
+                        medicalHistory: healthResponse.data.medicalHistory || '',
+                        visionDetails: healthResponse.data.visionDetails || '',
+                        hearingDetails: healthResponse.data.hearingDetails || '',
+                        vaccinationHistory: healthResponse.data.vaccinationHistory || ''
+                    });
+                } else {
+                    setFormData({
+                        ...baseData,
+                        allergies: '',
+                        chronicDiseases: '',
+                        medicalHistory: '',
+                        visionDetails: '',
+                        hearingDetails: '',
+                        vaccinationHistory: ''
+                    });
+                }
+                console.log('Health profile data refreshed:', healthResponse.data || 'No health profile found');
+            } catch (healthError) {
+                if (healthError.response?.status === 404) {
+                    // Không có health profile, chỉ sử dụng thông tin từ student
+                    setFormData({
+                        ...baseData,
+                        allergies: '',
+                        chronicDiseases: '',
+                        medicalHistory: '',
+                        visionDetails: '',
+                        hearingDetails: '',
+                        vaccinationHistory: ''
+                    });
+                } else {
+                    throw healthError;
+                }
             }
         } catch (error) {
             console.error('Error refreshing health profile data:', error);

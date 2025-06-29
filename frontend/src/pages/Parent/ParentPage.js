@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {Card, Button, Container, Table, Alert, Spinner, Row, Col, ListGroup } from 'react-bootstrap';
 import NewHealthProfile from '../HealthProfile/NewHealthProfile';
 import StudentListView from './StudentListView';
+import SendMedicine from './SendMedicine';
 import api from '../../config/api';
 import './ParentPage.scss';
 
@@ -79,6 +80,7 @@ const ParentPage = () => {
               ) : <div>Không có thông tin phụ huynh</div>}
               <ListGroup variant="flush">
                 <ListGroup.Item action active={key==='students'} onClick={()=>setKey('students')}>Hồ sơ sức khỏe học sinh</ListGroup.Item>
+                <ListGroup.Item action active={key==='sendMedicine'} onClick={()=>setKey('sendMedicine')}>Gửi thuốc cho học sinh</ListGroup.Item>
                 <ListGroup.Item action active={key==='confirmVaccination'} onClick={()=>setKey('confirmVaccination')}>Xác nhận tiêm chủng/kiểm tra y tế</ListGroup.Item>
                 <ListGroup.Item action active={key==='results'} onClick={()=>setKey('results')}>Kết quả tiêm chủng & Lịch tư vấn</ListGroup.Item>
               </ListGroup>
@@ -90,6 +92,7 @@ const ParentPage = () => {
           {alert && <Alert variant="info" onClose={() => setAlert(null)} dismissible>{alert}</Alert>}
           <div className="parent-content">
             {key === 'students' && <StudentListView onStudentSelect={setSelectedStudentId} />}
+            {key === 'sendMedicine' && <SendMedicine />}
             {key === 'confirmVaccination' && (
               <Card>
                 <Card.Body>
