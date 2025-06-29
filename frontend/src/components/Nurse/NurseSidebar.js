@@ -55,16 +55,16 @@ const NurseSidebar = () => {
 
         <div className="sidebar-section mt-3">
           <h6 className="text-muted small fw-bold">TIÊM CHỦNG</h6>
-          <LinkContainer to="/nurse/vaccination">
+          <LinkContainer to="/nurse/manage-vaccination">
             <Nav.Link className="sidebar-link mb-1">
               <FaSyringe className="me-2" />
-              Quản lý tiêm chủng
+              Quản lý lịch tiêm chủng
             </Nav.Link>
           </LinkContainer>
-          <LinkContainer to="/nurse/vaccination/schedule">
+          <LinkContainer to="/nurse/vaccination">
             <Nav.Link className="sidebar-link mb-1 ms-3">
               <FaFileAlt className="me-2" />
-              Lịch tiêm chủng
+              Lịch sử tiêm chủng
             </Nav.Link>
           </LinkContainer>
         </div>

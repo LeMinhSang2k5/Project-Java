@@ -2,13 +2,17 @@ package com.java.backend.controller;
 
 import com.java.backend.entity.VaccinationSchedule;
 import com.java.backend.service.VaccinationScheduleService;
+import com.java.backend.enums.ConsentStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/api/vaccinations")
+@RequestMapping("/api/vaccination-schedules")
 @CrossOrigin(origins = "http://localhost:3000")
 public class VaccinationScheduleController {
 
@@ -23,26 +27,127 @@ public class VaccinationScheduleController {
 
     // ✅ Get by ID
     @GetMapping("/{id}")
-    public VaccinationSchedule getSchedule(@PathVariable String id) {
-        return service.getById(id);
+    public ResponseEntity<VaccinationSchedule> getSchedule(@PathVariable Long id) {
+        VaccinationSchedule schedule = service.getById(id);
+        if (schedule != null) {
+            return ResponseEntity.ok(schedule);
+        }
+        return ResponseEntity.notFound().build();
     }
 
-    // ✅ Create or Update
+    // ✅ Create
     @PostMapping
-    public VaccinationSchedule addSchedule(@RequestBody VaccinationSchedule schedule) {
+    public VaccinationSchedule createSchedule(@RequestBody VaccinationSchedule schedule) {
         return service.save(schedule);
     }
 
     // ✅ Update
     @PutMapping("/{id}")
-    public VaccinationSchedule updateSchedule(@PathVariable String id, @RequestBody VaccinationSchedule schedule) {
-        schedule.setId(id);
-        return service.save(schedule);
+    public ResponseEntity<VaccinationSchedule> updateSchedule(@PathVariable Long id,
+            @RequestBody VaccinationSchedule schedule) {
+        VaccinationSchedule existingSchedule = service.getById(id);
+        if (existingSchedule != null) {
+            schedule.setId(id);
+            return ResponseEntity.ok(service.save(schedule));
+        }
+        return ResponseEntity.notFound().build();
     }
 
     // ✅ Delete
     @DeleteMapping("/{id}")
-    public void deleteSchedule(@PathVariable String id) {
-        service.delete(id);
+    public ResponseEntity<Void> deleteSchedule(@PathVariable Long id) {
+        VaccinationSchedule schedule = service.getById(id);
+        if (schedule != null) {
+            service.delete(id);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    // Lấy lịch tiêm chủng theo học sinh
+    @GetMapping("/student/{studentId}")
+    public List<VaccinationSchedule> getByStudentId(@PathVariable Long studentId) {
+        return service.getByStudentId(studentId);
+    }
+
+    // Lấy lịch tiêm chủng cần xác nhận từ phụ huynh
+    @GetMapping("/pending-parent-consent")
+    public List<VaccinationSchedule> getPendingParentConsent() {
+        return service.getPendingParentConsent();
+    }
+
+    // Lấy lịch tiêm chủng cần xác nhận từ học sinh
+    @GetMapping("/pending-student-confirmation")
+    public List<VaccinationSchedule> getPendingStudentConfirmation() {
+        return service.getPendingStudentConfirmation();
+    }
+
+    // Lấy lịch tiêm chủng theo trạng thái xác nhận của phụ huynh
+    @GetMapping("/parent-consent/{consent}")
+    public List<VaccinationSchedule> getByParentConsent(@PathVariable ConsentStatus consent) {
+        return service.getByParentConsent(consent);
+    }
+
+    // Lấy lịch tiêm chủng chưa được tiêm
+    @GetMapping("/not-vaccinated")
+    public List<VaccinationSchedule> getNotVaccinated() {
+        return service.getNotVaccinated();
+    }
+
+    // Lấy lịch tiêm chủng đã được tiêm
+    @GetMapping("/vaccinated")
+    public List<VaccinationSchedule> getVaccinated() {
+        return service.getVaccinated();
+    }
+
+    // Xác nhận từ phụ huynh
+    @PutMapping("/{id}/parent-consent")
+    public ResponseEntity<VaccinationSchedule> updateParentConsent(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> request) {
+        try {
+            ConsentStatus consent = ConsentStatus.valueOf(request.get("consent"));
+            VaccinationSchedule schedule = service.updateParentConsent(id, consent);
+            if (schedule != null) {
+                return ResponseEntity.ok(schedule);
+            }
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    // Xác nhận từ học sinh
+    @PutMapping("/{id}/student-confirmation")
+    public ResponseEntity<VaccinationSchedule> updateStudentConfirmation(
+            @PathVariable Long id,
+            @RequestBody Map<String, Boolean> request) {
+        VaccinationSchedule schedule = service.updateStudentConfirmation(id, request.get("confirmed"));
+        if (schedule != null) {
+            return ResponseEntity.ok(schedule);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    // Cập nhật trạng thái tiêm chủng
+    @PutMapping("/{id}/vaccination-status")
+    public ResponseEntity<VaccinationSchedule> updateVaccinationStatus(
+            @PathVariable Long id,
+            @RequestBody Map<String, Boolean> request) {
+        VaccinationSchedule schedule = service.updateVaccinationStatus(id, request.get("isVaccinated"));
+        if (schedule != null) {
+            return ResponseEntity.ok(schedule);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    // Lấy lịch tiêm chủng theo khoảng thời gian
+    @GetMapping("/date-range")
+    public List<VaccinationSchedule> getByDateRange(
+            @RequestParam String startDate,
+            @RequestParam String endDate) {
+        LocalDateTime start = LocalDateTime.parse(startDate);
+        LocalDateTime end = LocalDateTime.parse(endDate);
+        return service.getByDateRange(start, end);
     }
 }

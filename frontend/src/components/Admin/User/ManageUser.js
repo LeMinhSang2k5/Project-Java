@@ -78,8 +78,8 @@ const ManageUser = () => {
 
   // Lọc users theo role được chọn
   const filteredUsers = selectedRole
-    ? users.filter((user) => user.role === selectedRole)
-    : users;
+    ? users.filter((user) => user && user.role === selectedRole)
+    : users.filter((user) => user !== null && user !== undefined);
 
   if (loading) return <div>Đang tải...</div>;
   if (error) return <div>{error}</div>;

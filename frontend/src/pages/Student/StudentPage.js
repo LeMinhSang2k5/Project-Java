@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Badge, Alert, Spinner, ListGroup, Table } from 'react-bootstrap';
+import { Card, Row, Col, Badge, Alert, Spinner, ListGroup, Table, Button } from 'react-bootstrap';
 import api from '../../config/api';
+import { toast } from 'react-toastify';
 import './StudentPage.scss';
 
 const StudentPage = () => {
@@ -11,6 +12,8 @@ const StudentPage = () => {
     const [key, setKey] = useState('personal');
     const [medicalRequests, setMedicalRequests] = useState([]);
     const [loadingMedical, setLoadingMedical] = useState(false);
+    const [vaccinationSchedules, setVaccinationSchedules] = useState([]);
+    const [loadingVaccination, setLoadingVaccination] = useState(false);
 
     useEffect(() => {
         fetchStudentProfile();
@@ -19,6 +22,12 @@ const StudentPage = () => {
     useEffect(() => {
         if (key === 'medication') {
             fetchMedicalRequests();
+        }
+    }, [key]);
+
+    useEffect(() => {
+        if (key === 'vaccination') {
+            fetchVaccinationSchedules();
         }
     }, [key]);
 
@@ -86,6 +95,34 @@ const StudentPage = () => {
         }
     };
 
+    const fetchVaccinationSchedules = async () => {
+        try {
+            setLoadingVaccination(true);
+            const studentId = localStorage.getItem('studentId');
+            if (studentId) {
+                const response = await api.get(`/vaccination-schedules/student/${studentId}`);
+                setVaccinationSchedules(response.data);
+            }
+        } catch (error) {
+            console.error('Error fetching vaccination schedules:', error);
+        } finally {
+            setLoadingVaccination(false);
+        }
+    };
+
+    const handleVaccinationConfirmation = async (scheduleId, confirmed) => {
+        try {
+            await api.put(`/vaccination-schedules/${scheduleId}/student-confirmation`, {
+                confirmed: confirmed
+            });
+            toast.success(confirmed ? 'Đã xác nhận tiêm chủng!' : 'Đã hủy xác nhận!');
+            // Cập nhật lại danh sách
+            fetchVaccinationSchedules();
+        } catch (error) {
+            toast.error('Có lỗi xảy ra khi xác nhận!');
+        }
+    };
+
     const formatDate = (dateString) => {
         if (!dateString) return 'Chưa cập nhật';
         try {
@@ -94,6 +131,12 @@ const StudentPage = () => {
         } catch (error) {
             return dateString;
         }
+    };
+
+    const formatDateTime = (dateTimeString) => {
+        if (!dateTimeString) return 'Chưa có';
+        const date = new Date(dateTimeString);
+        return date.toLocaleString('vi-VN');
     };
 
     const getStatusBadge = (status) => {
@@ -106,6 +149,39 @@ const StudentPage = () => {
         
         const config = statusConfig[status] || { variant: 'secondary', text: status };
         return <Badge bg={config.variant}>{config.text}</Badge>;
+    };
+
+    const getVaccinationStatusBadge = (vaccination) => {
+        if (vaccination.isVaccinated) {
+            return <Badge bg="success">Đã tiêm</Badge>;
+        }
+        
+        if (vaccination.parentConsent === 'REJECTED') {
+            return <Badge bg="danger">Phụ huynh từ chối</Badge>;
+        }
+        
+        if (vaccination.parentConsent === 'APPROVED') {
+            return <Badge bg="warning">Chờ xác nhận</Badge>;
+        }
+        
+        if (vaccination.parentConsent === 'PENDING') {
+            return <Badge bg="info">Chờ phụ huynh xác nhận</Badge>;
+        }
+        
+        return <Badge bg="secondary">Không xác định</Badge>;
+    };
+
+    const getConsentBadge = (consent) => {
+        switch (consent) {
+            case 'APPROVED':
+                return <Badge bg="success">Đồng ý</Badge>;
+            case 'REJECTED':
+                return <Badge bg="danger">Từ chối</Badge>;
+            case 'PENDING':
+                return <Badge bg="warning">Chờ xác nhận</Badge>;
+            default:
+                return <Badge bg="secondary">Không xác định</Badge>;
+        }
     };
 
     const renderPersonalInfo = () => (
@@ -341,6 +417,80 @@ const StudentPage = () => {
         </Card>
     );
 
+    const renderVaccinationSchedules = () => (
+        <Card className="mb-4">
+            <Card.Header>
+                <h5 className="mb-0">Lịch tiêm chủng</h5>
+            </Card.Header>
+            <Card.Body>
+                {loadingVaccination ? (
+                    <div className="text-center py-4">
+                        <Spinner animation="border" />
+                        <p className="mt-2">Đang tải lịch tiêm chủng...</p>
+                    </div>
+                ) : vaccinationSchedules.length === 0 ? (
+                    <Alert variant="info">
+                        <Alert.Heading>Thông báo</Alert.Heading>
+                        <p>Hiện tại chưa có lịch tiêm chủng nào.</p>
+                    </Alert>
+                ) : (
+                    <Table striped bordered hover responsive>
+                        <thead>
+                            <tr>
+                                <th>Vaccine</th>
+                                <th>Ngày giờ tiêm</th>
+                                <th>Trạng thái</th>
+                                <th>Xác nhận phụ huynh</th>
+                                <th>Xác nhận của bạn</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {vaccinationSchedules.map((schedule) => (
+                                <tr key={schedule.id}>
+                                    <td>{schedule.vaccineName}</td>
+                                    <td>{formatDateTime(schedule.scheduledDateTime)}</td>
+                                    <td>{getVaccinationStatusBadge(schedule)}</td>
+                                    <td>{getConsentBadge(schedule.parentConsent)}</td>
+                                    <td>
+                                        {schedule.studentConfirmation ? (
+                                            <Badge bg="success">Đã xác nhận</Badge>
+                                        ) : (
+                                            <Badge bg="secondary">Chưa xác nhận</Badge>
+                                        )}
+                                    </td>
+                                    <td>
+                                        {schedule.parentConsent === 'APPROVED' && !schedule.isVaccinated && (
+                                            <div className="d-flex gap-1">
+                                                <Button
+                                                    variant="success"
+                                                    size="sm"
+                                                    onClick={() => handleVaccinationConfirmation(schedule.id, true)}
+                                                    disabled={schedule.studentConfirmation}
+                                                >
+                                                    Xác nhận đã tiêm
+                                                </Button>
+                                                {schedule.studentConfirmation && (
+                                                    <Button
+                                                        variant="warning"
+                                                        size="sm"
+                                                        onClick={() => handleVaccinationConfirmation(schedule.id, false)}
+                                                    >
+                                                        Hủy xác nhận
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </Table>
+                )}
+            </Card.Body>
+        </Card>
+    );
+
     if (loading) {
         return (
             <div className="d-flex justify-content-center align-items-center min-height-400">
@@ -390,6 +540,9 @@ const StudentPage = () => {
                                     <ListGroup.Item action active={key === 'health'} onClick={() => setKey('health')}>
                                         Hồ sơ sức khỏe
                                     </ListGroup.Item>
+                                    <ListGroup.Item action active={key === 'vaccination'} onClick={() => setKey('vaccination')}>
+                                        Lịch tiêm chủng
+                                    </ListGroup.Item>
                                     <ListGroup.Item action active={key === 'medication'} onClick={() => setKey('medication')}>
                                         Phụ huynh gửi thuốc
                                     </ListGroup.Item>
@@ -403,6 +556,7 @@ const StudentPage = () => {
                         <div className="parent-content">
                             {key === 'personal' && renderPersonalInfo()}
                             {key === 'health' && renderHealthProfile()}
+                            {key === 'vaccination' && renderVaccinationSchedules()}
                             {key === 'medication' && renderMedicationRequests()}
                         </div>
                     </Col>
