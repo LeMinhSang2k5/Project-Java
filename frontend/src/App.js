@@ -28,7 +28,7 @@ import ParentPage from './pages/Parent/ParentPage';
 import NurseLayout from './components/Nurse/NurseLayout';
 import NurseDashboard from './components/Nurse/NurseDashboard';
 import ManageMedicalSupply from './components/Admin/MedicalSupply/ManageMedicalSupply';
-
+import StudentPage from './pages/Student/StudentPage';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -62,6 +62,7 @@ function App() {
                 <Route path="/createblog" element={<CreateBlog />} />
                 <Route path="/blog/:id" element={<BlogDetail />} />
                 <Route path="/parent" element={<ParentPage />} />
+                <Route path="/student" element={<StudentPage />} />
             </Route>
 
             {/* Admin Layout */}
@@ -77,9 +78,8 @@ function App() {
             {/* Nurse Layout */}
             <Route element={<NurseLayout />}>
                 <Route path="/nurse" element={<NurseDashboard />} />
-                
+                <Route path="/nurse/medical-supplies" element={<ManageMedicalSupply />} />
             </Route>
-
             <Route path="/login" element={<Login />} />
         </Routes>
       </BrowserRouter>

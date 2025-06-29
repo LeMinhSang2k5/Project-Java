@@ -1,0 +1,135 @@
+.student-page {
+  h2 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .parent-sidebar {
+    min-height: 100vh;
+    border-right: 1px solid #eee;
+    background: #fafbfc;
+    padding-top: 1rem;
+    
+    .card {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      border-radius: 8px;
+    }
+    
+    .list-group-item {
+      cursor: pointer;
+      font-weight: 500;
+      
+      &:hover, &.active {
+        background: #e3f0ff;
+        color: #007bff;
+      }
+    }
+  }
+  
+  .parent-content {
+    padding: 2rem 1rem 1rem 1rem;
+  }
+  
+  .card {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    border-radius: 8px;
+  }
+  
+  .table {
+    margin-top: 1rem;
+    
+    th, td {
+      text-align: center;
+      vertical-align: middle;
+    }
+  }
+  
+  .alert {
+    margin-bottom: 1.5rem;
+  }
+  
+  // Student-specific styles
+  .min-height-400 {
+    min-height: 400px;
+  }
+
+  .student-name {
+    font-weight: 700;
+    color: #007bff;
+  }
+
+  .student-description {
+    color: #6c757d;
+    margin-bottom: 0;
+  }
+
+  .info-row {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f0f0f0;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .info-label {
+    color: #495057;
+    min-width: 120px;
+    font-weight: 600;
+  }
+
+  .info-value {
+    color: #212529;
+    font-weight: 500;
+    margin-left: 0.5rem;
+  }
+
+  .parent-badge {
+    font-size: 0.7rem;
+  }
+
+  .no-data {
+    color: #6c757d;
+    font-style: italic;
+  }
+
+  .data-box {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 0.5rem;
+    background-color: #f8f9fa;
+  }
+
+  .allergies-header {
+    background-color: #ffc107;
+    color: #212529;
+  }
+
+  .medical-history-header {
+    background-color: #17a2b8;
+    color: white;
+  }
+
+  .vision-header {
+    background-color: #28a745;
+    color: white;
+  }
+
+  .hearing-header {
+    background-color: #6c757d;
+    color: white;
+  }
+  
+  .spinner-border {
+    color: #007bff;
+  }
+  
+  .text-center {
+    .fas {
+      color: #6c757d;
+    }
+  }
+} 
