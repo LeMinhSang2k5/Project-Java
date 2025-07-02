@@ -84,6 +84,7 @@ function App() {
                 <Route path="/nurse/manage-vaccination" element={<ManageVaccination />} />
                 <Route path="/nurse/health-profiles" element={<ManageHealthProfile />} />
             </Route>
+
             <Route path="/login" element={<Login />} />
         </Routes>
       </BrowserRouter>
