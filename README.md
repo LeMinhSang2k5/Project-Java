@@ -116,10 +116,10 @@ Truy vấn tổng hợp qua Repository, hiển thị biểu đồ (Chart.js) tr�
 | 1 | Khởi tạo dự án, cấu hình CI/CD, DB schema | ✔️ Done |
 | 2 | Module Auth, phân quyền, bảng người dùng | ✔️ Done |
 | 3 | Module Hồ sơ sức khỏe & giao diện phụ huynh | ✔️ Done |
-| 4 | Module Sự kiện y tế & quản lý thuốc | ⏳ In-progress |
-| 5 | Module Tiêm chủng & Khám định kỳ | ⏳ Planned |
-| 6 | Dashboard, báo cáo, kiểm thử tích hợp | ⏳ Planned |
-| 7 | Hoàn thiện tài liệu, triển khai staging | ⏳ Planned |
+| 4 | Module Sự kiện y tế & quản lý thuốc | ✔️ Done |
+| 5 | Module Tiêm chủng & Quản lý quá trình kiểm tra y tế định kỳ | ✔️ Done |
+| 6 | Dashboard, báo cáo | ⏳ Planned |
+| 7 | Tài liệu về sức khỏe học đường, blog chia sẻ kinh nghiệm  | ⏳ Planned |
 
 ## 7. Tài liệu tham khảo & quy ước phát triển
 * **Directory backend**: `controller/`, `service/`, `repository/`, `entity/`, `enums/`, `exception/`.
