@@ -66,13 +66,7 @@ const Header = () => {
                     <Nav className="me-auto">
                         <NavLink to="/" className="nav-link">Trang chủ</NavLink>
                         <NavLink to="/about" className="nav-link">Giới thiệu</NavLink>
-                        
-                        <NavDropdown className="me-2" title="Tài liệu & Hướng dẫn" id="health-docs-dropdown">
-                            <NavDropdown.Item as={NavLink} to="/docs/general">Sức khỏe học đường</NavDropdown.Item>
-                            <NavDropdown.Item as={NavLink} to="/docs/nutrition">Dinh dưỡng học đường</NavDropdown.Item>
-                            <NavDropdown.Item as={NavLink} to="/docs/prevention">Phòng chống dịch bệnh</NavDropdown.Item>
-                        </NavDropdown>
-
+                        <NavLink to="/docs/general" className="nav-link">Tài liệu & Hướng dẫn</NavLink>
                         <NavLink to="/blog" className="nav-link">Blog chia sẻ</NavLink>
                         
 
