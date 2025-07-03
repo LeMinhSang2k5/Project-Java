@@ -25,6 +25,8 @@ const ParentPage = () => {
   // State cho lịch tiêm chủng
   const [vaccinationSchedules, setVaccinationSchedules] = useState([]);
   const [loadingVaccination, setLoadingVaccination] = useState(false);
+  const [medicalCheckupNotifications, setMedicalCheckupNotifications] = useState([]);
+  const [loadingMedicalCheckup, setLoadingMedicalCheckup] = useState(false);
 
   useEffect(() => {
     const parentId = localStorage.getItem('parentId');
@@ -61,10 +63,43 @@ const ParentPage = () => {
   useEffect(() => {
     if (key === 'vaccinationSchedules') {
       setLoadingVaccination(true);
-      api.get('/vaccination-schedules/pending-parent-consent')
-        .then(res => setVaccinationSchedules(res.data))
-        .catch(() => setAlert('Không thể tải lịch tiêm chủng!'))
-        .finally(() => setLoadingVaccination(false));
+      const parentId = localStorage.getItem('parentId');
+      if (parentId) {
+        api.get(`/vaccination-schedules/pending-parent-consent/${parentId}`)
+          .then(res => setVaccinationSchedules(res.data))
+          .catch(() => setAlert('Không thể tải lịch tiêm chủng!'))
+          .finally(() => setLoadingVaccination(false));
+      } else {
+        setVaccinationSchedules([]);
+        setLoadingVaccination(false);
+      }
+    }
+  }, [key]);
+
+  useEffect(() => {
+    if (key === 'medicalCheckupNotify') {
+      setLoadingMedicalCheckup(true);
+      const parentId = localStorage.getItem('parentId');
+      if (parentId) {
+        api.get(`/medical-checkup/notifications?parentId=${parentId}&status=PENDING`)
+          .then(res => setMedicalCheckupNotifications(res.data))
+          .catch(() => setAlert('Không thể tải phiếu kiểm tra y tế!'))
+          .finally(() => setLoadingMedicalCheckup(false));
+      } else {
+        setMedicalCheckupNotifications([]);
+        setLoadingMedicalCheckup(false);
+      }
+    }
+  }, [key]);
+
+  useEffect(() => {
+    if (key === 'medicalCheckupResults') {
+      setLoadingResults(true);
+      const parentId = localStorage.getItem('parentId');
+      api.get(`/medical-checkup/results?parentId=${parentId}`)
+        .then(res => setResults(res.data))
+        .catch(() => setAlert('Không thể tải kết quả kiểm tra y tế!'))
+        .finally(() => setLoadingResults(false));
     }
   }, [key]);
 
@@ -89,6 +124,18 @@ const ParentPage = () => {
       const updatedSchedules = vaccinationSchedules.filter(schedule => schedule.id !== scheduleId);
       setVaccinationSchedules(updatedSchedules);
     } catch (error) {
+      toast.error('Có lỗi xảy ra khi xác nhận!');
+    }
+  };
+
+  const handleMedicalCheckupConsent = async (notificationId, status) => {
+    try {
+      await api.put(`/medical-checkup/notification/${notificationId}/consent`, status, {
+        headers: { 'Content-Type': 'text/plain' }
+      });
+      toast.success(status === 'APPROVED' ? 'Đã đồng ý kiểm tra y tế!' : 'Đã từ chối kiểm tra y tế!');
+      setMedicalCheckupNotifications(list => list.filter(n => n.id !== notificationId));
+    } catch {
       toast.error('Có lỗi xảy ra khi xác nhận!');
     }
   };
@@ -133,6 +180,12 @@ const ParentPage = () => {
                 <ListGroup.Item action active={key==='vaccinationSchedules'} onClick={()=>setKey('vaccinationSchedules')}>Xác nhận lịch tiêm chủng</ListGroup.Item>
                 <ListGroup.Item action active={key==='confirmVaccination'} onClick={()=>setKey('confirmVaccination')}>Xác nhận tiêm chủng/kiểm tra y tế</ListGroup.Item>
                 <ListGroup.Item action active={key==='results'} onClick={()=>setKey('results')}>Kết quả tiêm chủng & Lịch tư vấn</ListGroup.Item>
+                <ListGroup.Item action active={key==='medicalCheckupNotify'} onClick={()=>setKey('medicalCheckupNotify')}>
+                  Xác nhận kiểm tra y tế
+                </ListGroup.Item>
+                <ListGroup.Item action active={key==='medicalCheckupResults'} onClick={()=>setKey('medicalCheckupResults')}>
+                  Kết quả kiểm tra y tế
+                </ListGroup.Item>
               </ListGroup>
             </Card.Body>
           </Card>
@@ -269,6 +322,106 @@ const ParentPage = () => {
                             <td>{result.vaccinationDate}</td>
                             <td>{result.notes}</td>
                             <td>{result.consultationDate ? result.consultationDate : 'Không có'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  )}
+                </Card.Body>
+              </Card>
+            )}
+            {key === 'medicalCheckupNotify' && (
+              <Card>
+                <Card.Header>
+                  <h5 className="mb-0">Phiếu kiểm tra y tế cần xác nhận</h5>
+                </Card.Header>
+                <Card.Body>
+                  {loadingMedicalCheckup ? (
+                    <div className="text-center py-4">
+                      <Spinner animation="border" />
+                      <p className="mt-2">Đang tải phiếu kiểm tra y tế...</p>
+                    </div>
+                  ) : medicalCheckupNotifications.length === 0 ? (
+                    <Alert variant="info">
+                      <Alert.Heading>Thông báo</Alert.Heading>
+                      <p>Hiện tại không có phiếu kiểm tra y tế nào cần xác nhận.</p>
+                    </Alert>
+                  ) : (
+                    <Table striped bordered hover responsive>
+                      <thead>
+                        <tr>
+                          <th>Học sinh</th>
+                          <th>Nội dung</th>
+                          <th>Ngày kiểm tra</th>
+                          <th>Trạng thái</th>
+                          <th>Hành động</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {medicalCheckupNotifications.map((n, idx) => (
+                          <tr key={n.id || idx}>
+                            <td>{n.studentName || n.studentId}</td>
+                            <td>{n.content}</td>
+                            <td>{n.scheduledDate ? new Date(n.scheduledDate).toLocaleString('vi-VN') : ''}</td>
+                            <td>{n.status === 'PENDING' ? 'Chờ xác nhận' : n.status}</td>
+                            <td>
+                              {n.id ? (
+                                <>
+                                  <Button
+                                    variant="success"
+                                    size="sm"
+                                    onClick={() => handleMedicalCheckupConsent(n.id, 'APPROVED')}
+                                  >Đồng ý</Button>
+                                  {' '}
+                                  <Button
+                                    variant="danger"
+                                    size="sm"
+                                    onClick={() => handleMedicalCheckupConsent(n.id, 'REJECTED')}
+                                  >Từ chối</Button>
+                                </>
+                              ) : (
+                                <span className="text-danger">Không xác định ID</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  )}
+                </Card.Body>
+              </Card>
+            )}
+            {key === 'medicalCheckupResults' && (
+              <Card>
+                <Card.Header>
+                  <h5 className="mb-0">Kết quả kiểm tra y tế của học sinh</h5>
+                </Card.Header>
+                <Card.Body>
+                  {loadingResults ? (
+                    <Spinner animation="border" />
+                  ) : results.length === 0 ? (
+                    <Alert variant="info">Chưa có kết quả kiểm tra y tế nào.</Alert>
+                  ) : (
+                    <Table striped bordered hover>
+                      <thead>
+                        <tr>
+                          <th>Học sinh</th>
+                          <th>Ngày kiểm tra</th>
+                          <th>Kết quả</th>
+                          <th>Ghi chú</th>
+                          <th>Bất thường</th>
+                          <th>Xác nhận học sinh</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {results.map(r => (
+                          <tr key={r.id}>
+                            <td>{r.studentName || r.studentId}</td>
+                            <td>{r.checkupDate ? new Date(r.checkupDate).toLocaleString('vi-VN') : ''}</td>
+                            <td>{r.result}</td>
+                            <td>{r.notes}</td>
+                            <td>{r.abnormal ? 'Có' : 'Không'}</td>
+                            <td>{r.studentConfirmation ? 'Đã xác nhận' : 'Chưa xác nhận'}</td>
                           </tr>
                         ))}
                       </tbody>

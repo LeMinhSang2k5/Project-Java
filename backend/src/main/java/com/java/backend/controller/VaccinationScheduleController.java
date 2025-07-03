@@ -2,6 +2,7 @@ package com.java.backend.controller;
 
 import com.java.backend.entity.VaccinationSchedule;
 import com.java.backend.service.VaccinationScheduleService;
+import com.java.backend.service.StudentService;
 import com.java.backend.enums.ConsentStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,9 @@ public class VaccinationScheduleController {
 
     @Autowired
     private VaccinationScheduleService service;
+
+    @Autowired
+    private StudentService studentService;
 
     // ✅ Get all
     @GetMapping
@@ -149,5 +153,50 @@ public class VaccinationScheduleController {
         LocalDateTime start = LocalDateTime.parse(startDate);
         LocalDateTime end = LocalDateTime.parse(endDate);
         return service.getByDateRange(start, end);
+    }
+
+    // Tạo nhiều lịch tiêm chủng cho nhiều học sinh
+    @PostMapping("/bulk")
+    public ResponseEntity<?> createBulkSchedules(@RequestBody Map<String, Object> payload) {
+        try {
+            // Lấy danh sách studentIds
+            List<Integer> studentIds = (List<Integer>) payload.get("studentIds");
+            String vaccineName = (String) payload.get("vaccineName");
+            String scheduledDateTime = (String) payload.get("scheduledDateTime");
+            String notes = payload.get("notes") != null ? (String) payload.get("notes") : null;
+            String location = payload.get("location") != null ? (String) payload.get("location") : null;
+
+            if (studentIds == null || studentIds.isEmpty() || vaccineName == null || scheduledDateTime == null) {
+                return ResponseEntity.badRequest().body("Thiếu thông tin bắt buộc");
+            }
+
+            List<VaccinationSchedule> createdSchedules = new java.util.ArrayList<>();
+            for (Integer id : studentIds) {
+                Long studentId = id.longValue();
+                var student = studentService.getStudentById(studentId);
+                VaccinationSchedule schedule = new VaccinationSchedule();
+                schedule.setStudentId(studentId);
+                schedule.setStudentName(student.getFullName());
+                schedule.setStudentCode(student.getCode());
+                schedule.setVaccineName(vaccineName);
+                schedule.setScheduledDateTime(java.time.LocalDateTime.parse(scheduledDateTime));
+                schedule.setNotes(notes);
+                schedule.setLocation(location);
+                schedule.setVaccinated(false);
+                schedule.setParentConsent(com.java.backend.enums.ConsentStatus.PENDING);
+                schedule.setStudentConfirmation(false);
+                createdSchedules.add(service.save(schedule));
+            }
+            return ResponseEntity.ok(createdSchedules);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Lỗi khi tạo lịch tiêm chủng hàng loạt: " + e.getMessage());
+        }
+    }
+
+    // Lấy lịch tiêm chủng cần xác nhận từ phụ huynh theo parentId
+    @GetMapping("/pending-parent-consent/{parentId}")
+    public List<VaccinationSchedule> getPendingParentConsentByParentId(@PathVariable Long parentId) {
+        return service.getPendingParentConsentByParentId(parentId);
     }
 }

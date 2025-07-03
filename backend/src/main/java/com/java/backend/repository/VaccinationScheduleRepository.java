@@ -40,4 +40,8 @@ public interface VaccinationScheduleRepository extends JpaRepository<Vaccination
     @Query("SELECT v FROM VaccinationSchedule v WHERE v.scheduledDateTime BETWEEN :startDate AND :endDate")
     List<VaccinationSchedule> findByScheduledDateTimeBetween(@Param("startDate") java.time.LocalDateTime startDate,
             @Param("endDate") java.time.LocalDateTime endDate);
+
+    // Tìm lịch tiêm chủng cần xác nhận theo parent_id của học sinh
+    @Query("SELECT v FROM VaccinationSchedule v WHERE v.parentConsent = 'PENDING' AND v.studentId IN (SELECT s.id FROM Student s WHERE s.parent.id = :parentId)")
+    List<VaccinationSchedule> findPendingParentConsentByParentId(@Param("parentId") Long parentId);
 }

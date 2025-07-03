@@ -99,4 +99,9 @@ public class VaccinationScheduleService {
     public List<VaccinationSchedule> getByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
         return repository.findByScheduledDateTimeBetween(startDate, endDate);
     }
+
+    // Lấy lịch tiêm chủng cần xác nhận theo parentId
+    public List<VaccinationSchedule> getPendingParentConsentByParentId(Long parentId) {
+        return repository.findPendingParentConsentByParentId(parentId);
+    }
 }

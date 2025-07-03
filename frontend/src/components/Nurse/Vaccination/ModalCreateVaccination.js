@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 
 const ModalCreateVaccination = ({ show, onClose, onVaccinationCreated }) => {
   const [formData, setFormData] = useState({
-    personName: '',
+    studentIds: [],
     vaccineName: '',
     scheduledDateTime: '',
     notes: '',
@@ -37,38 +37,31 @@ const ModalCreateVaccination = ({ show, onClose, onVaccinationCreated }) => {
     }));
   };
 
+  const handleStudentCheckbox = (studentId) => {
+    setFormData(prev => {
+      const selected = prev.studentIds.includes(studentId)
+        ? prev.studentIds.filter(id => id !== studentId)
+        : [...prev.studentIds, studentId];
+      return { ...prev, studentIds: selected };
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!formData.personName || !formData.vaccineName || !formData.scheduledDateTime) {
-      toast.error('Vui lòng điền đầy đủ thông tin bắt buộc');
+    if (!formData.studentIds || formData.studentIds.length === 0 || !formData.vaccineName || !formData.scheduledDateTime) {
+      toast.error('Vui lòng chọn học sinh và điền đầy đủ thông tin bắt buộc');
       return;
     }
-
     try {
       setLoading(true);
-      
-      // Tìm student ID từ danh sách students
-      const selectedStudent = students.find(student => student.fullName === formData.personName);
-      if (!selectedStudent) {
-        toast.error('Không tìm thấy thông tin học sinh');
-        return;
-      }
-
       const vaccinationData = {
-        studentId: selectedStudent.id,
-        studentName: formData.personName,
-        studentCode: selectedStudent.code,
+        studentIds: formData.studentIds,
         vaccineName: formData.vaccineName,
         scheduledDateTime: formData.scheduledDateTime,
         notes: formData.notes,
-        location: formData.location || 'Phòng y tế trường học',
-        isVaccinated: false,
-        parentConsent: 'PENDING',
-        studentConfirmation: false
+        location: formData.location || 'Phòng y tế trường học'
       };
-
-      await api.post('/vaccination-schedules', vaccinationData);
+      await api.post('/vaccination-schedules/bulk', vaccinationData);
       toast.success('Tạo lịch tiêm chủng thành công!');
       onVaccinationCreated();
       handleClose();
@@ -82,7 +75,7 @@ const ModalCreateVaccination = ({ show, onClose, onVaccinationCreated }) => {
 
   const handleClose = () => {
     setFormData({
-      personName: '',
+      studentIds: [],
       vaccineName: '',
       scheduledDateTime: '',
       notes: '',
@@ -99,20 +92,19 @@ const ModalCreateVaccination = ({ show, onClose, onVaccinationCreated }) => {
       <Form onSubmit={handleSubmit}>
         <Modal.Body>
           <Form.Group className="mb-3">
-            <Form.Label>Học sinh <span className="text-danger">*</span></Form.Label>
-            <Form.Select
-              name="personName"
-              value={formData.personName}
-              onChange={handleInputChange}
-              required
-            >
-              <option value="">Chọn học sinh</option>
+            <Form.Label>Chọn học sinh <span className="text-danger">*</span></Form.Label>
+            <div style={{ maxHeight: 200, overflowY: 'auto', border: '1px solid #eee', padding: 8 }}>
               {students.map((student) => (
-                <option key={student.id} value={student.fullName}>
-                  {student.fullName} - {student.code}
-                </option>
+                <Form.Check
+                  key={student.id}
+                  type="checkbox"
+                  label={`${student.fullName} - ${student.code}`}
+                  value={student.id}
+                  checked={formData.studentIds.includes(student.id)}
+                  onChange={() => handleStudentCheckbox(student.id)}
+                />
               ))}
-            </Form.Select>
+            </div>
           </Form.Group>
 
           <Form.Group className="mb-3">

@@ -3,6 +3,7 @@ import { Card, Row, Col, Badge, Alert, Spinner, ListGroup, Table, Button } from 
 import api from '../../config/api';
 import { toast } from 'react-toastify';
 import './StudentPage.scss';
+import MedicalCheckupConfirm from './MedicalCheckupConfirm';
 
 const StudentPage = () => {
     const [healthProfile, setHealthProfile] = useState(null);
@@ -546,6 +547,9 @@ const StudentPage = () => {
                                     <ListGroup.Item action active={key === 'medication'} onClick={() => setKey('medication')}>
                                         Phụ huynh gửi thuốc
                                     </ListGroup.Item>
+                                    <ListGroup.Item action active={key === 'medicalCheckupConfirm'} onClick={() => setKey('medicalCheckupConfirm')}>
+                                        Xác nhận kết quả kiểm tra y tế
+                                    </ListGroup.Item>
                                 </ListGroup>
                             </Card.Body>
                         </Card>
@@ -558,6 +562,13 @@ const StudentPage = () => {
                             {key === 'health' && renderHealthProfile()}
                             {key === 'vaccination' && renderVaccinationSchedules()}
                             {key === 'medication' && renderMedicationRequests()}
+                            {key === 'medicalCheckupConfirm' && (
+                                <Card>
+                                    <Card.Body>
+                                        <MedicalCheckupConfirm studentId={localStorage.getItem('studentId')} />
+                                    </Card.Body>
+                                </Card>
+                            )}
                         </div>
                     </Col>
                 </Row>
