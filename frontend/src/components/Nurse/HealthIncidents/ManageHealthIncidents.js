@@ -5,7 +5,6 @@ import { toast } from 'react-toastify';
 import CreateIncidentModal from './CreateIncidentModal';
 import ViewIncidentModal from './ViewIncidentModal';
 import api from '../../../config/api';
-
 const ManageHealthIncidents = () => {
   const [incidents, setIncidents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,52 +25,9 @@ const ManageHealthIncidents = () => {
   const fetchIncidents = async () => {
     try {
       setLoading(true);
-      // Giả lập API call
-      const mockIncidents = [
-        {
-          id: 1,
-          studentName: 'Nguyễn Văn A',
-          studentCode: 'SV2024001',
-          studentClass: '10A1',
-          type: 'Sốt',
-          description: 'Học sinh có biểu hiện sốt cao 38.5°C',
-          status: 'pending',
-          priority: 'high',
-          reportedBy: 'Giáo viên chủ nhiệm',
-          reportedAt: '2024-01-15 09:30:00',
-          treatedBy: null,
-          treatmentNotes: null
-        },
-        {
-          id: 2,
-          studentName: 'Trần Thị B',
-          studentCode: 'SV2024002',
-          studentClass: '9B2',
-          type: 'Té ngã',
-          description: 'Học sinh bị té ngã trong sân chơi, đau chân trái',
-          status: 'treating',
-          priority: 'medium',
-          reportedBy: 'Giáo viên thể dục',
-          reportedAt: '2024-01-15 14:15:00',
-          treatedBy: 'Y tá Nguyễn Văn C',
-          treatmentNotes: 'Đã sơ cứu, băng bó vết thương'
-        },
-        {
-          id: 3,
-          studentName: 'Lê Văn D',
-          studentCode: 'SV2024003',
-          studentClass: '11A3',
-          type: 'Đau bụng',
-          description: 'Học sinh phàn nàn đau bụng sau bữa trưa',
-          status: 'resolved',
-          priority: 'low',
-          reportedBy: 'Tự báo cáo',
-          reportedAt: '2024-01-15 11:45:00',
-          treatedBy: 'Y tá Nguyễn Văn C',
-          treatmentNotes: 'Đã cho uống thuốc, theo dõi 30 phút, tình trạng ổn định'
-        }
-      ];
-      setIncidents(mockIncidents);
+      // Gọi API backend lấy danh sách sự kiện y tế
+      const response = await api.get('/api/health-incidents');
+      setIncidents(response.data);
     } catch (error) {
       toast.error('Lỗi khi tải danh sách sự kiện y tế');
     } finally {

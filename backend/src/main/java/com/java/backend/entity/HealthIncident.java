@@ -48,4 +48,72 @@ public class HealthIncident {
     public enum IncidentStatus {
         REPORTED, MONITORING, PARENT_NOTIFIED, RESOLVED
     }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Student getStudent() {
+        return student;
+    }
+
+    public void setStudent(Student student) {
+        this.student = student;
+    }
+
+    public User getReportedBy() {
+        return reportedBy;
+    }
+
+    public void setReportedBy(User reportedBy) {
+        this.reportedBy = reportedBy;
+    }
+
+    public String getIncidentType() {
+        return incidentType;
+    }
+
+    public void setIncidentType(String incidentType) {
+        this.incidentType = incidentType;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getActionTaken() {
+        return actionTaken;
+    }
+
+    public void setActionTaken(String actionTaken) {
+        this.actionTaken = actionTaken;
+    }
+
+    public LocalDateTime getIncidentTime() {
+        return incidentTime;
+    }
+
+    public void setIncidentTime(LocalDateTime incidentTime) {
+        this.incidentTime = incidentTime;
+    }
+
+    public IncidentStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(IncidentStatus status) {
+        this.status = status;
+    }
+
+    public enum IncidentType {
+        FALL, FEVER, HEADACHE, STOMACH_ACHE, OTHER
+    }
 }
