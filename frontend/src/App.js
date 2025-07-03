@@ -30,7 +30,6 @@ import NurseDashboard from './components/Nurse/NurseDashboard';
 import ManageMedicalSupply from './components/Admin/MedicalSupply/ManageMedicalSupply';
 import StudentPage from './pages/Student/StudentPage';
 import ManageVaccination from './components/Nurse/Vaccination/ManageVaccination';
-import MedicalCheckup from './components/Nurse/MedicalCheckup/MedicalCheckup';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -65,6 +64,7 @@ function App() {
                 <Route path="/blog/:id" element={<BlogDetail />} />
                 <Route path="/parent" element={<ParentPage />} />
                 <Route path="/student" element={<StudentPage />} />
+                <Route path="/docs/general" element={<General />} />
             </Route>
 
             {/* Admin Layout */}
@@ -84,7 +84,6 @@ function App() {
                 <Route path="/nurse/vaccination" element={<VaccinationHistory />} />
                 <Route path="/nurse/manage-vaccination" element={<ManageVaccination />} />
                 <Route path="/nurse/health-profiles" element={<ManageHealthProfile />} />
-                <Route path="/nurse/health-check" element={<MedicalCheckup />} />
             </Route>
 
             <Route path="/login" element={<Login />} />

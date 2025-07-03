@@ -22,11 +22,10 @@ public class HealthCheckResult {
 
     private Double heightCm;
     private Double weightKg;
-    private String visionLeft; // "10/10"
-    private String visionRight;
+    private String vision; // "10/10"
     private String hearingStatus; // "Tốt", "Kém"
     private String dentalStatus; // Tình trạng răng miệng
-    private String scoliosisStatus; // Tình trạng cong vẹo cột sống
+    private String bloodPressure; // "120/80"
 
     @Column(columnDefinition = "TEXT")
     private String nurseNotes;
@@ -65,20 +64,12 @@ public class HealthCheckResult {
         this.weightKg = weightKg;
     }
 
-    public String getVisionLeft() {
-        return visionLeft;
+    public String getVision() {
+        return vision;
     }
 
-    public void setVisionLeft(String visionLeft) {
-        this.visionLeft = visionLeft;
-    }
-
-    public String getVisionRight() {
-        return visionRight;
-    }
-
-    public void setVisionRight(String visionRight) {
-        this.visionRight = visionRight;
+    public void setVision(String vision) {
+        this.vision = vision;
     }
 
     public String getHearingStatus() {
@@ -97,12 +88,12 @@ public class HealthCheckResult {
         this.dentalStatus = dentalStatus;
     }
 
-    public String getScoliosisStatus() {
-        return scoliosisStatus;
+    public String getBloodPressure() {
+        return bloodPressure;
     }
 
-    public void setScoliosisStatus(String scoliosisStatus) {
-        this.scoliosisStatus = scoliosisStatus;
+    public void setBloodPressure(String bloodPressure) {
+        this.bloodPressure = bloodPressure;
     }
 
     public String getNurseNotes() {

@@ -1,5 +1,8 @@
 package com.java.backend.entity;
 
+import java.util.List;
+import java.util.ArrayList;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -9,8 +12,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import com.java.backend.enums.Role;
@@ -42,6 +48,10 @@ public class User {
 
     @Column()
     private boolean isActive = true;
+
+    @OneToMany(mappedBy = "reportedBy", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<HealthIncident> healthIncidents = new ArrayList<>();
 
     public User() {
         // Default constructor required by JPA

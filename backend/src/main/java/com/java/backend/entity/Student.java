@@ -2,12 +2,14 @@ package com.java.backend.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
-
+import java.util.List;
+import java.util.ArrayList;
 
 import com.java.backend.enums.Gender;
 import com.java.backend.enums.Role;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "students")
@@ -44,6 +46,10 @@ public class Student extends User {
     @OneToOne(mappedBy = "student", cascade = CascadeType.ALL)
     @JsonManagedReference
     private HealthProfile healthProfile;
+
+    @OneToMany(mappedBy = "student", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<HealthIncident> healthIncidents = new ArrayList<>();
 
     public Student() {
         super();
@@ -141,6 +147,14 @@ public class Student extends User {
 
     public void setParent(Parent parent) {
         this.parent = parent;
+    }
+
+    public List<HealthIncident> getHealthIncidents() {
+        return healthIncidents;
+    }
+
+    public void setHealthIncidents(List<HealthIncident> healthIncidents) {
+        this.healthIncidents = healthIncidents;
     }
 
 }
