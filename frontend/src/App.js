@@ -30,6 +30,9 @@ import NurseDashboard from './components/Nurse/NurseDashboard';
 import ManageMedicalSupply from './components/Admin/MedicalSupply/ManageMedicalSupply';
 import StudentPage from './pages/Student/StudentPage';
 import ManageVaccination from './components/Nurse/Vaccination/ManageVaccination';
+import MedicalCheckup from './components/Nurse/MedicalCheckup/MedicalCheckup';
+import ManageHealthIncidents from './components/Nurse/HealthIncidents/ManageHealthIncidents';
+import General from './pages/General';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -84,6 +87,8 @@ function App() {
                 <Route path="/nurse/vaccination" element={<VaccinationHistory />} />
                 <Route path="/nurse/manage-vaccination" element={<ManageVaccination />} />
                 <Route path="/nurse/health-profiles" element={<ManageHealthProfile />} />
+                <Route path="/nurse/health-incidents" element={<ManageHealthIncidents />} />
+                <Route path="/nurse/health-check" element={<MedicalCheckup />} />
             </Route>
 
             <Route path="/login" element={<Login />} />

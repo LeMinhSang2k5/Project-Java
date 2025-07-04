@@ -61,12 +61,8 @@ const NurseSidebar = () => {
               Quản lý lịch tiêm chủng
             </Nav.Link>
           </LinkContainer>
-          <LinkContainer to="/nurse/vaccination">
-            <Nav.Link className="sidebar-link mb-1 ms-3">
-              <FaFileAlt className="me-2" />
-              Lịch sử tiêm chủng
-            </Nav.Link>
-          </LinkContainer>
+        
+          
         </div>
 
         <div className="sidebar-section mt-3">
@@ -77,12 +73,7 @@ const NurseSidebar = () => {
               Kiểm tra định kỳ
             </Nav.Link>
           </LinkContainer>
-          <LinkContainer to="/nurse/health-check/results">
-            <Nav.Link className="sidebar-link mb-1 ms-3">
-              <FaFileAlt className="me-2" />
-              Kết quả kiểm tra
-            </Nav.Link>
-          </LinkContainer>
+          
         </div>
 
         <div className="sidebar-section mt-3">
