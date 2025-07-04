@@ -86,7 +86,6 @@ const ManageUser = () => {
 
   return (
     <div>
-      <h2>Quản lý người dùng</h2>
       <div className="mb-3 d-flex align-items-center justify-content-between">
         <div className="d-flex align-items-center">
           <Button variant="success" onClick={() => setShowCreate(true)} className="me-2">

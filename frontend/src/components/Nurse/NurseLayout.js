@@ -5,6 +5,22 @@ import Footer from '../../pages/Header/Footer';
 import NurseSidebar from './NurseSidebar';
 
 const NurseLayout = () => {
+  const getUserRole = () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user && user.role) {
+        return user.role;
+    }
+  };
+  const role = getUserRole();
+
+  if (role !== 'SCHOOL_NURSE' && role !== 'ADMIN') {
+      return (
+          <div className="unauthorized">
+              <h1>Unauthorized Access</h1>
+              <p>You do not have permission to access this page.</p>
+          </div>
+      );
+  }
   return (
     <div className="d-flex">
       <NurseSidebar />

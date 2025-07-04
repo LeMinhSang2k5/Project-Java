@@ -175,11 +175,12 @@ const ParentPage = () => {
                 </div>
               ) : <div>Không có thông tin phụ huynh</div>}
               <ListGroup variant="flush">
-                <ListGroup.Item action active={key==='students'} onClick={()=>setKey('students')}>Hồ sơ sức khỏe học sinh</ListGroup.Item>
-                <ListGroup.Item action active={key==='sendMedicine'} onClick={()=>setKey('sendMedicine')}>Gửi thuốc cho học sinh</ListGroup.Item>
-                <ListGroup.Item action active={key==='vaccinationSchedules'} onClick={()=>setKey('vaccinationSchedules')}>Xác nhận lịch tiêm chủng</ListGroup.Item>
-                <ListGroup.Item action active={key==='confirmVaccination'} onClick={()=>setKey('confirmVaccination')}>Xác nhận tiêm chủng/kiểm tra y tế</ListGroup.Item>
-                <ListGroup.Item action active={key==='results'} onClick={()=>setKey('results')}>Kết quả tiêm chủng & Lịch tư vấn</ListGroup.Item>
+                <ListGroup.Item action active={key==='students'} onClick={()=>setKey('students')}>
+                  Hồ sơ sức khỏe học sinh</ListGroup.Item>
+                <ListGroup.Item action active={key==='sendMedicine'} onClick={()=>setKey('sendMedicine')}>
+                  Gửi thuốc cho học sinh</ListGroup.Item>
+                <ListGroup.Item action active={key==='vaccinationSchedules'} onClick={()=>setKey('vaccinationSchedules')}>
+                Xác nhận lịch tiêm chủng</ListGroup.Item>
                 <ListGroup.Item action active={key==='medicalCheckupNotify'} onClick={()=>setKey('medicalCheckupNotify')}>
                   Xác nhận kiểm tra y tế
                 </ListGroup.Item>

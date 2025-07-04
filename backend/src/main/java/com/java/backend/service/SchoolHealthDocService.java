@@ -29,7 +29,6 @@ public class SchoolHealthDocService {
         return schoolHealthDocRepository.save(schoolHealthDoc);
     }
 
-
     public SchoolHealthDoc updateSchoolHealthDoc(Long id, SchoolHealthDoc schoolHealthDoc) {
         SchoolHealthDoc existingSchoolHealthDoc = getSchoolHealthDocById(id);
         existingSchoolHealthDoc.setTitle(schoolHealthDoc.getTitle());

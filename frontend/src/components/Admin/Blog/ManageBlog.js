@@ -34,7 +34,6 @@ const ManageBlog = () => {
 
     return (
         <>
-            <h2>Quản lý Blog</h2>
             <div className="mb-3">
                 <Button variant="success" onClick={() => setShowCreate(true)}>
                     <FaPlus className="me-2" /> Thêm Blog

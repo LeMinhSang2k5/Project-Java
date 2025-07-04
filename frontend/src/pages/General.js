@@ -80,7 +80,6 @@ const General = () => {
             <div className="general-container">
                 <div className="general-header">
                     <h1>Tài liệu học đường</h1>
-                    <p>Thư viện tài liệu về sức khỏe, dinh dưỡng và phòng chống dịch bệnh trong môi trường học đường</p>
                 </div>
                 <div className="general-content">
                     <div className="general-sidebar">

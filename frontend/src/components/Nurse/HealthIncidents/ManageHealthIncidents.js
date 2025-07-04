@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, Button, Table, Badge, Form, Row, Col, Modal } from 'react-bootstrap';
-import { FaPlus, FaEdit, FaEye, FaFilter } from 'react-icons/fa';
+import { FaPlus} from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import CreateIncidentModal from './CreateIncidentModal';
-import ViewIncidentModal from './ViewIncidentModal';
 import api from '../../../config/api';
 const ManageHealthIncidents = () => {
   const [incidents, setIncidents] = useState([]);
@@ -62,11 +61,6 @@ const ManageHealthIncidents = () => {
     toast.success('Tạo sự kiện y tế thành công!');
   };
 
-  const handleViewIncident = (incident) => {
-    setSelectedIncident(incident);
-    setShowView(true);
-  };
-
   if (loading) return <div>Đang tải...</div>;
 
   return (
@@ -108,23 +102,6 @@ const ManageHealthIncidents = () => {
                   <td>{incident.description}</td>
                   <td>{incident.actionTaken}</td>
                   <td>{getStatusBadge(incident.status)}</td>
-                  <td>
-                    <Button
-                      variant="outline-primary"
-                      size="sm"
-                      className="me-2"
-                      onClick={() => handleViewIncident(incident)}
-                    >
-                      <FaEye />
-                    </Button>
-                    <Button
-                      variant="outline-warning"
-                      size="sm"
-                      disabled={incident.status === 'RESOLVED'}
-                    >
-                      <FaEdit />
-                    </Button>
-                  </td>
                 </tr>
               ))}
             </tbody>
@@ -137,13 +114,6 @@ const ManageHealthIncidents = () => {
         show={showCreate}
         onClose={() => setShowCreate(false)}
         onIncidentCreated={handleIncidentCreated}
-      />
-
-      <ViewIncidentModal
-        show={showView}
-        onClose={() => setShowView(false)}
-        incident={selectedIncident}
-        onUpdate={fetchIncidents}
       />
     </div>
   );

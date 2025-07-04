@@ -108,7 +108,6 @@ function ManageHealthProfile() {
 
   return (
     <div>
-      <h2>Quản lý hồ sơ sức khỏe</h2>
       <div className="mb-3 d-flex justify-content-between align-items-center gap-2">
         <div>
           <Button variant="success" onClick={handleShowCreate} className="me-2">

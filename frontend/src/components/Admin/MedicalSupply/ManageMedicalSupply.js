@@ -107,8 +107,6 @@ const ManageMedicalSupply = () => {
         pauseOnHover
         theme="colored"
       />
-
-      <h2>Quản lý thuốc & vật tư y tế</h2>
       <div className="mb-3 d-flex align-items-center">
         <Button 
           variant="success" 

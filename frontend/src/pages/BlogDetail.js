@@ -52,42 +52,44 @@ const BlogDetail = () => {
 
   return (
     <div className="blog-detail-container">
-      <div className="blog-detail-header">
-        <h1>{blog.title}</h1>
-        <div className="blog-meta">
-          <span className="author">Tác giả: {blog.author}</span>
-          <span className="date">
-            Ngày đăng: {new Date(blog.publishDate).toLocaleDateString('vi-VN')}
-          </span>
-          <span className="category">Danh mục: {blog.category}</span>
+      <div className="blog-detail-content">
+        <div className="blog-detail-header">
+          <h1>{blog.title}</h1>
+          <div className="blog-meta">
+            <span className="author">Tác giả: {blog.author}</span>
+            <span className="date">
+              Ngày đăng: {new Date(blog.publishDate).toLocaleDateString('vi-VN')}
+            </span>
+            <span className="category">Danh mục: {blog.category}</span>
+          </div>
         </div>
-      </div>
 
-      {blog.thumbnail && (
-        <div className="blog-thumbnail">
-          <img 
-            src={blog.thumbnail} 
-            alt={blog.title}
-            onError={(e) => {
-              e.target.src = '/default-blog-image.jpg';
-            }}
-          />
+        {blog.thumbnail && (
+          <div className="blog-thumbnail">
+            <img 
+              src={blog.thumbnail} 
+              alt={blog.title}
+              onError={(e) => {
+                e.target.src = '/default-blog-image.jpg';
+              }}
+            />
+          </div>
+        )}
+
+        <div className="blog-content">
+          {blog.content.split('\n').map((paragraph, index) => (
+            paragraph ? <p key={index}>{paragraph}</p> : <br key={index} />
+          ))}
         </div>
-      )}
 
-      <div className="blog-content">
-        {blog.content.split('\n').map((paragraph, index) => (
-          paragraph ? <p key={index}>{paragraph}</p> : <br key={index} />
-        ))}
-      </div>
-
-      <div className="blog-footer">
-        <button onClick={() => window.history.back()} className="back-button">
-          Quay lại danh sách
-        </button>
-        <div className="blog-timestamps">
-          <p>Ngày tạo: {new Date(blog.createdAt).toLocaleString('vi-VN')}</p>
-          <p>Cập nhật lần cuối: {new Date(blog.updatedAt).toLocaleString('vi-VN')}</p>
+        <div className="blog-footer">
+          <button onClick={() => window.history.back()} className="back-button">
+            Quay lại danh sách
+          </button>
+          <div className="blog-timestamps">
+            <p>Ngày tạo: {new Date(blog.createdAt).toLocaleString('vi-VN')}</p>
+            <p>Cập nhật lần cuối: {new Date(blog.updatedAt).toLocaleString('vi-VN')}</p>
+          </div>
         </div>
       </div>
     </div>

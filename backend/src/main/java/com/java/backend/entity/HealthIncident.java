@@ -1,6 +1,9 @@
 package com.java.backend.entity;
 
 import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -23,10 +26,12 @@ public class HealthIncident {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false)
+    @JsonIgnore
     private Student student;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reported_by_user_id", nullable = false) // Y tá ghi nhận
+    @JsonIgnore
     private User reportedBy;
 
     @Column(nullable = false)

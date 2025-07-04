@@ -41,7 +41,7 @@ function ModalCreateUser({ show, onClose, onUserAdded }) {
       case "MANAGER":
         return "manager";
       case "SCHOOL_NURSE":
-        return "nurse";
+        return "/nurses";
       case "ADMIN":
         return "admin";
       default:

@@ -6,9 +6,6 @@ import {
   FaMedkit, 
   FaChartBar, 
   FaCalendarCheck,
-  FaUserGraduate,
-  FaUserTie,
-  FaUserNurse,
   FaCog,
   FaSignOutAlt,
   FaBars,
@@ -16,11 +13,10 @@ import {
 } from 'react-icons/fa';
 import './Admin.scss';
 
-const Sidebar = () => {
-    const [isCollapsed, setIsCollapsed] = useState(false);
+const Sidebar = (props) => {
+    const isCollapsed = props.isOpen;
     const location = useLocation();
     const navigate = useNavigate();
-
     const menuItems = [
         { path: '/admin', icon: FaChartBar, label: 'Dashboard', exact: true },
         { path: '/manage-user', icon: FaUsers, label: 'Quản lý người dùng' },
@@ -51,12 +47,6 @@ const Sidebar = () => {
                         </div>
                     )}
                 </div>
-                <button 
-                    className="collapse-btn"
-                    onClick={() => setIsCollapsed(!isCollapsed)}
-                >
-                    {isCollapsed ? <FaBars /> : <FaTimes />}
-                </button>
             </div>
 
             <div className="sidebar-menu">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import emailjs from 'emailjs-com';
 import './SentEmail.scss';
 
@@ -6,7 +6,9 @@ const SentEmail = () => {
   const [formData, setFormData] = useState({
     user_email: 'linhsubin007@gmail.com',
     user_name: 'Y Tế Học Đường',
+    email: '',
     from_name: '',
+    phone: '',
     message: ''
   });
   const [loading, setLoading] = useState(false);
@@ -33,7 +35,10 @@ const SentEmail = () => {
       const emailParams = {
         user_email: formData.user_email,
         user_name: formData.user_name,
-        from_name: formData.from_name,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        time: new Date().toLocaleString(),
         message: formData.message
       };
 
@@ -42,11 +47,13 @@ const SentEmail = () => {
       
       setStatus({
         type: 'success',
-        message: 'Gửi email thành công! Chúng tôi sẽ liên hệ lại với bạn sớm nhất.'
+        message: 'Gửi email thành công! Chúng tôi sẽ liên hệ lại với bạn sớm nhất (qua email hoặc sdt).'
       });
       
       setFormData(prev => ({
         ...prev,
+        email: '',
+        phone: '',
         from_name: '',
         message: ''
       }));
@@ -67,7 +74,7 @@ const SentEmail = () => {
       <div className="email-form-wrapper">
         <h2>Liên hệ với chúng tôi</h2>
         <p className="form-description">
-          Hãy điền thông tin bên dưới và chúng tôi sẽ liên hệ lại với bạn sớm nhất có thể.
+          Hãy điền thông tin bên dưới và chúng tôi sẽ liên hệ lại với bạn.
         </p>
 
         {status.message && (
@@ -87,6 +94,34 @@ const SentEmail = () => {
               onChange={handleChange}
               required
               placeholder="Nhập họ và tên của bạn"
+              disabled={loading}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              placeholder="Nhập email của bạn"
+              disabled={loading}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="phone">Số điện thoại</label>
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              required
+              placeholder="Nhập số điện thoại của bạn"
               disabled={loading}
             />
           </div>

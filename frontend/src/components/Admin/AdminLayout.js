@@ -9,6 +9,23 @@ const AdminLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const location = useLocation();
 
+    const getUserRole = () => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (user && user.role) {
+            return user.role;
+        }
+    };
+    const role = getUserRole();
+
+    if (role !== 'ADMIN') {
+        return (
+            <div className="unauthorized">
+                <h1>Unauthorized Access</h1>
+                <p>You do not have permission to access this page.</p>
+            </div>
+        );
+    }
+
     const getPageTitle = () => {
         const path = location.pathname;
         if (path === '/admin') return 'Dashboard';
@@ -20,12 +37,13 @@ const AdminLayout = () => {
     };
 
 
+
     return (
         <div className="admin-layout">
-            <Sidebar />
+            <Sidebar  />
             <div className="admin-main">
                 <header className="admin-header">
-                    <div className="header-left">
+                    <div className="header-left" >
                         <button 
                             className="sidebar-toggle"
                             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -33,12 +51,7 @@ const AdminLayout = () => {
                             <FaBars />
                         </button>
                         <div className="page-info">
-                            <h1>{getPageTitle()}</h1>
-                            <nav className="breadcrumb">
-                                <span>Admin</span>
-                                <span>/</span>
-                                <span>{getPageTitle()}</span>
-                            </nav>
+                            <h1 style={{ display: 'flex' }}>{getPageTitle()}</h1>
                         </div>
                     </div>
                     
@@ -67,6 +80,11 @@ const AdminLayout = () => {
                 </header>
 
                 <main className="admin-content">
+                    {/* <nav className="breadcrumb">
+                        <span>Admin</span>
+                        <span>/</span>
+                        <span>{getPageTitle()}</span>
+                    </nav> */}
                     <ErrorBoundary>
                         <Outlet />
                     </ErrorBoundary>

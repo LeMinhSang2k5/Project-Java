@@ -33,7 +33,7 @@ import ManageVaccination from './components/Nurse/Vaccination/ManageVaccination'
 import MedicalCheckup from './components/Nurse/MedicalCheckup/MedicalCheckup';
 import ManageHealthIncidents from './components/Nurse/HealthIncidents/ManageHealthIncidents';
 import General from './pages/General';
-
+import SentEmail from './pages/Contact/SentEmail';
 function App() {
   const [isLoading, setIsLoading] = useState(true);
 
@@ -55,6 +55,8 @@ function App() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/blog" element={<BlogPage />} />
+                <Route path="/blog/:id" element={<BlogDetail />} />
+                <Route path="/docs/general" element={<General />} />
                 <Route path="/health-profile/new" element={<NewHealthProfile />} />
                 <Route path="/new-health-profile/:studentId" element={<NewHealthProfile />} />
                 <Route path="/health-profile/:studentId" element={<NewHealthProfile />} />
@@ -64,10 +66,10 @@ function App() {
                 <Route path="/calendar" element={<Calendar />} />
                 <Route path="/medicalsupply" element={<MedicalSupply />} />
                 <Route path="/createblog" element={<CreateBlog />} />
-                <Route path="/blog/:id" element={<BlogDetail />} />
                 <Route path="/parent" element={<ParentPage />} />
                 <Route path="/student" element={<StudentPage />} />
-                <Route path="/docs/general" element={<General />} />
+
+                <Route path="/sendmail" element={<SentEmail />} />
             </Route>
 
             {/* Admin Layout */}

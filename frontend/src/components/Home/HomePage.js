@@ -328,11 +328,7 @@ function HomePage() {
                   Hãy liên hệ với chúng tôi để được tư vấn và hỗ trợ tốt nhất!
                 </p>
                 <div className="contact-buttons">
-                  <Button variant="primary" size="lg" className="contact-btn">
-                    <FaPhone className="btn-icon" />
-                    Gọi ngay
-                  </Button>
-                  <Button variant="outline-primary" size="lg" className="contact-btn">
+                  <Button variant="outline-primary" size="lg" className="contact-btn" href="/sendmail">
                     <FaComments className="btn-icon" />
                     Gửi email
                   </Button>
