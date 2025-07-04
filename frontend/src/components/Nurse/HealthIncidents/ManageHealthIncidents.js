@@ -11,12 +11,6 @@ const ManageHealthIncidents = () => {
   const [showCreate, setShowCreate] = useState(false);
   const [showView, setShowView] = useState(false);
   const [selectedIncident, setSelectedIncident] = useState(null);
-  const [filters, setFilters] = useState({
-    status: '',
-    type: '',
-    dateFrom: '',
-    dateTo: ''
-  });
 
   useEffect(() => {
     fetchIncidents();
@@ -26,7 +20,7 @@ const ManageHealthIncidents = () => {
     try {
       setLoading(true);
       // Gọi API backend lấy danh sách sự kiện y tế
-      const response = await api.get('/api/health-incidents');
+      const response = await api.get('/health-incidents');
       setIncidents(response.data);
     } catch (error) {
       toast.error('Lỗi khi tải danh sách sự kiện y tế');
@@ -37,14 +31,14 @@ const ManageHealthIncidents = () => {
 
   const getStatusBadge = (status) => {
     switch (status) {
-      case 'pending':
-        return <Badge bg="warning">Chờ xử lý</Badge>;
-      case 'treating':
-        return <Badge bg="info">Đang điều trị</Badge>;
-      case 'resolved':
+      case 'REPORTED':
+        return <Badge bg="warning">Đã báo cáo</Badge>;
+      case 'MONITORING':
+        return <Badge bg="info">Đang theo dõi</Badge>;
+      case 'PARENT_NOTIFIED':
+        return <Badge bg="primary">Đã báo phụ huynh</Badge>;
+      case 'RESOLVED':
         return <Badge bg="success">Đã xử lý</Badge>;
-      case 'referred':
-        return <Badge bg="primary">Chuyển viện</Badge>;
       default:
         return <Badge bg="secondary">Không xác định</Badge>;
     }
@@ -73,12 +67,6 @@ const ManageHealthIncidents = () => {
     setShowView(true);
   };
 
-  const filteredIncidents = incidents.filter(incident => {
-    if (filters.status && incident.status !== filters.status) return false;
-    if (filters.type && !incident.type.toLowerCase().includes(filters.type.toLowerCase())) return false;
-    return true;
-  });
-
   if (loading) return <div>Đang tải...</div>;
 
   return (
@@ -91,99 +79,35 @@ const ManageHealthIncidents = () => {
         </Button>
       </div>
 
-      {/* Bộ lọc */}
-      <Card className="mb-4">
-        <Card.Header>
-          <FaFilter className="me-2" />
-          Bộ lọc
-        </Card.Header>
-        <Card.Body>
-          <Row>
-            <Col md={3}>
-              <Form.Group>
-                <Form.Label>Trạng thái</Form.Label>
-                <Form.Select 
-                  value={filters.status} 
-                  onChange={(e) => setFilters({...filters, status: e.target.value})}
-                >
-                  <option value="">Tất cả</option>
-                  <option value="pending">Chờ xử lý</option>
-                  <option value="treating">Đang điều trị</option>
-                  <option value="resolved">Đã xử lý</option>
-                  <option value="referred">Chuyển viện</option>
-                </Form.Select>
-              </Form.Group>
-            </Col>
-            <Col md={3}>
-              <Form.Group>
-                <Form.Label>Loại sự kiện</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Nhập loại sự kiện..."
-                  value={filters.type}
-                  onChange={(e) => setFilters({...filters, type: e.target.value})}
-                />
-              </Form.Group>
-            </Col>
-            <Col md={3}>
-              <Form.Group>
-                <Form.Label>Từ ngày</Form.Label>
-                <Form.Control
-                  type="date"
-                  value={filters.dateFrom}
-                  onChange={(e) => setFilters({...filters, dateFrom: e.target.value})}
-                />
-              </Form.Group>
-            </Col>
-            <Col md={3}>
-              <Form.Group>
-                <Form.Label>Đến ngày</Form.Label>
-                <Form.Control
-                  type="date"
-                  value={filters.dateTo}
-                  onChange={(e) => setFilters({...filters, dateTo: e.target.value})}
-                />
-              </Form.Group>
-            </Col>
-          </Row>
-        </Card.Body>
-      </Card>
-
       {/* Bảng danh sách */}
       <Card>
         <Card.Header>
-          <h5 className="mb-0">Danh sách sự kiện y tế ({filteredIncidents.length})</h5>
+          <h5 className="mb-0">Danh sách sự kiện y tế ({incidents.length})</h5>
         </Card.Header>
         <Card.Body>
           <Table responsive hover>
             <thead>
               <tr>
                 <th>Thời gian</th>
-                <th>Học sinh</th>
-                <th>Lớp</th>
+                <th>Học sinh (ID)</th>
+                <th>Người báo cáo (ID)</th>
                 <th>Loại sự kiện</th>
-                <th>Mức độ</th>
+                <th>Mô tả</th>
+                <th>Hành động đã xử lý</th>
                 <th>Trạng thái</th>
-                <th>Người báo cáo</th>
                 <th>Hành động</th>
               </tr>
             </thead>
             <tbody>
-              {filteredIncidents.map((incident) => (
+              {incidents.map((incident) => (
                 <tr key={incident.id}>
-                  <td>{new Date(incident.reportedAt).toLocaleString('vi-VN')}</td>
-                  <td>
-                    <div>
-                      <strong>{incident.studentName}</strong>
-                      <br />
-                      <small className="text-muted">{incident.studentCode}</small>
-                    </div>
-                  </td>
-                  <td>{incident.studentClass}</td>
-                  <td>{incident.type}</td>
-                  <td>{getPriorityBadge(incident.priority)}</td>
+                  <td>{incident.incidentTime ? new Date(incident.incidentTime).toLocaleString('vi-VN') : ''}</td>
+                  <td>{incident.student?.id || ''}</td>
+                  <td>{incident.reportedBy?.id || ''}</td>
+                  <td>{incident.incidentType}</td>
+                  <td>{incident.description}</td>
+                  <td>{incident.actionTaken}</td>
                   <td>{getStatusBadge(incident.status)}</td>
-                  <td>{incident.reportedBy}</td>
                   <td>
                     <Button
                       variant="outline-primary"
@@ -196,7 +120,7 @@ const ManageHealthIncidents = () => {
                     <Button
                       variant="outline-warning"
                       size="sm"
-                      disabled={incident.status === 'resolved'}
+                      disabled={incident.status === 'RESOLVED'}
                     >
                       <FaEdit />
                     </Button>

@@ -5,12 +5,20 @@ import api from '../../../config/api';
 
 const initialState = {
   studentId: '',
-  type: '',
-  description: '',
-  priority: 'medium',
-  status: 'pending',
   reportedBy: '',
+  incidentType: '',
+  description: '',
+  actionTaken: '',
+  incidentTime: '',
+  status: 'REPORTED',
 };
+
+const statusOptions = [
+  { value: 'REPORTED', label: 'Đã báo cáo' },
+  { value: 'MONITORING', label: 'Đang theo dõi' },
+  { value: 'PARENT_NOTIFIED', label: 'Đã báo phụ huynh' },
+  { value: 'RESOLVED', label: 'Đã xử lý' },
+];
 
 const CreateIncidentModal = ({ show, onClose, onIncidentCreated }) => {
   const [form, setForm] = useState(initialState);
@@ -24,22 +32,22 @@ const CreateIncidentModal = ({ show, onClose, onIncidentCreated }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      // Gửi dữ liệu lên backend
-      await api.post('/api/health-incidents', {
+      await api.post('/health-incidents', {
         student: { id: form.studentId },
-        incidentType: form.type,
-        description: form.description,
-        priority: form.priority,
-        status: form.status,
         reportedBy: { id: form.reportedBy },
-        incidentTime: new Date().toISOString(),
+        incidentType: form.incidentType,
+        description: form.description,
+        actionTaken: form.actionTaken,
+        incidentTime: form.incidentTime ? new Date(form.incidentTime).toISOString() : new Date().toISOString(),
+        status: form.status,
       });
       toast.success('Tạo sự kiện y tế thành công!');
       setForm(initialState);
       onIncidentCreated && onIncidentCreated();
       onClose();
     } catch (error) {
-      toast.error('Không thể tạo sự kiện y tế');
+      console.error(error);
+      toast.error(error.response?.data?.message || 'Không thể tạo sự kiện y tế');
     } finally {
       setLoading(false);
     }
@@ -84,8 +92,8 @@ const CreateIncidentModal = ({ show, onClose, onIncidentCreated }) => {
             <Form.Label>Loại sự kiện</Form.Label>
             <Form.Control
               type="text"
-              name="type"
-              value={form.type}
+              name="incidentType"
+              value={form.incidentType}
               onChange={handleChange}
               required
               placeholder="Nhập loại sự kiện (VD: Sốt, Té ngã, ... )"
@@ -103,25 +111,37 @@ const CreateIncidentModal = ({ show, onClose, onIncidentCreated }) => {
               placeholder="Nhập mô tả chi tiết sự kiện"
             />
           </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Hành động đã xử lý</Form.Label>
+            <Form.Control
+              as="textarea"
+              name="actionTaken"
+              value={form.actionTaken}
+              onChange={handleChange}
+              rows={2}
+              placeholder="Nhập hành động đã xử lý (nếu có)"
+            />
+          </Form.Group>
           <Row>
             <Col md={6}>
               <Form.Group className="mb-3">
-                <Form.Label>Mức độ</Form.Label>
-                <Form.Select name="priority" value={form.priority} onChange={handleChange}>
-                  <option value="high">Cao</option>
-                  <option value="medium">Trung bình</option>
-                  <option value="low">Thấp</option>
-                </Form.Select>
+                <Form.Label>Thời gian sự kiện</Form.Label>
+                <Form.Control
+                  type="datetime-local"
+                  name="incidentTime"
+                  value={form.incidentTime}
+                  onChange={handleChange}
+                  required
+                />
               </Form.Group>
             </Col>
             <Col md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Trạng thái</Form.Label>
                 <Form.Select name="status" value={form.status} onChange={handleChange}>
-                  <option value="pending">Chờ xử lý</option>
-                  <option value="treating">Đang điều trị</option>
-                  <option value="resolved">Đã xử lý</option>
-                  <option value="referred">Chuyển viện</option>
+                  {statusOptions.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
                 </Form.Select>
               </Form.Group>
             </Col>
