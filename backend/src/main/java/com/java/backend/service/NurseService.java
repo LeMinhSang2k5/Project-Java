@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.java.backend.entity.Nurse;
 import com.java.backend.repository.NurseRepository;
+import com.java.backend.enums.Role;
 
 @Service
 public class NurseService {
@@ -15,11 +16,34 @@ public class NurseService {
     private NurseRepository nurseRepository;
 
     public Nurse saveNurse(Nurse nurse) {
-        return nurseRepository.save(nurse);
+        try {
+            // Đảm bảo role được set
+            if (nurse.getRole() == null) {
+                nurse.setRole(Role.SCHOOL_NURSE);
+            }
+
+            // Đảm bảo isActive được set
+            if (!nurse.isActive()) {
+                nurse.setActive(true);
+            }
+
+            System.out.println("Saving nurse: " + nurse.getEmail() + ", Role: " + nurse.getRole());
+            return nurseRepository.save(nurse);
+        } catch (Exception e) {
+            System.err.println("Error saving nurse: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     public List<Nurse> getAllNurses() {
-        return nurseRepository.findAll();
+        try {
+            return nurseRepository.findAll();
+        } catch (Exception e) {
+            System.err.println("Error getting all nurses: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     public Nurse getNurseById(Long id) {

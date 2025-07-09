@@ -15,6 +15,7 @@ import jakarta.persistence.InheritanceType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Table;
+import jakarta.persistence.PrePersist;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -63,6 +64,23 @@ public class User {
         this.fullName = fullName;
         this.role = role;
         this.isActive = true; // Default value
+    }
+
+    @PrePersist
+    public void prePersist() {
+        // Đảm bảo role không null trước khi persist
+        if (this.role == null) {
+            // Nếu là Nurse, set role SCHOOL_NURSE
+            if (this instanceof Nurse) {
+                this.role = Role.SCHOOL_NURSE;
+            }
+            // Có thể thêm các trường hợp khác ở đây
+        }
+
+        // Đảm bảo isActive có giá trị
+        if (!this.isActive) {
+            this.isActive = true;
+        }
     }
 
     public Long getId() {

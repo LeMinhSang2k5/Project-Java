@@ -14,18 +14,27 @@ import jakarta.persistence.Table;
 public class Nurse extends User {
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = true) // Cho phép null
     private Gender gender;
 
-    @Column(nullable = false)
+    @Column(nullable = true) // Cho phép null
     private String phoneNumber;
 
+    @Column(nullable = true) // Cho phép null
     private String department;
 
     public Nurse() {
     }
 
+    public Nurse(String fullName, String email, String password, Gender gender, String phoneNumber, String department) {
+        super(email, password, fullName, Role.SCHOOL_NURSE);
+        this.gender = gender;
+        this.phoneNumber = phoneNumber;
+        this.department = department;
+    }
+
     public Nurse(String fullName, String email, Gender gender, String phoneNumber, String department) {
-        super(email, null, fullName, Role.SCHOOL_NURSE);
+        super(email, "defaultPassword", fullName, Role.SCHOOL_NURSE); // Thay null bằng default password
         this.gender = gender;
         this.phoneNumber = phoneNumber;
         this.department = department;

@@ -8,11 +8,8 @@ import java.util.List;
 
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long> {
-    // Spring Data JPA automatically provides basic CRUD operations
-    // Custom query methods can be added here if needed
 
     Optional<Student> findByCode(String code);
-    
-    // Method để tìm học sinh theo parent ID
+
     List<Student> findByParentId(Long parentId);
 }
