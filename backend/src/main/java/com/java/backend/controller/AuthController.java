@@ -2,6 +2,7 @@ package com.java.backend.controller;
 
 import com.java.backend.entity.User;
 import com.java.backend.service.AuthService;
+import com.java.backend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,18 +15,23 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     public static class LoginResponse {
         private Long id;
         private String email;
         private String fullName;
         private String role;
+        private String accessToken;
         
         // constructor
-        public LoginResponse(Long id, String email, String fullName, String role) {
+        public LoginResponse(Long id, String email, String fullName, String role, String accessToken) {
             this.id = id;
             this.email = email;
             this.fullName = fullName;
             this.role = role;
+            this.accessToken = accessToken;
         }
         
         // getters & setters
@@ -40,17 +46,26 @@ public class AuthController {
         
         public String getRole() { return role; }
         public void setRole(String role) { this.role = role; }
+
+        public String getAccessToken() { return accessToken; }
+        public void setAccessToken(String accessToken) { this.accessToken = accessToken; }
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user) {
         try {
             User userLogin = authService.login(user.getEmail(), user.getPassword());
+            String accessToken = jwtUtil.generateToken(
+                userLogin.getId(),
+                userLogin.getEmail(),
+                userLogin.getRole().toString()
+            );
             LoginResponse response = new LoginResponse(
                 userLogin.getId(),
                 userLogin.getEmail(),
                 userLogin.getFullName(),
-                userLogin.getRole().toString()
+                userLogin.getRole().toString(),
+                accessToken
             );
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
