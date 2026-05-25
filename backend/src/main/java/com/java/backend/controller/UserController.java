@@ -1,9 +1,13 @@
 package com.java.backend.controller;
 
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -64,10 +69,25 @@ public class UserController {
     }
 
     @GetMapping("/users")
-    ResponseEntity<?> getAllUsers() {
+    ResponseEntity<?> getAllUsers(@RequestParam(defaultValue = "0") int page) {
         try {
-            List<User> users = userRepository.findAll();
-            return ResponseEntity.ok(users);
+            if (page < 0) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "Số trang phải lớn hơn hoặc bằng 0"));
+            }
+
+            Pageable pageable = PageRequest.of(page, 5, Sort.by("id").ascending());
+            Page<User> userPage = userRepository.findAll(pageable);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("content", userPage.getContent());
+            response.put("currentPage", userPage.getNumber());
+            response.put("pageSize", userPage.getSize());
+            response.put("totalItems", userPage.getTotalElements());
+            response.put("totalPages", userPage.getTotalPages());
+            response.put("isLast", userPage.isLast());
+
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                     .body(Map.of("message", "Lỗi khi lấy danh sách user: " + e.getMessage()));
