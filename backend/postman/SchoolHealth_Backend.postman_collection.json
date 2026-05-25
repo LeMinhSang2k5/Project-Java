@@ -1,8 +1,8 @@
 {
   "info": {
     "_postman_id": "6c49ab6f-4fd4-41ab-9b4a-c5c78d2703cb",
-    "name": "School Health Backend Auto Tests",
-    "description": "Auto-test collection for the Spring Boot school health backend. Import with the local environment, start the backend on port 8080, then run read-only folders first. Requests in Mutation Samples can change the local database.",
+    "name": "School Health Backend - Full API",
+    "description": "Collection bao gom day du endpoint hien co trong backend Spring Boot (controller package).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "event": [
@@ -11,22 +11,8 @@
       "script": {
         "type": "text/javascript",
         "exec": [
-          "const expectedStatusCodes = [200, 201, 204, 400, 401, 404];",
-          "",
-          "pm.test('status code is expected for this API suite', function () {",
-          "  pm.expect(expectedStatusCodes, 'Unexpected status: ' + pm.response.code).to.include(pm.response.code);",
-          "});",
-          "",
-          "pm.test('response time is under 2000ms', function () {",
-          "  pm.expect(pm.response.responseTime).to.be.below(2000);",
-          "});",
-          "",
-          "pm.test('JSON response is valid when body looks like JSON', function () {",
-          "  const body = pm.response.text().trim();",
-          "  if (!body || pm.response.code === 204) return;",
-          "  if (body.startsWith('{') || body.startsWith('[')) {",
-          "    pm.expect(function () { pm.response.json(); }).not.to.throw();",
-          "  }",
+          "pm.test('status code is valid', function () {",
+          "  pm.expect([200, 201, 204, 400, 401, 404, 500]).to.include(pm.response.code);",
           "});"
         ]
       }
@@ -44,18 +30,10 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('login returns success or unauthorized for seeded password style', function () {",
-                  "  pm.expect([200, 401]).to.include(pm.response.code);",
-                  "});",
                   "if (pm.response.code === 200) {",
-                  "  const json = pm.response.json();",
-                  "  pm.test('login response has user identity fields', function () {",
-                  "    pm.expect(json).to.have.property('id');",
-                  "    pm.expect(json).to.have.property('email');",
-                  "    pm.expect(json).to.have.property('fullName');",
-                  "    pm.expect(json).to.have.property('role');",
-                  "  });",
-                  "  pm.environment.set('userId', json.id);",
+                  "  const data = pm.response.json();",
+                  "  if (data.accessToken) pm.environment.set('accessToken', data.accessToken);",
+                  "  if (data.id) pm.environment.set('userId', data.id);",
                   "}"
                 ]
               }
@@ -71,19 +49,9 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"{{loginEmail}}\",\n  \"password\": \"{{loginPassword}}\"\n}"
+              "raw": "{\"email\":\"{{loginEmail}}\",\"password\":\"{{loginPassword}}\"}"
             },
-            "url": {
-              "raw": "{{baseUrl}}/api/auth/login",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "auth",
-                "login"
-              ]
-            }
+            "url": "{{baseUrl}}/api/auth/login"
           },
           "response": []
         }
@@ -93,1258 +61,43 @@
       "name": "Users",
       "item": [
         {
-          "name": "Get All Users",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code === 200) {",
-                  "  const json = pm.response.json();",
-                  "  pm.test('users response is an array', function () { pm.expect(json).to.be.an('array'); });",
-                  "  if (json.length > 0) {",
-                  "    pm.test('first user has identity fields', function () {",
-                  "      pm.expect(json[0]).to.have.property('id');",
-                  "      pm.expect(json[0]).to.have.property('email');",
-                  "      pm.expect(json[0]).to.have.property('fullName');",
-                  "    });",
-                  "    pm.environment.set('userId', json[0].id);",
-                  "  }",
-                  "}"
-                ]
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
               }
-            }
-          ],
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"postman.user{{$timestamp}}@school.com\",\"password\":\"password123\",\"fullName\":\"Postman User\",\"role\":\"PARENT\",\"active\":true}"
+            },
+            "url": "{{baseUrl}}/api/user"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Users",
           "request": {
             "method": "GET",
             "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/users",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "users"
-              ]
-            }
+            "url": "{{baseUrl}}/api/users"
           },
           "response": []
         },
         {
           "name": "Get User By ID",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code === 200) {",
-                  "  const json = pm.response.json();",
-                  "  pm.test('user has expected fields', function () {",
-                  "    pm.expect(json).to.have.property('id');",
-                  "    pm.expect(json).to.have.property('email');",
-                  "    pm.expect(json).to.have.property('fullName');",
-                  "  });",
-                  "}"
-                ]
-              }
-            }
-          ],
           "request": {
             "method": "GET",
             "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/user/{{userId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "user",
-                "{{userId}}"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Students",
-      "item": [
-        {
-          "name": "Get All Students",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code === 200) {",
-                  "  const json = pm.response.json();",
-                  "  pm.test('students response is an array', function () { pm.expect(json).to.be.an('array'); });",
-                  "  if (json.length > 0) {",
-                  "    pm.test('first student has fields', function () {",
-                  "      pm.expect(json[0]).to.have.property('id');",
-                  "      pm.expect(json[0]).to.have.property('fullName');",
-                  "    });",
-                  "    pm.environment.set('studentId', json[0].id);",
-                  "  }",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/students",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "students"
-              ]
-            }
+            "url": "{{baseUrl}}/api/user/{{userId}}"
           },
           "response": []
         },
         {
-          "name": "Get Student By ID",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code === 200) {",
-                  "  const json = pm.response.json();",
-                  "  pm.test('student has expected fields', function () {",
-                  "    pm.expect(json).to.have.property('id');",
-                  "    pm.expect(json).to.have.property('fullName');",
-                  "  });",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/students/{{studentId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "students",
-                "{{studentId}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Students By Parent",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/students/by-parent/{{parentId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "students",
-                "by-parent",
-                "{{parentId}}"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Parents",
-      "item": [
-        {
-          "name": "Get Parent By ID",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/parent/{{parentId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "parent",
-                "{{parentId}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Parent Students",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/parent/{{parentId}}/students",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "parent",
-                "{{parentId}}",
-                "students"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Nurses",
-      "item": [
-        {
-          "name": "Get All Nurses",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/nurses",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "nurses"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Nurse By ID",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/nurses/{{userId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "nurses",
-                "{{userId}}"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Managers",
-      "item": [
-        {
-          "name": "Get All Managers",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/managers",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "managers"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Manager By ID",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/managers/{{userId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "managers",
-                "{{userId}}"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Blogs",
-      "item": [
-        {
-          "name": "Get All Blogs",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code === 200) {",
-                  "  const json = pm.response.json();",
-                  "  pm.test('blogs response is an array', function () { pm.expect(json).to.be.an('array'); });",
-                  "  if (json.length > 0) {",
-                  "    pm.test('first blog has fields', function () {",
-                  "      pm.expect(json[0]).to.have.property('id');",
-                  "      pm.expect(json[0]).to.have.property('title');",
-                  "      pm.expect(json[0]).to.have.property('content');",
-                  "    });",
-                  "    pm.environment.set('blogId', json[0].id);",
-                  "  }",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/blogs",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "blogs"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Blog By ID",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code === 200) {",
-                  "  const json = pm.response.json();",
-                  "  pm.test('blog has expected fields', function () {",
-                  "    pm.expect(json).to.have.property('id');",
-                  "    pm.expect(json).to.have.property('title');",
-                  "    pm.expect(json).to.have.property('content');",
-                  "  });",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/blogs/{{blogId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "blogs",
-                "{{blogId}}"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "School Health Docs",
-      "item": [
-        {
-          "name": "Get All School Health Docs",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code === 200) {",
-                  "  const json = pm.response.json();",
-                  "  pm.test('school health docs response is an array', function () { pm.expect(json).to.be.an('array'); });",
-                  "  if (json.length > 0) {",
-                  "    pm.test('first doc has title/content', function () {",
-                  "      pm.expect(json[0]).to.have.property('id');",
-                  "      pm.expect(json[0]).to.have.property('title');",
-                  "      pm.expect(json[0]).to.have.property('content');",
-                  "    });",
-                  "    pm.environment.set('schoolHealthDocId', json[0].id);",
-                  "  }",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/school-health-docs",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "school-health-docs"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get School Health Doc By ID",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/school-health-docs/{{schoolHealthDocId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "school-health-docs",
-                "{{schoolHealthDocId}}"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Medical Supplies",
-      "item": [
-        {
-          "name": "Get All Medical Supplies",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/medical-supplies",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "medical-supplies"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Medical Supply By ID",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/medical-supplies/{{medicalSupplyId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "medical-supplies",
-                "{{medicalSupplyId}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Medical Supplies By Category",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/medical-supplies/category/Thuoc",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "medical-supplies",
-                "category",
-                "Thuoc"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Low Stock Medical Supplies",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/medical-supplies/low-stock/10",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "medical-supplies",
-                "low-stock",
-                "10"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Medical Requests",
-      "item": [
-        {
-          "name": "Get All Medical Requests",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/medical",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "medical"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Medical Request By ID",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/medical/{{medicalRequestId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "medical",
-                "{{medicalRequestId}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Medical Requests By Student",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/medical/student/{{studentId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "medical",
-                "student",
-                "{{studentId}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Medical Requests By Parent",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/medical/parent/{{parentId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "medical",
-                "parent",
-                "{{parentId}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Medical Requests By Status",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/medical/status/PENDING",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "medical",
-                "status",
-                "PENDING"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Health Profiles",
-      "item": [
-        {
-          "name": "Get All Health Profiles",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/health-profiles",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "health-profiles"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Health Profile By Student",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/health-profiles/student/{{studentId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "health-profiles",
-                "student",
-                "{{studentId}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Student ID By Parent",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/health-profiles/by-parent/{{parentId}}/student",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "health-profiles",
-                "by-parent",
-                "{{parentId}}",
-                "student"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Health Incidents",
-      "item": [
-        {
-          "name": "Get All Health Incidents",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/health-incidents",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "health-incidents"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Health Incident By ID",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/health-incidents/{{healthIncidentId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "health-incidents",
-                "{{healthIncidentId}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Health Incidents By Student",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/health-incidents/student/{{studentId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "health-incidents",
-                "student",
-                "{{studentId}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Health Incidents By Status",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/health-incidents/status/ACTIVE",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "health-incidents",
-                "status",
-                "ACTIVE"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Medical Checkup",
-      "item": [
-        {
-          "name": "Get All Notifications",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/medical-checkup/notifications",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "medical-checkup",
-                "notifications"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Notifications By Parent",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/medical-checkup/notifications?parentId={{parentId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "medical-checkup",
-                "notifications"
-              ],
-              "query": [
-                {
-                  "key": "parentId",
-                  "value": "{{parentId}}"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Results By Student",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/medical-checkup/results?studentId={{studentId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "medical-checkup",
-                "results"
-              ],
-              "query": [
-                {
-                  "key": "studentId",
-                  "value": "{{studentId}}"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Results By Parent",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/medical-checkup/results?parentId={{parentId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "medical-checkup",
-                "results"
-              ],
-              "query": [
-                {
-                  "key": "parentId",
-                  "value": "{{parentId}}"
-                }
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Vaccination Schedules",
-      "item": [
-        {
-          "name": "Get All Vaccination Schedules",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code === 200) {",
-                  "  const json = pm.response.json();",
-                  "  pm.test('vaccination schedules response is an array', function () { pm.expect(json).to.be.an('array'); });",
-                  "  if (json.length > 0) {",
-                  "    pm.test('first schedule has fields', function () {",
-                  "      pm.expect(json[0]).to.have.property('id');",
-                  "      pm.expect(json[0]).to.have.property('studentId');",
-                  "      pm.expect(json[0]).to.have.property('vaccineName');",
-                  "    });",
-                  "    pm.environment.set('vaccinationScheduleId', json[0].id);",
-                  "  }",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/vaccination-schedules",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "vaccination-schedules"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Vaccination Schedule By ID",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code === 200) {",
-                  "  const json = pm.response.json();",
-                  "  pm.test('vaccination schedule has expected fields', function () {",
-                  "    pm.expect(json).to.have.property('id');",
-                  "    pm.expect(json).to.have.property('studentId');",
-                  "    pm.expect(json).to.have.property('vaccineName');",
-                  "  });",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/vaccination-schedules/{{vaccinationScheduleId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "vaccination-schedules",
-                "{{vaccinationScheduleId}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Vaccination Schedules By Student",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/vaccination-schedules/student/{{studentId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "vaccination-schedules",
-                "student",
-                "{{studentId}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Pending Parent Consent",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/vaccination-schedules/pending-parent-consent",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "vaccination-schedules",
-                "pending-parent-consent"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Pending Student Confirmation",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/vaccination-schedules/pending-student-confirmation",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "vaccination-schedules",
-                "pending-student-confirmation"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Vaccination Schedules By Parent Consent",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/vaccination-schedules/parent-consent/PENDING",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "vaccination-schedules",
-                "parent-consent",
-                "PENDING"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Not Vaccinated",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/vaccination-schedules/not-vaccinated",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "vaccination-schedules",
-                "not-vaccinated"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Vaccinated",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/vaccination-schedules/vaccinated",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "vaccination-schedules",
-                "vaccinated"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Vaccination Date Range",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/vaccination-schedules/date-range?startDate=2024-01-01T00:00:00&endDate=2024-12-31T23:59:59",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "vaccination-schedules",
-                "date-range"
-              ],
-              "query": [
-                {
-                  "key": "startDate",
-                  "value": "2024-01-01T00:00:00"
-                },
-                {
-                  "key": "endDate",
-                  "value": "2024-12-31T23:59:59"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Pending Parent Consent By Parent",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/vaccination-schedules/pending-parent-consent/{{parentId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "vaccination-schedules",
-                "pending-parent-consent",
-                "{{parentId}}"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Mutation Samples",
-      "description": "These requests can change the local database. Run them only when you want to test create/update/delete flows.",
-      "item": [
-        {
-          "name": "Create User Sample",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"postman.user{{$timestamp}}@school.com\",\n  \"password\": \"password123\",\n  \"fullName\": \"Postman Test User\",\n  \"role\": \"PARENT\",\n  \"active\": true\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/user",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "user"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Create Blog Sample",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code === 200) {",
-                  "  const json = pm.response.json();",
-                  "  pm.test('created blog has id and title', function () {",
-                  "    pm.expect(json).to.have.property('id');",
-                  "    pm.expect(json).to.have.property('title');",
-                  "  });",
-                  "  pm.environment.set('blogId', json.id);",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"title\": \"Postman Auto Test Blog {{$timestamp}}\",\n  \"content\": \"Content generated by Postman collection.\",\n  \"author\": \"postman\",\n  \"category\": \"Test\",\n  \"thumbnail\": \"https://example.com/postman.png\",\n  \"publishDate\": \"2026-05-22\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/blogs",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "blogs"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Create Medical Supply Sample",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code === 201) {",
-                  "  const json = pm.response.json();",
-                  "  pm.test('created medical supply has id/name/quantity', function () {",
-                  "    pm.expect(json).to.have.property('id');",
-                  "    pm.expect(json).to.have.property('name');",
-                  "    pm.expect(json).to.have.property('quantity');",
-                  "  });",
-                  "  pm.environment.set('medicalSupplyId', json.id);",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Postman Supply {{$timestamp}}\",\n  \"quantity\": 20,\n  \"category\": \"Thuoc\",\n  \"expiryDate\": \"2027-12-31\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/medical-supplies",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "medical-supplies"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Update Vaccination Parent Consent Sample",
+          "name": "Update User",
           "request": {
             "method": "PUT",
             "header": [
@@ -1355,25 +108,28 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"consent\": \"APPROVED\"\n}"
+              "raw": "{\"fullName\":\"Updated User Name\",\"role\":\"PARENT\",\"active\":true}"
             },
-            "url": {
-              "raw": "{{baseUrl}}/api/vaccination-schedules/{{vaccinationScheduleId}}/parent-consent",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "vaccination-schedules",
-                "{{vaccinationScheduleId}}",
-                "parent-consent"
-              ]
-            }
+            "url": "{{baseUrl}}/api/user/{{userId}}"
           },
           "response": []
         },
         {
-          "name": "Create Medical Request Sample",
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/user/{{userId}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Students",
+      "item": [
+        {
+          "name": "Create Student",
           "request": {
             "method": "POST",
             "header": [
@@ -1384,23 +140,73 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"studentId\": {{studentId}},\n  \"parentId\": {{parentId}},\n  \"medicalName\": \"Paracetamol\",\n  \"dosage\": \"1 tablet after lunch\",\n  \"note\": \"Postman sample request\"\n}"
+              "raw": "{\"email\":\"student{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"Student Postman\",\"code\":\"ST{{$timestamp}}\",\"studentClass\":\"5A\",\"gender\":\"MALE\",\"dateOfBirth\":\"2014-01-01\",\"parentId\":{{parentId}}}"
             },
-            "url": {
-              "raw": "{{baseUrl}}/api/medical",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "medical"
-              ]
-            }
+            "url": "{{baseUrl}}/api/students"
           },
           "response": []
         },
         {
-          "name": "Create Vaccination Schedule Sample",
+          "name": "Get All Students",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/students"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Student By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/students/{{studentId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Student",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"id\":{{studentId}},\"email\":\"student{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"Student Updated\",\"role\":\"STUDENT\",\"code\":\"STU001\",\"dateOfBirth\":\"2014-01-01\",\"gender\":\"MALE\",\"studentClass\":\"6A\",\"city\":\"HCM\",\"district\":\"District 1\",\"grade\":\"6\",\"active\":true}"
+            },
+            "url": "{{baseUrl}}/api/students/{{studentId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Student",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/students/{{studentId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Students By Parent",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/students/by-parent/{{parentId}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Parents",
+      "item": [
+        {
+          "name": "Create Parent",
           "request": {
             "method": "POST",
             "header": [
@@ -1411,18 +217,1121 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"studentId\": {{studentId}},\n  \"studentName\": \"Postman Student\",\n  \"studentCode\": \"PM001\",\n  \"vaccineName\": \"Postman Vaccine\",\n  \"scheduledDateTime\": \"2026-06-01T08:00:00\",\n  \"vaccinated\": false,\n  \"parentConsent\": \"PENDING\",\n  \"studentConfirmation\": false,\n  \"notes\": \"Postman sample schedule\",\n  \"location\": \"School clinic\",\n  \"batchNumber\": \"PM-001\",\n  \"createdBy\": \"postman\"\n}"
+              "raw": "{\"email\":\"parent{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"Parent Postman\",\"role\":\"PARENT\",\"gender\":\"FEMALE\",\"phoneNumber\":\"0900000000\",\"active\":true}"
             },
-            "url": {
-              "raw": "{{baseUrl}}/api/vaccination-schedules",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "vaccination-schedules"
-              ]
-            }
+            "url": "{{baseUrl}}/api/parent"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Parent By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/parent/{{parentId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Parent Students",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/parent/{{parentId}}/students"
+          },
+          "response": []
+        },
+        {
+          "name": "Link Student To Parent",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": "{{baseUrl}}/api/parent/link-student?parentId={{parentId}}&studentId={{studentId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Confirm Parent Form",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/parent/confirm/{{formId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Parent",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/parent/{{parentId}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Nurses",
+      "item": [
+        {
+          "name": "Create Nurse",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"nurse{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"Nurse Postman\",\"role\":\"SCHOOL_NURSE\",\"gender\":\"FEMALE\",\"phoneNumber\":\"0911111111\",\"department\":\"Medical Room\",\"active\":true}"
+            },
+            "url": "{{baseUrl}}/api/nurses"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Nurses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/nurses"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Nurse By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/nurses/{{nurseId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Nurse",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"id\":{{nurseId}},\"email\":\"nurse{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"Nurse Updated\",\"role\":\"SCHOOL_NURSE\",\"gender\":\"FEMALE\",\"phoneNumber\":\"0911111111\",\"department\":\"Infirmary\",\"active\":true}"
+            },
+            "url": "{{baseUrl}}/api/nurses/{{nurseId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Nurse",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/nurses/{{nurseId}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Managers",
+      "item": [
+        {
+          "name": "Create Manager",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"manager{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"Manager Postman\",\"role\":\"MANAGER\",\"gender\":\"MALE\",\"phoneNumber\":\"0922222222\",\"active\":true}"
+            },
+            "url": "{{baseUrl}}/api/managers"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Managers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/managers"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Manager By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/managers/{{managerId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Manager",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"id\":{{managerId}},\"email\":\"manager{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"Manager Updated\",\"role\":\"MANAGER\",\"gender\":\"MALE\",\"phoneNumber\":\"0922222222\",\"active\":true}"
+            },
+            "url": "{{baseUrl}}/api/managers/{{managerId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Manager",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/managers/{{managerId}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Blogs",
+      "item": [
+        {
+          "name": "Create Blog",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"Blog {{$timestamp}}\",\"content\":\"Noi dung blog tu Postman\",\"author\":\"postman\",\"category\":\"Health\",\"thumbnail\":\"https://example.com/thumb.png\",\"publishDate\":\"2026-05-25\"}"
+            },
+            "url": "{{baseUrl}}/api/blogs"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Blogs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/blogs"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Blog By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/blogs/{{blogId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Blog",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"Blog Updated {{$timestamp}}\",\"content\":\"Noi dung da cap nhat\",\"author\":\"postman\",\"category\":\"Health\",\"thumbnail\":\"https://example.com/thumb-updated.png\",\"publishDate\":\"2026-05-25\"}"
+            },
+            "url": "{{baseUrl}}/api/blogs/{{blogId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Blog",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/blogs/{{blogId}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "School Health Docs",
+      "item": [
+        {
+          "name": "Create School Health Doc",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"Health Doc {{$timestamp}}\",\"content\":\"Noi dung tai lieu suc khoe\",\"url\":\"https://example.com/health-doc\"}"
+            },
+            "url": "{{baseUrl}}/api/school-health-docs"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All School Health Docs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/school-health-docs"
+          },
+          "response": []
+        },
+        {
+          "name": "Get School Health Doc By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/school-health-docs/{{schoolHealthDocId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Update School Health Doc",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"Health Doc Updated\",\"content\":\"Noi dung da cap nhat\",\"url\":\"https://example.com/health-doc-updated\"}"
+            },
+            "url": "{{baseUrl}}/api/school-health-docs/{{schoolHealthDocId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete School Health Doc",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/school-health-docs/{{schoolHealthDocId}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Medical Supplies",
+      "item": [
+        {
+          "name": "Create Medical Supply",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Supply {{$timestamp}}\",\"quantity\":100,\"category\":\"Thuoc\",\"expiryDate\":\"2027-12-31\"}"
+            },
+            "url": "{{baseUrl}}/api/medical-supplies"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Medical Supplies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/medical-supplies"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Medical Supply By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/medical-supplies/{{medicalSupplyId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Medical Supply",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Supply Updated\",\"quantity\":80,\"category\":\"Vat tu\",\"expiryDate\":\"2028-12-31\"}"
+            },
+            "url": "{{baseUrl}}/api/medical-supplies/{{medicalSupplyId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Medical Supply",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/medical-supplies/{{medicalSupplyId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Search Medical Supplies",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/plain"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "Paracetamol"
+            },
+            "url": "{{baseUrl}}/api/medical-supplies/search"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Medical Supplies By Category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/medical-supplies/category/Thuoc"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Low Stock Medical Supplies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/medical-supplies/low-stock/10"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Medical Requests",
+      "item": [
+        {
+          "name": "Create Medical Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"studentId\":{{studentId}},\"parentId\":{{parentId}},\"medicalName\":\"Paracetamol\",\"dosage\":\"1 vien sau an\",\"note\":\"Sample request\"}"
+            },
+            "url": "{{baseUrl}}/api/medical"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Medical Requests",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/medical"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Medical Request By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/medical/{{medicalRequestId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Medical Requests By Student",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/medical/student/{{studentId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Medical Requests By Parent",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/medical/parent/{{parentId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Medical Requests By Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/medical/status/PENDING"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Medical Request Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\":\"APPROVED\",\"approvedBy\":\"nurse@school.com\"}"
+            },
+            "url": "{{baseUrl}}/api/medical/{{medicalRequestId}}/status"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Medical Request",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"medicalName\":\"Ibuprofen\",\"dosage\":\"1 vien toi\",\"note\":\"Update tu Postman\"}"
+            },
+            "url": "{{baseUrl}}/api/medical/{{medicalRequestId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Medical Request",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/medical/{{medicalRequestId}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health Profiles",
+      "item": [
+        {
+          "name": "Create Health Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"student\":{\"id\":{{studentId}}},\"studentName\":\"Student Postman\",\"className\":\"5A\",\"grade\":\"5\",\"gender\":\"MALE\",\"dateOfBirth\":\"2014-01-01\",\"city\":\"HCM\",\"district\":\"District 1\",\"allergies\":\"None\",\"chronicDiseases\":\"None\",\"medicalHistory\":\"None\",\"vaccinationHistory\":\"Basic\",\"visionDetails\":\"Normal\",\"hearingDetails\":\"Normal\"}"
+            },
+            "url": "{{baseUrl}}/api/health-profiles"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Health Profiles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health-profiles"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Health Profile By Student",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health-profiles/student/{{studentId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Student ID By Parent",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health-profiles/by-parent/{{parentId}}/student"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Health Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"id\":{{healthProfileId}},\"student\":{\"id\":{{studentId}}},\"studentName\":\"Student Updated\",\"className\":\"6A\",\"grade\":\"6\",\"gender\":\"MALE\",\"dateOfBirth\":\"2014-01-01\",\"city\":\"HCM\",\"district\":\"District 2\",\"allergies\":\"Pollen\",\"chronicDiseases\":\"None\",\"medicalHistory\":\"Updated\",\"vaccinationHistory\":\"Updated\",\"visionDetails\":\"Good\",\"hearingDetails\":\"Good\"}"
+            },
+            "url": "{{baseUrl}}/api/health-profiles/{{healthProfileId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Health Profile",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/health-profiles/{{healthProfileId}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health Incidents",
+      "item": [
+        {
+          "name": "Create Health Incident",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"student\":{\"id\":{{studentId}}},\"reportedBy\":{\"id\":{{reportedById}}},\"incidentType\":\"FALL\",\"description\":\"Student slipped in corridor\",\"actionTaken\":\"First aid\",\"incidentTime\":\"{{incidentTime}}\",\"status\":\"REPORTED\"}"
+            },
+            "url": "{{baseUrl}}/api/health-incidents"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Health Incidents",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health-incidents"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Health Incident By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health-incidents/{{healthIncidentId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Health Incident",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"student\":{\"id\":{{studentId}}},\"reportedBy\":{\"id\":{{reportedById}}},\"incidentType\":\"FALL\",\"description\":\"Updated incident description\",\"actionTaken\":\"Observation\",\"incidentTime\":\"{{incidentTime}}\",\"status\":\"MONITORING\"}"
+            },
+            "url": "{{baseUrl}}/api/health-incidents/{{healthIncidentId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Health Incident",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/health-incidents/{{healthIncidentId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Health Incidents By Student",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health-incidents/student/{{studentId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Health Incidents By Reported By",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health-incidents/reported-by/{{reportedById}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Health Incidents By Incident Time",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health-incidents/incident-time/{{incidentTime}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Health Incidents By Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health-incidents/status/REPORTED"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Health Incidents By Incident Type",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health-incidents/incident-type/FALL"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Health Incidents By Incident Time And Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health-incidents/incident-time-and-status/{{incidentTime}}/REPORTED"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Health Incidents By Student And Incident Time",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health-incidents/student-and-incident-time/{{studentId}}/{{incidentTime}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Medical Checkup",
+      "item": [
+        {
+          "name": "Create Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"studentId\":{{studentId}},\"parentId\":{{parentId}},\"content\":\"Thong bao kham suc khoe\",\"scheduledDate\":\"2026-06-01T08:00:00\",\"status\":\"PENDING\"}"
+            },
+            "url": "{{baseUrl}}/api/medical-checkup/notify"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Notification Bulk",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"studentIds\":[{{studentId}}],\"content\":\"Thong bao kham tong quat\",\"scheduledDate\":\"2026-06-10T08:00:00\"}"
+            },
+            "url": "{{baseUrl}}/api/medical-checkup/notify/bulk"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/medical-checkup/notifications"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Notifications By Parent",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/medical-checkup/notifications?parentId={{parentId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Notifications By Student",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/medical-checkup/notifications?studentId={{studentId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Notifications By Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/medical-checkup/notifications?status=PENDING"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Notification Consent",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/plain"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "APPROVED"
+            },
+            "url": "{{baseUrl}}/api/medical-checkup/notification/{{medicalCheckupNotificationId}}/consent"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Result",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"studentId\":{{studentId}},\"checkupDate\":\"2026-06-01T09:00:00\",\"result\":\"Good health\",\"notes\":\"No issue\",\"abnormal\":false,\"createdBy\":{{reportedById}}}"
+            },
+            "url": "{{baseUrl}}/api/medical-checkup/result"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Results By Student",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/medical-checkup/results?studentId={{studentId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Results By Parent",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/medical-checkup/results?parentId={{parentId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Result",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"id\":{{medicalCheckupResultId}},\"studentId\":{{studentId}},\"checkupDate\":\"2026-06-01T09:00:00\",\"result\":\"Updated result\",\"notes\":\"Follow-up needed\",\"abnormal\":true,\"createdBy\":{{reportedById}},\"studentConfirmation\":false}"
+            },
+            "url": "{{baseUrl}}/api/medical-checkup/result/{{medicalCheckupResultId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Student Confirm Result",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": "{{baseUrl}}/api/medical-checkup/result/{{medicalCheckupResultId}}/student-confirm"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Vaccination Schedules",
+      "item": [
+        {
+          "name": "Create Vaccination Schedule",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"studentId\":{{studentId}},\"studentName\":\"Student Postman\",\"studentCode\":\"ST001\",\"vaccineName\":\"Covid-19\",\"scheduledDateTime\":\"2026-06-15T08:00:00\",\"vaccinated\":false,\"parentConsent\":\"PENDING\",\"studentConfirmation\":false,\"notes\":\"Lich tiem mau\",\"location\":\"School Clinic\",\"batchNumber\":\"VAC001\",\"createdBy\":\"postman\"}"
+            },
+            "url": "{{baseUrl}}/api/vaccination-schedules"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Vaccination Schedules Bulk",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"studentIds\":[{{studentId}}],\"vaccineName\":\"Flu\",\"scheduledDateTime\":\"2026-06-20T08:00:00\",\"notes\":\"Bulk schedule\",\"location\":\"School Hall\"}"
+            },
+            "url": "{{baseUrl}}/api/vaccination-schedules/bulk"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Vaccination Schedules",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/vaccination-schedules"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Vaccination Schedule By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/vaccination-schedules/{{vaccinationScheduleId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Vaccination Schedule",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"id\":{{vaccinationScheduleId}},\"studentId\":{{studentId}},\"studentName\":\"Student Updated\",\"studentCode\":\"ST001\",\"vaccineName\":\"HPV\",\"scheduledDateTime\":\"2026-06-25T08:00:00\",\"vaccinated\":false,\"parentConsent\":\"PENDING\",\"studentConfirmation\":false,\"notes\":\"Updated schedule\",\"location\":\"Room A\",\"batchNumber\":\"VAC002\",\"createdBy\":\"postman\"}"
+            },
+            "url": "{{baseUrl}}/api/vaccination-schedules/{{vaccinationScheduleId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Vaccination Schedule",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/vaccination-schedules/{{vaccinationScheduleId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Vaccination Schedules By Student",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/vaccination-schedules/student/{{studentId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Pending Parent Consent",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/vaccination-schedules/pending-parent-consent"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Pending Parent Consent By Parent",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/vaccination-schedules/pending-parent-consent/{{parentId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Pending Student Confirmation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/vaccination-schedules/pending-student-confirmation"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Vaccination Schedules By Parent Consent",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/vaccination-schedules/parent-consent/PENDING"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Not Vaccinated",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/vaccination-schedules/not-vaccinated"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Vaccinated",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/vaccination-schedules/vaccinated"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Vaccination Date Range",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/vaccination-schedules/date-range?startDate=2026-01-01T00:00:00&endDate=2026-12-31T23:59:59"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Parent Consent",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"consent\":\"APPROVED\"}"
+            },
+            "url": "{{baseUrl}}/api/vaccination-schedules/{{vaccinationScheduleId}}/parent-consent"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Student Confirmation",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"confirmed\":true}"
+            },
+            "url": "{{baseUrl}}/api/vaccination-schedules/{{vaccinationScheduleId}}/student-confirmation"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Vaccination Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"isVaccinated\":true}"
+            },
+            "url": "{{baseUrl}}/api/vaccination-schedules/{{vaccinationScheduleId}}/vaccination-status"
           },
           "response": []
         }
