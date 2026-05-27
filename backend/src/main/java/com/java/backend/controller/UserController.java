@@ -2,6 +2,8 @@ package com.java.backend.controller;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -29,6 +31,8 @@ import com.java.backend.repository.UserRepository;
 @CrossOrigin(origins = "http://localhost:3000")
 public class UserController {
 
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+
     @Autowired
     private UserRepository userRepository;
 
@@ -40,6 +44,13 @@ public class UserController {
                 return ResponseEntity.badRequest()
                         .body(Map.of("message", "Email không được để trống"));
             }
+
+            String email = newUser.getEmail().trim();
+            if (!isValidEmailFormat(email)) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "Email không đúng định dạng"));
+            }
+
             if (newUser.getPassword() == null || newUser.getPassword().trim().isEmpty()) {
                 return ResponseEntity.badRequest()
                         .body(Map.of("message", "Mật khẩu không được để trống"));
@@ -54,12 +65,14 @@ public class UserController {
             }
 
             // Check if email already exists
-            if (userRepository.findByEmail(newUser.getEmail()).isPresent()) {
+            if (userRepository.findByEmail(email).isPresent()) {
                 return ResponseEntity.badRequest()
                         .body(Map.of("message", "Email đã tồn tại trong hệ thống"));
             }
 
-            // Save user
+            // Normalize and save user
+            newUser.setEmail(email);
+            newUser.setFullName(newUser.getFullName().trim());
             User savedUser = userRepository.save(newUser);
             return ResponseEntity.ok(savedUser);
         } catch (Exception e) {
@@ -109,6 +122,10 @@ public class UserController {
         }
     }
 
+    private boolean isValidEmailFormat(String email) {
+        return email != null && EMAIL_PATTERN.matcher(email).matches();
+    }
+
     @PutMapping("/user/{id}")
     ResponseEntity<?> updateUser(@RequestBody User newUser, @PathVariable Long id) {
         try {
@@ -119,10 +136,25 @@ public class UserController {
                             user.setPassword(newUser.getPassword());
                         }
                         if (newUser.getEmail() != null) {
-                            user.setEmail(newUser.getEmail());
+                            String email = newUser.getEmail().trim();
+
+                            if (email.isEmpty()) {
+                                throw new IllegalArgumentException("Email không được để trống");
+                            }
+
+                            if (!isValidEmailFormat(email)) {
+                                throw new IllegalArgumentException("Email không đúng định dạng");
+                            }
+
+                            Optional<User> existingByEmail = userRepository.findByEmail(email);
+                            if (existingByEmail.isPresent() && !existingByEmail.get().getId().equals(id)) {
+                                throw new IllegalArgumentException("Email đã tồn tại trong hệ thống");
+                            }
+
+                            user.setEmail(email);
                         }
                         if (newUser.getFullName() != null) {
-                            user.setFullName(newUser.getFullName());
+                            user.setFullName(newUser.getFullName().trim());
                         }
                         if (newUser.getRole() != null) {
                             user.setRole(newUser.getRole());
@@ -135,6 +167,9 @@ public class UserController {
         } catch (UserNotFoundException e) {
             return ResponseEntity.notFound()
                     .build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                     .body(Map.of("message", "Lỗi khi cập nhật user: " + e.getMessage()));

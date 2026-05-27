@@ -16,6 +16,8 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Table;
 import jakarta.persistence.PrePersist;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -29,25 +31,26 @@ import lombok.Data;
 @Table(name = "users")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @Email(message = "Email không đúng định dạng")
+    @NotBlank(message = "Email không được để trống")
     @Column(nullable = false, unique = true)
     private String email;
 
+    @NotBlank(message = "Password không được để trống")
     @Column(nullable = false)
     private String password;
 
+    @NotBlank(message = "Họ tên không được để trống")
     @Column(nullable = false)
     private String fullName;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
-
-    @Column()
     private boolean isActive = true;
 
     @OneToMany(mappedBy = "reportedBy", fetch = FetchType.LAZY)
