@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.java.backend.entity.Manager;
+import com.java.backend.enums.Role;
 import com.java.backend.repository.ManagerRepository;
 
 @Service
@@ -15,6 +16,7 @@ public class ManagerService {
     private ManagerRepository managerRepository;
 
     public Manager saveManager(Manager manager) {
+        manager.setRole(Role.MANAGER);
         return managerRepository.save(manager);
     }
 

@@ -1,12 +1,14 @@
 package com.java.backend.controller;
 
 import com.java.backend.entity.Nurse;
+import com.java.backend.enums.Role;
 import com.java.backend.service.NurseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/nurses")
@@ -19,6 +21,15 @@ public class NurseController {
     @PostMapping
     public ResponseEntity<?> createNurse(@RequestBody Nurse nurse) {
         try {
+            if (nurse.getRole() == null) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "Trường role là bắt buộc và phải là SCHOOL_NURSE"));
+            }
+            if (nurse.getRole() != Role.SCHOOL_NURSE) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "Khi tạo nhân viên y tế, role chỉ được phép là SCHOOL_NURSE"));
+            }
+
             System.out.println("Received nurse data: " + nurse.getEmail() + ", " + nurse.getFullName());
             Nurse saved = nurseService.saveNurse(nurse);
             return ResponseEntity.ok(saved);

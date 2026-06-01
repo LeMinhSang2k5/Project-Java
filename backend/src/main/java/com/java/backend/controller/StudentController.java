@@ -95,6 +95,16 @@ public class StudentController {
                         .body(Map.of("message", "Lớp học không được để trống"));
             }
 
+            Object roleObj = requestData.get("role");
+            if (roleObj == null || roleObj.toString().trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "Trường role là bắt buộc và phải là STUDENT"));
+            }
+            if (!"STUDENT".equalsIgnoreCase(roleObj.toString().trim())) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "Khi tạo học sinh, role chỉ được phép là STUDENT"));
+            }
+
             // Tạo Student object
             Student student = studentService.createStudent(email, password, fullName, studentClass, code, gender,
                     dateOfBirth);

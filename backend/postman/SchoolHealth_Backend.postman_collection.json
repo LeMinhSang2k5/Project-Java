@@ -140,7 +140,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"email\":\"student{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"Student Postman\",\"code\":\"ST{{$timestamp}}\",\"studentClass\":\"5A\",\"gender\":\"MALE\",\"dateOfBirth\":\"2014-01-01\",\"parentId\":{{parentId}}}"
+              "raw": "{\"email\":\"student{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"Student Postman\",\"role\":\"STUDENT\",\"code\":\"ST{{$timestamp}}\",\"studentClass\":\"5A\",\"gender\":\"MALE\",\"dateOfBirth\":\"2014-01-01\",\"parentId\":{{parentId}}}"
             },
             "url": "{{baseUrl}}/api/students"
           },

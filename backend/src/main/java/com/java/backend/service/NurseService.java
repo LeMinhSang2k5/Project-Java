@@ -17,10 +17,7 @@ public class NurseService {
 
     public Nurse saveNurse(Nurse nurse) {
         try {
-            // Đảm bảo role được set
-            if (nurse.getRole() == null) {
-                nurse.setRole(Role.SCHOOL_NURSE);
-            }
+            nurse.setRole(Role.SCHOOL_NURSE);
 
             // Đảm bảo isActive được set
             if (!nurse.isActive()) {

@@ -2,6 +2,7 @@ package com.java.backend.controller;
 
 import com.java.backend.entity.Parent;
 import com.java.backend.entity.Student;
+import com.java.backend.enums.Role;
 import com.java.backend.service.ParentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,16 @@ public class ParentController {
     private ParentService parentService;
 
     @PostMapping
-    public ResponseEntity<Parent> createParent(@RequestBody Parent parent) {
+    public ResponseEntity<?> createParent(@RequestBody Parent parent) {
+        if (parent.getRole() == null) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "Trường role là bắt buộc và phải là PARENT"));
+        }
+        if (parent.getRole() != Role.PARENT) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "Khi tạo phụ huynh, role chỉ được phép là PARENT"));
+        }
+
         Parent saved = parentService.saveParent(parent);
         return ResponseEntity.ok(saved);
     }

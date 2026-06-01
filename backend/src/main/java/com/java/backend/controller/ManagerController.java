@@ -1,12 +1,14 @@
 package com.java.backend.controller;
 
 import com.java.backend.entity.Manager;
+import com.java.backend.enums.Role;
 import com.java.backend.service.ManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/managers")
@@ -17,7 +19,16 @@ public class ManagerController {
     private ManagerService managerService;
 
     @PostMapping
-    public ResponseEntity<Manager> createManager(@RequestBody Manager manager) {
+    public ResponseEntity<?> createManager(@RequestBody Manager manager) {
+        if (manager.getRole() == null) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "Trường role là bắt buộc và phải là MANAGER"));
+        }
+        if (manager.getRole() != Role.MANAGER) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "Khi tạo quản lý, role chỉ được phép là MANAGER"));
+        }
+
         Manager saved = managerService.saveManager(manager);
         return ResponseEntity.ok(saved);
     }
