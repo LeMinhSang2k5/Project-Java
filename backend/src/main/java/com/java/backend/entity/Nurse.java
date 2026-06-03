@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Pattern;
 
 @Entity
 @Table(name = "nurses")
@@ -17,7 +18,8 @@ public class Nurse extends User {
     @Column(nullable = true) // Cho phép null
     private Gender gender;
 
-    @Column(nullable = true) // Cho phép null
+    @Pattern(regexp = "^\\d{10}$", message = "Số điện thoại phải gồm đúng 10 chữ số")
+    @Column(nullable = true, length = 10) // Cho phép null, giới hạn 10 ký tự
     private String phoneNumber;
 
     @Column(nullable = true) // Cho phép null
