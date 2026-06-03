@@ -9,6 +9,8 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Pattern;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 
 @Entity
 @Table(name = "nurses")
@@ -18,7 +20,7 @@ public class Nurse extends User {
     @Column(nullable = true) // Cho phép null
     private Gender gender;
 
-    @Pattern(regexp = "^\\d{10}$", message = "Số điện thoại phải gồm đúng 10 chữ số")
+    @Pattern(regexp = "^0\\d{9}$", message = "Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng 0")
     @Column(nullable = true, length = 10) // Cho phép null, giới hạn 10 ký tự
     private String phoneNumber;
 
@@ -64,5 +66,20 @@ public class Nurse extends User {
 
     public void setGender(Gender gender) {
         this.gender = gender;
+    }
+
+    @PrePersist
+    public void ensureRoleOnPersist() {
+        super.setRole(Role.SCHOOL_NURSE);
+    }
+
+    @PreUpdate
+    public void ensureRoleOnUpdate() {
+        super.setRole(Role.SCHOOL_NURSE);
+    }
+
+    @Override
+    public void setRole(Role role) {
+        super.setRole(Role.SCHOOL_NURSE);
     }
 }
