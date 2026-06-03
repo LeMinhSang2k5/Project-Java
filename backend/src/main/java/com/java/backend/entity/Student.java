@@ -56,22 +56,28 @@ public class Student extends User {
     }
 
     public Student(String fullName, String email, String password, String code, LocalDate dateOfBirth, Gender gender,
-            String studentClass) {
+            String studentClass, String city, String district, String grade) {
         super(email, password, fullName, Role.STUDENT);
         this.code = code;
         this.dateOfBirth = dateOfBirth;
         this.gender = gender;
         this.studentClass = studentClass;
+        this.city = city;
+        this.district = district;
+        this.grade = grade;
     }
 
     // Constructor với password mặc định cho import Excel
     public Student(String fullName, String email, String code, LocalDate dateOfBirth, Gender gender,
-            String studentClass) {
+            String studentClass, String city, String district, String grade) {
         super(email, "defaultPassword123", fullName, Role.STUDENT);
         this.code = code;
         this.dateOfBirth = dateOfBirth;
         this.gender = gender;
         this.studentClass = studentClass;
+        this.city = city;
+        this.district = district;
+        this.grade = grade;
     }
 
     public String getCode() {

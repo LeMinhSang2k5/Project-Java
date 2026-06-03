@@ -25,7 +25,8 @@ public class StudentService {
 
     // Method để tạo Student từ các parameters riêng lẻ
     public Student createStudent(String email, String password, String fullName,
-            String studentClass, String code, Gender gender, LocalDate dateOfBirth) {
+            String studentClass, String code, Gender gender, LocalDate dateOfBirth,
+            String city, String district, String grade) {
         Student student = new Student();
 
         // Set User fields
@@ -40,6 +41,9 @@ public class StudentService {
         student.setStudentClass(studentClass);
         student.setGender(gender != null ? gender : Gender.MALE);
         student.setDateOfBirth(dateOfBirth != null ? dateOfBirth : LocalDate.of(2010, 1, 1));
+        student.setCity(city);
+        student.setDistrict(district);
+        student.setGrade(grade);
 
         return student;
     }
@@ -100,11 +104,11 @@ public class StudentService {
         try {
             Student student = studentRepository.findById(studentId)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy học sinh với ID: " + studentId));
-            
+
             // Import Parent entity
             com.java.backend.entity.Parent parent = parentRepository.findById(parentId)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy phụ huynh với ID: " + parentId));
-            
+
             student.setParent(parent);
             studentRepository.save(student);
         } catch (Exception e) {
@@ -112,5 +116,4 @@ public class StudentService {
         }
     }
 
-    
 }

@@ -30,7 +30,10 @@ public class StudentController {
             String studentClass = (String) requestData.get("studentClass");
             String genderStr = (String) requestData.get("gender");
             String dateOfBirthStr = (String) requestData.get("dateOfBirth");
-            
+            String city = (String) requestData.get("city");
+            String district = (String) requestData.get("district");
+            String grade = (String) requestData.get("grade");
+
             // Extract parentId
             Long parentId = null;
             if (requestData.get("parentId") != null) {
@@ -52,26 +55,26 @@ public class StudentController {
             }
 
             // Parse date
-           LocalDate dateOfBirth = null;
-           
-           if (dateOfBirthStr == null || dateOfBirthStr.trim().isEmpty()) {
-               return ResponseEntity.badRequest()
-                       .body(Map.of("message", "Ngày sinh không được để trống"));
-           }
-           
-           try {
-               dateOfBirth = LocalDate.parse(dateOfBirthStr);
-           
-           } catch (DateTimeParseException e) {
-               return ResponseEntity.badRequest()
-                       .body(Map.of("message", "Ngày sinh không đúng định dạng yyyy-MM-dd"));
-           }
-           
-           // Kiểm tra ngày tương lai
-           if (dateOfBirth.isAfter(LocalDate.now())) {
-               return ResponseEntity.badRequest()
-                       .body(Map.of("message", "Ngày sinh không được ở tương lai"));
-           }
+            LocalDate dateOfBirth = null;
+
+            if (dateOfBirthStr == null || dateOfBirthStr.trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "Ngày sinh không được để trống"));
+            }
+
+            try {
+                dateOfBirth = LocalDate.parse(dateOfBirthStr);
+
+            } catch (DateTimeParseException e) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "Ngày sinh không đúng định dạng yyyy-MM-dd"));
+            }
+
+            // Kiểm tra ngày tương lai
+            if (dateOfBirth.isAfter(LocalDate.now())) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "Ngày sinh không được ở tương lai"));
+            }
 
             // Validation
             if (email == null || email.trim().isEmpty()) {
@@ -107,7 +110,7 @@ public class StudentController {
 
             // Tạo Student object
             Student student = studentService.createStudent(email, password, fullName, studentClass, code, gender,
-                    dateOfBirth);
+                    dateOfBirth, city, district, grade);
 
             // Lưu trước để có ID, sau đó liên kết với parent nếu có
             Student saved = studentService.saveStudent(student);
@@ -165,28 +168,36 @@ public class StudentController {
             Student existing = studentService.getStudentById(id);
 
             // Cập nhật các trường nếu có trong request
-            if (requestData.get("email") != null) existing.setEmail((String) requestData.get("email"));
-            if (requestData.get("password") != null) existing.setPassword((String) requestData.get("password"));
-            if (requestData.get("fullName") != null) existing.setFullName((String) requestData.get("fullName"));
-            if (requestData.get("code") != null) existing.setCode((String) requestData.get("code"));
-            if (requestData.get("studentClass") != null) existing.setStudentClass((String) requestData.get("studentClass"));
+            if (requestData.get("email") != null)
+                existing.setEmail((String) requestData.get("email"));
+            if (requestData.get("password") != null)
+                existing.setPassword((String) requestData.get("password"));
+            if (requestData.get("fullName") != null)
+                existing.setFullName((String) requestData.get("fullName"));
+            if (requestData.get("code") != null)
+                existing.setCode((String) requestData.get("code"));
+            if (requestData.get("studentClass") != null)
+                existing.setStudentClass((String) requestData.get("studentClass"));
             if (requestData.get("gender") != null) {
                 try {
-                    existing.setGender(com.java.backend.enums.Gender.valueOf(((String) requestData.get("gender")).toUpperCase()));
+                    existing.setGender(
+                            com.java.backend.enums.Gender.valueOf(((String) requestData.get("gender")).toUpperCase()));
                 } catch (Exception ignore) {
                 }
             }
 
             // Hỗ trợ cả "dateOfBirth" và "date_of_birth"
             Object dobObj = requestData.get("dateOfBirth");
-            if (dobObj == null) dobObj = requestData.get("date_of_birth");
+            if (dobObj == null)
+                dobObj = requestData.get("date_of_birth");
             if (dobObj != null) {
                 String dobStr = dobObj.toString();
                 LocalDate dob;
                 try {
                     dob = LocalDate.parse(dobStr);
                 } catch (DateTimeParseException e) {
-                    return ResponseEntity.badRequest().body(Map.of("message", "Ngày sinh không đúng định dạng yyyy-MM-dd"));
+                    return ResponseEntity.badRequest()
+                            .body(Map.of("message", "Ngày sinh không đúng định dạng yyyy-MM-dd"));
                 }
                 if (dob.isAfter(LocalDate.now())) {
                     return ResponseEntity.badRequest().body(Map.of("message", "Ngày sinh không được ở tương lai"));
@@ -199,7 +210,8 @@ public class StudentController {
 
             // Lấy parentId từ nhiều biến thể: parentId, parent_id
             Object parentVal = requestData.get("parentId");
-            if (parentVal == null) parentVal = requestData.get("parent_id");
+            if (parentVal == null)
+                parentVal = requestData.get("parent_id");
             Long parentId = null;
             if (parentVal != null) {
                 if (parentVal instanceof Number) {
