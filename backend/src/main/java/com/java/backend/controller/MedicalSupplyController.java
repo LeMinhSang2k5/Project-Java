@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.java.backend.entity.MedicalSupply;
@@ -46,6 +47,42 @@ public class MedicalSupplyController {
     public ResponseEntity<List<MedicalSupply>> getAllMedicalSupplies() {
         try {
             List<MedicalSupply> supplies = medicalSupplyService.getAllMedicalSupplies();
+            return ResponseEntity.ok(supplies);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // Tìm kiếm vật tư y tế theo tên
+    @GetMapping("/search")
+    public ResponseEntity<?> searchMedicalSupplies(@RequestParam String name) {
+        try {
+            if (name == null || name.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Tên tìm kiếm không được để trống");
+            }
+            List<MedicalSupply> supplies = medicalSupplyService.searchMedicalSupplies(name.trim());
+            return ResponseEntity.ok(supplies);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // Lấy vật tư y tế theo danh mục
+    @GetMapping("/category/{category}")
+    public ResponseEntity<List<MedicalSupply>> getMedicalSuppliesByCategory(@PathVariable String category) {
+        try {
+            List<MedicalSupply> supplies = medicalSupplyService.getMedicalSuppliesByCategory(category);
+            return ResponseEntity.ok(supplies);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // Lấy vật tư y tế có số lượng thấp
+    @GetMapping("/low-stock/{threshold}")
+    public ResponseEntity<List<MedicalSupply>> getLowStockSupplies(@PathVariable Integer threshold) {
+        try {
+            List<MedicalSupply> supplies = medicalSupplyService.getLowStockSupplies(threshold);
             return ResponseEntity.ok(supplies);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -93,39 +130,6 @@ public class MedicalSupplyController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Lỗi server: " + e.getMessage());
-        }
-    }
-
-    // Tìm kiếm vật tư y tế theo tên
-    @GetMapping("/search")
-    public ResponseEntity<List<MedicalSupply>> searchMedicalSupplies(@RequestBody String name) {
-        try {
-            List<MedicalSupply> supplies = medicalSupplyService.searchMedicalSupplies(name);
-            return ResponseEntity.ok(supplies);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    // Lấy vật tư y tế theo danh mục
-    @GetMapping("/category/{category}")
-    public ResponseEntity<List<MedicalSupply>> getMedicalSuppliesByCategory(@PathVariable String category) {
-        try {
-            List<MedicalSupply> supplies = medicalSupplyService.getMedicalSuppliesByCategory(category);
-            return ResponseEntity.ok(supplies);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    // Lấy vật tư y tế có số lượng thấp
-    @GetMapping("/low-stock/{threshold}")
-    public ResponseEntity<List<MedicalSupply>> getLowStockSupplies(@PathVariable Integer threshold) {
-        try {
-            List<MedicalSupply> supplies = medicalSupplyService.getLowStockSupplies(threshold);
-            return ResponseEntity.ok(supplies);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

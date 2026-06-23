@@ -78,13 +78,14 @@
           },
           "response": []
         },
-        {
-          "name": "Get All Users",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/api/users"
-          },
+        
+          {
+            "name": "Get All Users",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": "{{baseUrl}}/api/users"
+            },
           "response": []
         },
         {
@@ -612,17 +613,24 @@
           "name": "Search Medical Supplies",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "text/plain"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "Paracetamol"
-            },
-            "url": "{{baseUrl}}/api/medical-supplies/search"
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/medical-supplies/search?name=Bang",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medical-supplies",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "Bang"
+                }
+              ]
+            }
           },
           "response": []
         },
