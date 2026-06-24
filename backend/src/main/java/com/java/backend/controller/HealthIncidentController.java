@@ -50,7 +50,8 @@ public class HealthIncidentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<HealthIncident> updateHealthIncident(@PathVariable Long id, @RequestBody HealthIncident healthIncident) {
+    public ResponseEntity<HealthIncident> updateHealthIncident(@PathVariable Long id,
+            @RequestBody HealthIncident healthIncident) {
         HealthIncident updated = healthIncidentService.updateHealthIncident(id, healthIncident);
         return ResponseEntity.ok(updated);
     }
@@ -74,7 +75,8 @@ public class HealthIncidentController {
     }
 
     @GetMapping("/incident-time/{incidentTime}")
-    public ResponseEntity<List<HealthIncident>> getHealthIncidentsByIncidentTime(@PathVariable LocalDateTime incidentTime) {
+    public ResponseEntity<List<HealthIncident>> getHealthIncidentsByIncidentTime(
+            @PathVariable LocalDateTime incidentTime) {
         List<HealthIncident> incidents = healthIncidentService.getHealthIncidentsByIncidentTime(incidentTime);
         return ResponseEntity.ok(incidents);
     }
@@ -86,7 +88,8 @@ public class HealthIncidentController {
     }
 
     @GetMapping("/incident-type/{incidentType}")
-    public ResponseEntity<List<HealthIncident>> getHealthIncidentsByIncidentType(@PathVariable IncidentType incidentType) {
+    public ResponseEntity<List<HealthIncident>> getHealthIncidentsByIncidentType(
+            @PathVariable IncidentType incidentType) {
         List<HealthIncident> incidents = healthIncidentService.getHealthIncidentsByIncidentType(incidentType);
         return ResponseEntity.ok(incidents);
     }
@@ -95,7 +98,8 @@ public class HealthIncidentController {
     public ResponseEntity<List<HealthIncident>> getHealthIncidentsByIncidentTimeAndStatus(
             @PathVariable LocalDateTime incidentTime,
             @PathVariable IncidentStatus status) {
-        List<HealthIncident> incidents = healthIncidentService.getHealthIncidentsByIncidentTimeAndStatus(incidentTime, status);
+        List<HealthIncident> incidents = healthIncidentService.getHealthIncidentsByIncidentTimeAndStatus(incidentTime,
+                status);
         return ResponseEntity.ok(incidents);
     }
 
@@ -103,7 +107,8 @@ public class HealthIncidentController {
     public ResponseEntity<List<HealthIncident>> getHealthIncidentsByStudentIdAndIncidentTime(
             @PathVariable Long studentId,
             @PathVariable LocalDateTime incidentTime) {
-        List<HealthIncident> incidents = healthIncidentService.getHealthIncidentsByStudentIdAndIncidentTime(studentId, incidentTime);
+        List<HealthIncident> incidents = healthIncidentService.getHealthIncidentsByStudentIdAndIncidentTime(studentId,
+                incidentTime);
         return ResponseEntity.ok(incidents);
     }
 }

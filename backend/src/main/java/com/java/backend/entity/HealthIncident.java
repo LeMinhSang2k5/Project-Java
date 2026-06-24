@@ -2,57 +2,74 @@ package com.java.backend.entity;
 
 import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "health_incidents")
 public class HealthIncident {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Student reference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false)
-    @JsonIgnore
+    @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
     private Student student;
 
+    // User (nurse) reference
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reported_by_user_id", nullable = false) // Y tá ghi nhận
-    @JsonIgnore
+    @JoinColumn(name = "reported_by_user_id", nullable = false)
+    @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
     private User reportedBy;
 
+    // Type of incident
     @Column(nullable = false)
-    private String incidentType; // Ví dụ: "Té ngã", "Sốt cao", "Đau bụng"
+    private String incidentType;
 
+    // Detail description
     @Lob
     @Column(nullable = false)
-    private String description; // Mô tả chi tiết
+    private String description;
 
+    // Action taken
     @Lob
-    private String actionTaken; // Hành động đã xử lý
+    private String actionTaken;
 
+    // Time of incident
     @Column(nullable = false)
     private LocalDateTime incidentTime;
 
+    // Status
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private IncidentStatus status;
 
+    // =========================
+    // ENUMS
+    // =========================
+
     public enum IncidentStatus {
-        REPORTED, MONITORING, PARENT_NOTIFIED, RESOLVED
+        REPORTED,
+        MONITORING,
+        PARENT_NOTIFIED,
+        RESOLVED
     }
+
+    public enum IncidentType {
+        FALL,
+        FEVER,
+        HEADACHE,
+        STOMACH_ACHE,
+        OTHER
+    }
+
+    // =========================
+    // GETTERS & SETTERS
+    // =========================
 
     public Long getId() {
         return id;
@@ -116,9 +133,5 @@ public class HealthIncident {
 
     public void setStatus(IncidentStatus status) {
         this.status = status;
-    }
-
-    public enum IncidentType {
-        FALL, FEVER, HEADACHE, STOMACH_ACHE, OTHER
     }
 }
