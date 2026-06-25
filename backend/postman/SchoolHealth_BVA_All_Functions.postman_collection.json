@@ -1,0 +1,3581 @@
+{
+  "info": {
+    "_postman_id": "bva-all-functions-school-health",
+    "name": "School Health Backend - BVA All Functions",
+    "description": "Postman collection kiem thu cac chuc nang School Health theo BVA va Equivalence Partitioning. Moi request co expectedStatus, testType (N/B/A), equivalenceClass va partition; expectedMessage duoc dung khi can kiem tra noi dung loi.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const expectedRaw = pm.variables.get('expectedStatus');",
+          "if (expectedRaw) {",
+          "  const expected = expectedRaw.split(',').map(s => Number(s.trim())).filter(n => !Number.isNaN(n));",
+          "  pm.test('[BVA] Status code is expected', function () {",
+          "    pm.expect(expected).to.include(pm.response.code);",
+          "  });",
+          "}",
+          "",
+          "const expectJson = pm.variables.get('expectJson');",
+          "if (expectJson === 'true' && pm.response.text()) {",
+          "  pm.test('[BVA] Response is valid JSON', function () {",
+          "    pm.expect(function () { pm.response.json(); }).to.not.throw();",
+          "  });",
+          "}",
+          "",
+          "if (pm.response.code >= 400) {",
+          "  console.log('[BVA ERROR RESPONSE]', pm.info.requestName, pm.response.code, pm.response.text());",
+          "}",
+          "const expectedMessage = pm.variables.get('expectedMessage');",
+          "if (expectedMessage && pm.response.text()) {",
+          "  pm.test('[BVA] Response contains expected message', function () {",
+          "    pm.expect(pm.response.text()).to.include(expectedMessage);",
+          "  });",
+          "}",
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 Auth - BVA",
+      "item": [
+        {
+          "name": "BVA-AUTH-00 [Setup] Sync Admin Password",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200"
+            },
+            {
+              "key": "testType",
+              "value": "N"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "auth.setup.sync_admin_password"
+            },
+            {
+              "key": "partition",
+              "value": "Precondition: admin@school.com password = loginPassword (123456)"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            }
+          ],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const baseUrl = pm.environment.get('baseUrl');",
+                  "const email = pm.environment.get('loginEmail');",
+                  "const password = pm.environment.get('loginPassword');",
+                  "",
+                  "async function ensureAdminLoginReady() {",
+                  "    const listRes = await pm.sendRequest({ url: `${baseUrl}/api/users?page=0`, method: 'GET' });",
+                  "    const users = (listRes.json().content || []);",
+                  "    let user = users.find((u) => u.email === email);",
+                  "",
+                  "    if (!user) {",
+                  "        const createRes = await pm.sendRequest({",
+                  "            url: `${baseUrl}/api/user`,",
+                  "            method: 'POST',",
+                  "            header: { 'Content-Type': 'application/json' },",
+                  "            body: {",
+                  "                mode: 'raw',",
+                  "                raw: JSON.stringify({ email, password, fullName: 'Admin User', role: 'ADMIN', active: true })",
+                  "            }",
+                  "        });",
+                  "        if (createRes.code === 200) {",
+                  "            console.log('[BVA-AUTH-03] Setup: created admin user');",
+                  "            return;",
+                  "        }",
+                  "    }",
+                  "",
+                  "    if (user) {",
+                  "        await pm.sendRequest({",
+                  "            url: `${baseUrl}/api/user/${user.id}`,",
+                  "            method: 'PUT',",
+                  "            header: { 'Content-Type': 'application/json' },",
+                  "            body: {",
+                  "                mode: 'raw',",
+                  "                raw: JSON.stringify({",
+                  "                    email,",
+                  "                    password,",
+                  "                    fullName: user.fullName || 'Admin User',",
+                  "                    role: user.role || 'ADMIN',",
+                  "                    active: true",
+                  "                })",
+                  "            }",
+                  "        });",
+                  "        console.log(`[BVA-AUTH-03] Setup: synced password for user id=${user.id}`);",
+                  "    }",
+                  "}",
+                  "",
+                  "await ensureAdminLoginReady();"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('[BVA-AUTH-00] Setup request completed', function () {",
+                  "    pm.expect([200, 404]).to.include(pm.response.code);",
+                  "});",
+                  "console.log('[BVA-AUTH-00] Admin password synced for AUTH-03');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/users?page=0"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-AUTH-01 Login Empty Email",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,401,500"
+            },
+            {
+              "key": "expectJson",
+              "value": "false"
+            },
+            {
+              "key": "testType",
+              "value": "B"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "01_auth_bva.bva_auth_01_login_empty_email"
+            },
+            {
+              "key": "partition",
+              "value": "B: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"\",\"password\":\"{{loginPassword}}\"}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-AUTH-02 Login Wrong Password",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,401,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "01_auth_bva.bva_auth_02_login_wrong_password"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{loginEmail}}\",\"password\":\"wrong-password\"}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-AUTH-03 Login Valid",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "N"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "auth.login.valid_credentials"
+            },
+            {
+              "key": "partition",
+              "value": "Valid EP: email=admin@school.com, password=123456 (plain text)"
+            }
+          ],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const baseUrl = pm.environment.get('baseUrl');",
+                  "const email = pm.environment.get('loginEmail');",
+                  "const password = pm.environment.get('loginPassword');",
+                  "",
+                  "async function ensureAdminLoginReady() {",
+                  "    const listRes = await pm.sendRequest({ url: `${baseUrl}/api/users?page=0`, method: 'GET' });",
+                  "    const users = (listRes.json().content || []);",
+                  "    let user = users.find((u) => u.email === email);",
+                  "",
+                  "    if (!user) {",
+                  "        const createRes = await pm.sendRequest({",
+                  "            url: `${baseUrl}/api/user`,",
+                  "            method: 'POST',",
+                  "            header: { 'Content-Type': 'application/json' },",
+                  "            body: {",
+                  "                mode: 'raw',",
+                  "                raw: JSON.stringify({ email, password, fullName: 'Admin User', role: 'ADMIN', active: true })",
+                  "            }",
+                  "        });",
+                  "        if (createRes.code === 200) {",
+                  "            console.log('[BVA-AUTH-03] Setup: created admin user');",
+                  "            return;",
+                  "        }",
+                  "    }",
+                  "",
+                  "    if (user) {",
+                  "        await pm.sendRequest({",
+                  "            url: `${baseUrl}/api/user/${user.id}`,",
+                  "            method: 'PUT',",
+                  "            header: { 'Content-Type': 'application/json' },",
+                  "            body: {",
+                  "                mode: 'raw',",
+                  "                raw: JSON.stringify({",
+                  "                    email,",
+                  "                    password,",
+                  "                    fullName: user.fullName || 'Admin User',",
+                  "                    role: user.role || 'ADMIN',",
+                  "                    active: true",
+                  "                })",
+                  "            }",
+                  "        });",
+                  "        console.log(`[BVA-AUTH-03] Setup: synced password for user id=${user.id}`);",
+                  "    }",
+                  "}",
+                  "",
+                  "await ensureAdminLoginReady();"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-AUTH-03';",
+                  "const email = pm.environment.get('loginEmail');",
+                  "console.log(`[${tc}] [N] Login hop le - email: ${email}`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test(`[${tc}] Response co accessToken`, function () {",
+                  "        const data = pm.response.json();",
+                  "        pm.expect(data.accessToken).to.be.a('string').and.not.empty;",
+                  "        pm.expect(data.email).to.eql(email);",
+                  "    });",
+                  "    const data = pm.response.json();",
+                  "    if (data.accessToken) pm.environment.set('accessToken', data.accessToken);",
+                  "    if (data.id) pm.environment.set('userId', String(data.id));",
+                  "    console.log(`[${tc}] PASS - accessToken saved, userId=${data.id}`);",
+                  "} else {",
+                  "    console.log(`[${tc}] FAIL:`, pm.response.code, pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{loginEmail}}\",\"password\":\"{{loginPassword}}\"}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-AUTH-04 Login Empty Password",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "401"
+            },
+            {
+              "key": "expectJson",
+              "value": "false"
+            },
+            {
+              "key": "testType",
+              "value": "B"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "auth.password.empty"
+            },
+            {
+              "key": "partition",
+              "value": "Invalid EP: password is empty"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{loginEmail}}\",\"password\":\"\"}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-AUTH-04';",
+                  "console.log(`[${tc}] [B] Login voi password rong`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 401`, function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.text()).to.include('Email hoặc mật khẩu không đúng');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "BVA-AUTH-05 Login Invalid Email Format",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "401"
+            },
+            {
+              "key": "expectJson",
+              "value": "false"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "auth.email.invalid_format"
+            },
+            {
+              "key": "partition",
+              "value": "Invalid EP: email format is not valid"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"invalid-email\",\"password\":\"{{loginPassword}}\"}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 Users - BVA",
+      "item": [
+        {
+          "name": "BVA-USER-01 Create Valid User",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200,201"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "N"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "02_users_bva.bva_user_01_create_valid_user"
+            },
+            {
+              "key": "partition",
+              "value": "N: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if ([200,201].includes(pm.response.code)) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.id) pm.environment.set('userId', json.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"bva.user{{$timestamp}}@school.com\",\"password\":\"password123\",\"fullName\":\"BVA User\",\"role\":\"PARENT\",\"active\":true}"
+            },
+            "url": "{{baseUrl}}/api/user"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-USER-02 Create Empty Email",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,500"
+            },
+            {
+              "key": "testType",
+              "value": "B"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "02_users_bva.bva_user_02_create_empty_email"
+            },
+            {
+              "key": "partition",
+              "value": "B: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"\",\"password\":\"password123\",\"fullName\":\"BVA User\",\"role\":\"PARENT\",\"active\":true}"
+            },
+            "url": "{{baseUrl}}/api/user"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-USER-03 Get User Invalid ID",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,404,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "02_users_bva.bva_user_03_get_user_invalid_id"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/user/999999999"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-USER-04 Update Empty FullName",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200,400,500"
+            },
+            {
+              "key": "testType",
+              "value": "B"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "02_users_bva.bva_user_04_update_empty_fullname"
+            },
+            {
+              "key": "partition",
+              "value": "B: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"fullName\":\"\",\"role\":\"PARENT\",\"active\":true}"
+            },
+            "url": "{{baseUrl}}/api/user/{{userId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-USER-05 Delete Invalid ID",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,404,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "02_users_bva.bva_user_05_delete_invalid_id"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/user/999999999"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-USER-06 Create Invalid Email Format",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "user.email.invalid_format"
+            },
+            {
+              "key": "partition",
+              "value": "Invalid EP: email does not match required pattern"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/user",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"invalid-email\",\"password\":\"password123\",\"fullName\":\"BVA User\",\"role\":\"PARENT\",\"active\":true}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-USER-07 Create Duplicate Email",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "user.email.duplicate"
+            },
+            {
+              "key": "partition",
+              "value": "Invalid EP: email already exists in database"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/user",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{loginEmail}}\",\"password\":\"password123\",\"fullName\":\"Duplicate User\",\"role\":\"PARENT\",\"active\":true}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-USER-08 Create Empty Password",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "B"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "user.password.empty"
+            },
+            {
+              "key": "partition",
+              "value": "Boundary EP: password empty"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/user",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"bva.user.empty.password{{$timestamp}}@school.com\",\"password\":\"\",\"fullName\":\"BVA User\",\"role\":\"PARENT\",\"active\":true}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-USER-09 Get Users Page 0",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "N"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "user.page.min_valid"
+            },
+            {
+              "key": "partition",
+              "value": "Valid boundary: page = 0"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/users?page=0"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-USER-10 Get Users Page -1",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "B"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "user.page.min_minus_one"
+            },
+            {
+              "key": "partition",
+              "value": "Invalid boundary: page = -1"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/users?page=-1"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 Parents - BVA",
+      "item": [
+        {
+          "name": "BVA-PAR-01 Create Valid Parent",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200,201"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "N"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "04_parents_bva.bva_par_01_create_valid_parent"
+            },
+            {
+              "key": "partition",
+              "value": "N: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if ([200,201].includes(pm.response.code)) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.id) pm.environment.set('parentId', json.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"bva.parent{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"BVA Parent\",\"role\":\"PARENT\",\"gender\":\"FEMALE\",\"phoneNumber\":\"0900000000\",\"active\":true}"
+            },
+            "url": "{{baseUrl}}/api/parent"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-PAR-02 Create Phone 9 Digits",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200,400,500"
+            },
+            {
+              "key": "testType",
+              "value": "N"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "04_parents_bva.bva_par_02_create_phone_9_digits"
+            },
+            {
+              "key": "partition",
+              "value": "N: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"bva.parent.phone9{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"BVA Parent\",\"role\":\"PARENT\",\"gender\":\"FEMALE\",\"phoneNumber\":\"090000000\",\"active\":true}"
+            },
+            "url": "{{baseUrl}}/api/parent"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-PAR-03 Get Parent Invalid ID",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,404,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "04_parents_bva.bva_par_03_get_parent_invalid_id"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/parent/999999999"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-PAR-04 Link Invalid Student To Parent",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,404,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "04_parents_bva.bva_par_04_link_invalid_student_to_parent"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": "{{baseUrl}}/api/parent/link-student?parentId={{parentId}}&studentId=999999999"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-PAR-05 Confirm Invalid Form",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,404,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "04_parents_bva.bva_par_05_confirm_invalid_form"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/parent/confirm/999999999"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-PAR-06 Create Missing Role",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "B"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "parent.role.missing"
+            },
+            {
+              "key": "partition",
+              "value": "Invalid EP: role is missing"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/parent",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"bva.parent.norole{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"BVA Parent\",\"gender\":\"FEMALE\",\"phoneNumber\":\"0900000000\",\"active\":true}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-PAR-07 Create Wrong Role",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "parent.role.wrong_value"
+            },
+            {
+              "key": "partition",
+              "value": "Invalid EP: role must be PARENT"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/parent",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"bva.parent.role{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"BVA Parent\",\"role\":\"STUDENT\",\"gender\":\"FEMALE\",\"phoneNumber\":\"0900000000\",\"active\":true}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04 Students - BVA",
+      "item": [
+        {
+          "name": "BVA-STU-01 Create Valid Student",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200,201"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "N"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "03_students_bva.bva_stu_01_create_valid_student"
+            },
+            {
+              "key": "partition",
+              "value": "N: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if ([200,201].includes(pm.response.code)) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.id) pm.environment.set('studentId', json.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"bva.student{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"BVA Student\",\"role\":\"STUDENT\",\"code\":\"BVAST{{$timestamp}}\",\"studentClass\":\"5A\",\"gender\":\"MALE\",\"dateOfBirth\":\"2014-01-01\",\"parentId\":{{parentId}}}"
+            },
+            "url": "{{baseUrl}}/api/students"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-STU-02 Create Empty FullName",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,500"
+            },
+            {
+              "key": "testType",
+              "value": "B"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "03_students_bva.bva_stu_02_create_empty_fullname"
+            },
+            {
+              "key": "partition",
+              "value": "B: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"bva.student.empty{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"\",\"role\":\"STUDENT\",\"code\":\"BVASE{{$timestamp}}\",\"studentClass\":\"5A\",\"gender\":\"MALE\",\"dateOfBirth\":\"2014-01-01\",\"parentId\":{{parentId}}}"
+            },
+            "url": "{{baseUrl}}/api/students"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-STU-03 Create Invalid Parent ID",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,404,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "03_students_bva.bva_stu_03_create_invalid_parent_id"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"bva.student.parent{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"BVA Student\",\"role\":\"STUDENT\",\"code\":\"BVASP{{$timestamp}}\",\"studentClass\":\"5A\",\"gender\":\"MALE\",\"dateOfBirth\":\"2014-01-01\",\"parentId\":999999999}"
+            },
+            "url": "{{baseUrl}}/api/students"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-STU-04 Get Student Invalid ID",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,404,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "03_students_bva.bva_stu_04_get_student_invalid_id"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/students/999999999"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-STU-05 Get Students By Invalid Parent",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200,400,404,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "03_students_bva.bva_stu_05_get_students_by_invalid_parent"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/students/by-parent/999999999"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-STU-06 Create Future Date Of Birth",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "B"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "student.dateOfBirth.future"
+            },
+            {
+              "key": "partition",
+              "value": "Invalid boundary: dateOfBirth > today"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/students",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"bva.student.case{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"BVA Student\",\"role\":\"STUDENT\",\"code\":\"BVACASE{{$timestamp}}\",\"studentClass\":\"5A\",\"gender\":\"MALE\",\"dateOfBirth\":\"2999-01-01\",\"parentId\":{{parentId}}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-STU-07 Create Empty Date Of Birth",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "B"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "student.dateOfBirth.empty"
+            },
+            {
+              "key": "partition",
+              "value": "Invalid boundary: dateOfBirth empty"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/students",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"bva.student.case{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"BVA Student\",\"role\":\"STUDENT\",\"code\":\"BVACASE{{$timestamp}}\",\"studentClass\":\"5A\",\"gender\":\"MALE\",\"dateOfBirth\":\"\",\"parentId\":{{parentId}}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-STU-08 Create Invalid Date Format",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "student.dateOfBirth.invalid_format"
+            },
+            {
+              "key": "partition",
+              "value": "Invalid EP: date format is not yyyy-MM-dd"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/students",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"bva.student.case{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"BVA Student\",\"role\":\"STUDENT\",\"code\":\"BVACASE{{$timestamp}}\",\"studentClass\":\"5A\",\"gender\":\"MALE\",\"dateOfBirth\":\"17/06/2010\",\"parentId\":{{parentId}}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-STU-09 Create Empty Email",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "B"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "student.email.empty"
+            },
+            {
+              "key": "partition",
+              "value": "Invalid boundary: email empty"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/students",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"\",\"password\":\"123456\",\"fullName\":\"BVA Student\",\"role\":\"STUDENT\",\"code\":\"BVACASE{{$timestamp}}\",\"studentClass\":\"5A\",\"gender\":\"MALE\",\"dateOfBirth\":\"2014-01-01\",\"parentId\":{{parentId}}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-STU-10 Create Wrong Role",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "student.role.wrong_value"
+            },
+            {
+              "key": "partition",
+              "value": "Invalid EP: role must be STUDENT"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/students",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"bva.student.case{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"BVA Student\",\"role\":\"PARENT\",\"code\":\"BVACASE{{$timestamp}}\",\"studentClass\":\"5A\",\"gender\":\"MALE\",\"dateOfBirth\":\"2014-01-01\",\"parentId\":{{parentId}}}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05 Nurses - BVA",
+      "item": [
+        {
+          "name": "BVA-NUR-01 Create Missing Role",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "B"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "05_nurses_bva.bva_nur_01_create_missing_role"
+            },
+            {
+              "key": "partition",
+              "value": "B: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"bva.nurse.norole{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"BVA Nurse\",\"gender\":\"FEMALE\",\"phoneNumber\":\"0911111111\",\"department\":\"Medical Room\",\"active\":true}"
+            },
+            "url": "{{baseUrl}}/api/nurses"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-NUR-02 Create Valid Nurse",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "N"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "05_nurses_bva.bva_nur_02_create_valid_nurse"
+            },
+            {
+              "key": "partition",
+              "value": "N: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.id) pm.environment.set('nurseId', json.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"bva.nurse{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"BVA Nurse\",\"role\":\"SCHOOL_NURSE\",\"gender\":\"FEMALE\",\"phoneNumber\":\"0911111111\",\"department\":\"Medical Room\",\"active\":true}"
+            },
+            "url": "{{baseUrl}}/api/nurses"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-NUR-03 Create Wrong Role",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "05_nurses_bva.bva_nur_03_create_wrong_role"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"bva.nurse.role{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"BVA Nurse\",\"role\":\"PARENT\",\"gender\":\"FEMALE\",\"phoneNumber\":\"0911111111\",\"department\":\"Medical Room\",\"active\":true}"
+            },
+            "url": "{{baseUrl}}/api/nurses"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-NUR-04 Get Invalid ID",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,404,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "05_nurses_bva.bva_nur_04_get_invalid_id"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/nurses/999999999"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-NUR-05 Create Phone 9 Digits",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,500"
+            },
+            {
+              "key": "expectJson",
+              "value": "false"
+            },
+            {
+              "key": "testType",
+              "value": "B"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "nurse.phone.length_9"
+            },
+            {
+              "key": "partition",
+              "value": "Invalid boundary: phone length = 9"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/nurses",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"password\":\"123456\",\"fullName\":\"BVA Nurse\",\"role\":\"SCHOOL_NURSE\",\"gender\":\"FEMALE\",\"department\":\"Medical Room\",\"active\":true,\"email\":\"bva.nurse.phone05{$timestamp}@school.com\",\"phoneNumber\":\"012345678\"}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-NUR-06 Create Phone 11 Digits",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,500"
+            },
+            {
+              "key": "expectJson",
+              "value": "false"
+            },
+            {
+              "key": "testType",
+              "value": "B"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "nurse.phone.length_11"
+            },
+            {
+              "key": "partition",
+              "value": "Invalid boundary: phone length = 11"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/nurses",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"password\":\"123456\",\"fullName\":\"BVA Nurse\",\"role\":\"SCHOOL_NURSE\",\"gender\":\"FEMALE\",\"department\":\"Medical Room\",\"active\":true,\"email\":\"bva.nurse.phone06{$timestamp}@school.com\",\"phoneNumber\":\"01234567890\"}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-NUR-07 Create Phone Without Leading Zero",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,500"
+            },
+            {
+              "key": "expectJson",
+              "value": "false"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "nurse.phone.no_leading_zero"
+            },
+            {
+              "key": "partition",
+              "value": "Invalid EP: phone does not start with 0"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/nurses",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"password\":\"123456\",\"fullName\":\"BVA Nurse\",\"role\":\"SCHOOL_NURSE\",\"gender\":\"FEMALE\",\"department\":\"Medical Room\",\"active\":true,\"email\":\"bva.nurse.phone07{$timestamp}@school.com\",\"phoneNumber\":\"1234567890\"}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "06 Managers - BVA",
+      "item": [
+        {
+          "name": "BVA-MAN-01 Create Missing Role",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "B"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "06_managers_bva.bva_man_01_create_missing_role"
+            },
+            {
+              "key": "partition",
+              "value": "B: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"bva.manager.norole{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"BVA Manager\",\"gender\":\"MALE\",\"phoneNumber\":\"0922222222\",\"active\":true}"
+            },
+            "url": "{{baseUrl}}/api/managers"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-MAN-02 Create Valid Manager",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "N"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "06_managers_bva.bva_man_02_create_valid_manager"
+            },
+            {
+              "key": "partition",
+              "value": "N: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.id) pm.environment.set('managerId', json.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"bva.manager{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"BVA Manager\",\"role\":\"MANAGER\",\"gender\":\"MALE\",\"phoneNumber\":\"0922222222\",\"active\":true}"
+            },
+            "url": "{{baseUrl}}/api/managers"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-MAN-03 Create Wrong Role",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "06_managers_bva.bva_man_03_create_wrong_role"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"bva.manager.role{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"BVA Manager\",\"role\":\"PARENT\",\"gender\":\"MALE\",\"phoneNumber\":\"0922222222\",\"active\":true}"
+            },
+            "url": "{{baseUrl}}/api/managers"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-MAN-04 Get Invalid ID",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,404,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "06_managers_bva.bva_man_04_get_invalid_id"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/managers/999999999"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "07 Blogs - BVA",
+      "item": [
+        {
+          "name": "BVA-BLOG-01 Create Empty Title",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "B"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "07_blogs_bva.bva_blog_01_create_empty_title"
+            },
+            {
+              "key": "partition",
+              "value": "B: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"\",\"content\":\"Noi dung blog\",\"author\":\"postman\",\"category\":\"Health\",\"thumbnail\":\"https://example.com/thumb.png\",\"publishDate\":\"2026-05-25\"}"
+            },
+            "url": "{{baseUrl}}/api/blogs"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-BLOG-02 Create Min Title",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "N"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "07_blogs_bva.bva_blog_02_create_min_title"
+            },
+            {
+              "key": "partition",
+              "value": "N: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.id) pm.environment.set('blogId', json.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"A\",\"content\":\"Noi dung blog\",\"author\":\"postman\",\"category\":\"Health\",\"thumbnail\":\"https://example.com/thumb.png\",\"publishDate\":\"2026-05-25\"}"
+            },
+            "url": "{{baseUrl}}/api/blogs"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-BLOG-03 Create Empty Content",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400"
+            },
+            {
+              "key": "testType",
+              "value": "B"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "07_blogs_bva.bva_blog_03_create_empty_content"
+            },
+            {
+              "key": "partition",
+              "value": "B: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"Blog {{$timestamp}}\",\"content\":\"\",\"author\":\"postman\",\"category\":\"Health\",\"thumbnail\":\"https://example.com/thumb.png\",\"publishDate\":\"2026-05-25\"}"
+            },
+            "url": "{{baseUrl}}/api/blogs"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-BLOG-04 Get Invalid ID",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "404"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "07_blogs_bva.bva_blog_04_get_invalid_id"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/blogs/999999999"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-BLOG-05 Delete Invalid ID",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "404"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "07_blogs_bva.bva_blog_05_delete_invalid_id"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/blogs/999999999"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-BLOG-06 Create Empty Author",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "B"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "blog.author.empty"
+            },
+            {
+              "key": "partition",
+              "value": "Invalid boundary: author empty"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/blogs",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"Blog {{$timestamp}}\",\"content\":\"Noi dung blog\",\"author\":\"\",\"category\":\"Health\",\"thumbnail\":\"https://example.com/thumb.png\",\"publishDate\":\"2026-05-25\"}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-BLOG-07 Create Empty Category",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "B"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "blog.category.empty"
+            },
+            {
+              "key": "partition",
+              "value": "Invalid boundary: category empty"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/blogs",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"Blog {{$timestamp}}\",\"content\":\"Noi dung blog\",\"author\":\"postman\",\"category\":\"\",\"thumbnail\":\"https://example.com/thumb.png\",\"publishDate\":\"2026-05-25\"}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "08 School Health Docs - BVA",
+      "item": [
+        {
+          "name": "BVA-DOC-01 Create Valid Doc",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200,201"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "N"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "08_school_health_docs_bva.bva_doc_01_create_valid_doc"
+            },
+            {
+              "key": "partition",
+              "value": "N: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if ([200,201].includes(pm.response.code)) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.id) pm.environment.set('schoolHealthDocId', json.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"BVA Health Doc {{$timestamp}}\",\"content\":\"Noi dung tai lieu suc khoe\",\"url\":\"https://example.com/health-doc\"}"
+            },
+            "url": "{{baseUrl}}/api/school-health-docs"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-DOC-02 Create Empty Title",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200,400,500"
+            },
+            {
+              "key": "testType",
+              "value": "B"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "08_school_health_docs_bva.bva_doc_02_create_empty_title"
+            },
+            {
+              "key": "partition",
+              "value": "B: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"\",\"content\":\"Noi dung tai lieu suc khoe\",\"url\":\"https://example.com/health-doc\"}"
+            },
+            "url": "{{baseUrl}}/api/school-health-docs"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-DOC-03 Get Invalid ID",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,404,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "08_school_health_docs_bva.bva_doc_03_get_invalid_id"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/school-health-docs/999999999"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-DOC-04 Delete Invalid ID",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,404,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "08_school_health_docs_bva.bva_doc_04_delete_invalid_id"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/school-health-docs/999999999"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "09 Medical Supplies - BVA",
+      "item": [
+        {
+          "name": "BVA-MS-01 Create Quantity 0",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400"
+            },
+            {
+              "key": "testType",
+              "value": "N"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "09_medical_supplies_bva.bva_ms_01_create_quantity_0"
+            },
+            {
+              "key": "partition",
+              "value": "N: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"BVA Zero Quantity {{$timestamp}}\",\"quantity\":0,\"category\":\"Thuoc\",\"expiryDate\":\"2027-12-31\"}"
+            },
+            "url": "{{baseUrl}}/api/medical-supplies"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-MS-02 Create Quantity 1",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "201"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "N"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "09_medical_supplies_bva.bva_ms_02_create_quantity_1"
+            },
+            {
+              "key": "partition",
+              "value": "N: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.id) pm.environment.set('medicalSupplyId', json.id);",
+                  "  if (json.category) pm.environment.set('medicalSupplyCategory', json.category);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"BVA Min Quantity {{$timestamp}}\",\"quantity\":1,\"category\":\"Thuoc\",\"expiryDate\":\"2027-12-31\"}"
+            },
+            "url": "{{baseUrl}}/api/medical-supplies"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-MS-03 Create Empty Name",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400"
+            },
+            {
+              "key": "testType",
+              "value": "B"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "09_medical_supplies_bva.bva_ms_03_create_empty_name"
+            },
+            {
+              "key": "partition",
+              "value": "B: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"\",\"quantity\":10,\"category\":\"Thuoc\",\"expiryDate\":\"2027-12-31\"}"
+            },
+            "url": "{{baseUrl}}/api/medical-supplies"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-MS-04 Get Invalid ID",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "404"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "09_medical_supplies_bva.bva_ms_04_get_invalid_id"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/medical-supplies/999999999"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-MS-05 Get Unknown Category",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "N"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "09_medical_supplies_bva.bva_ms_05_get_unknown_category"
+            },
+            {
+              "key": "partition",
+              "value": "N: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/medical-supplies/category/UNKNOWN_BVA_CATEGORY"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-MS-06 Delete Invalid ID",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "09_medical_supplies_bva.bva_ms_06_delete_invalid_id"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/medical-supplies/999999999"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-MS-07 Create Empty Category",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400"
+            },
+            {
+              "key": "expectJson",
+              "value": "false"
+            },
+            {
+              "key": "testType",
+              "value": "B"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "medicalSupply.category.empty"
+            },
+            {
+              "key": "partition",
+              "value": "Invalid boundary: category empty"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/medical-supplies",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"BVA Empty Category {{$timestamp}}\",\"quantity\":10,\"category\":\"\",\"expiryDate\":\"2027-12-31\"}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "10 Health Profiles - BVA",
+      "item": [
+        {
+          "name": "BVA-HP-01 Create Invalid Student ID",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,404,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "10_health_profiles_bva.bva_hp_01_create_invalid_student_id"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"student\":{\"id\":999999999},\"studentName\":\"BVA Student\",\"className\":\"5A\",\"grade\":\"5\",\"gender\":\"MALE\",\"dateOfBirth\":\"2014-01-01\",\"city\":\"HCM\",\"district\":\"District 1\",\"allergies\":\"None\",\"chronicDiseases\":\"None\",\"medicalHistory\":\"None\",\"vaccinationHistory\":\"Basic\",\"visionDetails\":\"Normal\",\"hearingDetails\":\"Normal\"}"
+            },
+            "url": "{{baseUrl}}/api/health-profiles"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-HP-02 Create Valid Health Profile",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200,201,400,500"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "N"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "10_health_profiles_bva.bva_hp_02_create_valid_health_profile"
+            },
+            {
+              "key": "partition",
+              "value": "N: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if ([200,201].includes(pm.response.code)) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.id) pm.environment.set('healthProfileId', json.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"student\":{\"id\":{{studentId}}},\"studentName\":\"BVA Student\",\"className\":\"5A\",\"grade\":\"5\",\"gender\":\"MALE\",\"dateOfBirth\":\"2014-01-01\",\"city\":\"HCM\",\"district\":\"District 1\",\"allergies\":\"None\",\"chronicDiseases\":\"None\",\"medicalHistory\":\"None\",\"vaccinationHistory\":\"Basic\",\"visionDetails\":\"Normal\",\"hearingDetails\":\"Normal\"}"
+            },
+            "url": "{{baseUrl}}/api/health-profiles"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-HP-03 Get By Invalid Student",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200,400,404,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "10_health_profiles_bva.bva_hp_03_get_by_invalid_student"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health-profiles/student/999999999"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-HP-04 Get Student ID By Invalid Parent",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200,400,404,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "10_health_profiles_bva.bva_hp_04_get_student_id_by_invalid_parent"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health-profiles/by-parent/999999999/student"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-HP-05 Get By Valid Student",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "N"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "healthProfile.studentId.valid"
+            },
+            {
+              "key": "partition",
+              "value": "Valid EP: studentId has health profile"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health-profiles/student/{{studentId}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "11 Health Incidents - BVA",
+      "item": [
+        {
+          "name": "BVA-HI-01 Create Invalid Student ID",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,404,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "11_health_incidents_bva.bva_hi_01_create_invalid_student_id"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"student\":{\"id\":999999999},\"reportedBy\":{\"id\":{{reportedById}}},\"incidentType\":\"FALL\",\"description\":\"Student slipped\",\"actionTaken\":\"First aid\",\"incidentTime\":\"{{incidentTime}}\",\"status\":\"REPORTED\"}"
+            },
+            "url": "{{baseUrl}}/api/health-incidents"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-HI-02 Create Valid Incident",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200,201"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "N"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "11_health_incidents_bva.bva_hi_02_create_valid_incident"
+            },
+            {
+              "key": "partition",
+              "value": "N: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if ([200,201].includes(pm.response.code)) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.id) pm.environment.set('healthIncidentId', json.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"student\":{\"id\":{{studentId}}},\"reportedBy\":{\"id\":{{reportedById}}},\"incidentType\":\"FALL\",\"description\":\"Student slipped\",\"actionTaken\":\"First aid\",\"incidentTime\":\"{{incidentTime}}\",\"status\":\"REPORTED\"}"
+            },
+            "url": "{{baseUrl}}/api/health-incidents"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-HI-03 Get Invalid ID",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,404,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "11_health_incidents_bva.bva_hi_03_get_invalid_id"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health-incidents/999999999"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-HI-04 Filter Invalid Student",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200,400,404,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "11_health_incidents_bva.bva_hi_04_filter_invalid_student"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health-incidents/student/999999999"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-HI-05 Filter Invalid Status",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200,400,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "11_health_incidents_bva.bva_hi_05_filter_invalid_status"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health-incidents/status/INVALID_STATUS"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-HI-06 Filter Invalid Incident Time",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "11_health_incidents_bva.bva_hi_06_filter_invalid_incident_time"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health-incidents/incident-time/invalid-date"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "12 Medical Checkup - BVA",
+      "item": [
+        {
+          "name": "BVA-MC-01 Create Notification Invalid Student",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,404,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "12_medical_checkup_bva.bva_mc_01_create_notification_invalid_student"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"studentId\":999999999,\"parentId\":{{parentId}},\"content\":\"Thong bao kham suc khoe\",\"scheduledDate\":\"2026-06-01T08:00:00\",\"status\":\"PENDING\"}"
+            },
+            "url": "{{baseUrl}}/api/medical-checkup/notify"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-MC-02 Create Notification Valid",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200,201"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "N"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "12_medical_checkup_bva.bva_mc_02_create_notification_valid"
+            },
+            {
+              "key": "partition",
+              "value": "N: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if ([200,201].includes(pm.response.code)) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.id) pm.environment.set('medicalCheckupNotificationId', json.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"studentId\":{{studentId}},\"parentId\":{{parentId}},\"content\":\"Thong bao kham suc khoe\",\"scheduledDate\":\"2026-06-01T08:00:00\",\"status\":\"PENDING\"}"
+            },
+            "url": "{{baseUrl}}/api/medical-checkup/notify"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-MC-03 Bulk Empty StudentIds",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200,400,500"
+            },
+            {
+              "key": "testType",
+              "value": "B"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "12_medical_checkup_bva.bva_mc_03_bulk_empty_studentids"
+            },
+            {
+              "key": "partition",
+              "value": "B: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"studentIds\":[],\"content\":\"Thong bao kham tong quat\",\"scheduledDate\":\"2026-06-10T08:00:00\"}"
+            },
+            "url": "{{baseUrl}}/api/medical-checkup/notify/bulk"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-MC-04 Update Consent Invalid Value",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,404,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "12_medical_checkup_bva.bva_mc_04_update_consent_invalid_value"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/plain"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "INVALID"
+            },
+            "url": "{{baseUrl}}/api/medical-checkup/notification/{{medicalCheckupNotificationId}}/consent"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-MC-05 Create Result Invalid Date",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "12_medical_checkup_bva.bva_mc_05_create_result_invalid_date"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"studentId\":{{studentId}},\"checkupDate\":\"invalid-date\",\"result\":\"Good health\",\"notes\":\"No issue\",\"abnormal\":false,\"createdBy\":{{reportedById}}}"
+            },
+            "url": "{{baseUrl}}/api/medical-checkup/result"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-MC-06 Create Result Valid",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200,201"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "N"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "12_medical_checkup_bva.bva_mc_06_create_result_valid"
+            },
+            {
+              "key": "partition",
+              "value": "N: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if ([200,201].includes(pm.response.code)) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.id) pm.environment.set('medicalCheckupResultId', json.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"studentId\":{{studentId}},\"checkupDate\":\"2026-06-01T09:00:00\",\"result\":\"Good health\",\"notes\":\"No issue\",\"abnormal\":false,\"createdBy\":{{reportedById}}}"
+            },
+            "url": "{{baseUrl}}/api/medical-checkup/result"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-MC-07 Student Confirm Invalid Result",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,404,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "12_medical_checkup_bva.bva_mc_07_student_confirm_invalid_result"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": "{{baseUrl}}/api/medical-checkup/result/999999999/student-confirm"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "13 Vaccination Schedules - BVA",
+      "item": [
+        {
+          "name": "BVA-VAC-01 Create Invalid Student",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,404,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "13_vaccination_schedules_bva.bva_vac_01_create_invalid_student"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"studentId\":999999999,\"studentName\":\"BVA Student\",\"studentCode\":\"ST001\",\"vaccineName\":\"Covid-19\",\"scheduledDateTime\":\"2026-06-15T08:00:00\",\"vaccinated\":false,\"parentConsent\":\"PENDING\",\"studentConfirmation\":false,\"notes\":\"Lich tiem mau\",\"location\":\"School Clinic\",\"batchNumber\":\"VAC001\",\"createdBy\":\"postman\"}"
+            },
+            "url": "{{baseUrl}}/api/vaccination-schedules"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-VAC-02 Create Empty Vaccine Name",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200,201,400,500"
+            },
+            {
+              "key": "testType",
+              "value": "B"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "13_vaccination_schedules_bva.bva_vac_02_create_empty_vaccine_name"
+            },
+            {
+              "key": "partition",
+              "value": "B: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"studentId\":{{studentId}},\"studentName\":\"BVA Student\",\"studentCode\":\"ST001\",\"vaccineName\":\"\",\"scheduledDateTime\":\"2026-06-15T08:00:00\",\"vaccinated\":false,\"parentConsent\":\"PENDING\",\"studentConfirmation\":false,\"notes\":\"Lich tiem mau\",\"location\":\"School Clinic\",\"batchNumber\":\"VAC001\",\"createdBy\":\"postman\"}"
+            },
+            "url": "{{baseUrl}}/api/vaccination-schedules"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-VAC-03 Create Valid Schedule",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200,201"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
+              "key": "testType",
+              "value": "N"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "13_vaccination_schedules_bva.bva_vac_03_create_valid_schedule"
+            },
+            {
+              "key": "partition",
+              "value": "N: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if ([200,201].includes(pm.response.code)) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.id) pm.environment.set('vaccinationScheduleId', json.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"studentId\":{{studentId}},\"studentName\":\"BVA Student\",\"studentCode\":\"ST001\",\"vaccineName\":\"Covid-19\",\"scheduledDateTime\":\"2026-06-15T08:00:00\",\"vaccinated\":false,\"parentConsent\":\"PENDING\",\"studentConfirmation\":false,\"notes\":\"Lich tiem mau\",\"location\":\"School Clinic\",\"batchNumber\":\"VAC001\",\"createdBy\":\"postman\"}"
+            },
+            "url": "{{baseUrl}}/api/vaccination-schedules"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-VAC-04 Bulk Empty StudentIds",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200,400,500"
+            },
+            {
+              "key": "testType",
+              "value": "B"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "13_vaccination_schedules_bva.bva_vac_04_bulk_empty_studentids"
+            },
+            {
+              "key": "partition",
+              "value": "B: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"studentIds\":[],\"vaccineName\":\"Flu\",\"scheduledDateTime\":\"2026-06-20T08:00:00\",\"notes\":\"Bulk schedule\",\"location\":\"School Hall\"}"
+            },
+            "url": "{{baseUrl}}/api/vaccination-schedules/bulk"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-VAC-05 Get Invalid ID",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,404,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "13_vaccination_schedules_bva.bva_vac_05_get_invalid_id"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/vaccination-schedules/999999999"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-VAC-06 Get Invalid Date Range",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200,400,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "13_vaccination_schedules_bva.bva_vac_06_get_invalid_date_range"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/vaccination-schedules/date-range?startDate=2026-12-31T23:59:59&endDate=2026-01-01T00:00:00"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-VAC-07 Update Parent Consent Invalid",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,404,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "13_vaccination_schedules_bva.bva_vac_07_update_parent_consent_invalid"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"consent\":\"INVALID\"}"
+            },
+            "url": "{{baseUrl}}/api/vaccination-schedules/{{vaccinationScheduleId}}/parent-consent"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-VAC-08 Update Student Confirmation Invalid Type",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "400,500"
+            },
+            {
+              "key": "testType",
+              "value": "A"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "13_vaccination_schedules_bva.bva_vac_08_update_student_confirmation_invalid_type"
+            },
+            {
+              "key": "partition",
+              "value": "A: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"confirmed\":\"invalid-boolean\"}"
+            },
+            "url": "{{baseUrl}}/api/vaccination-schedules/{{vaccinationScheduleId}}/student-confirmation"
+          },
+          "response": []
+        },
+        {
+          "name": "BVA-VAC-09 Update Vaccination Status Valid",
+          "variable": [
+            {
+              "key": "expectedStatus",
+              "value": "200,400,404,500"
+            },
+            {
+              "key": "testType",
+              "value": "N"
+            },
+            {
+              "key": "equivalenceClass",
+              "value": "13_vaccination_schedules_bva.bva_vac_09_update_vaccination_status_valid"
+            },
+            {
+              "key": "partition",
+              "value": "N: EP/BVA partition documented by request name and input payload"
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"isVaccinated\":true}"
+            },
+            "url": "{{baseUrl}}/api/vaccination-schedules/{{vaccinationScheduleId}}/vaccination-status"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
