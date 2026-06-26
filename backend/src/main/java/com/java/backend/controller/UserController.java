@@ -154,7 +154,11 @@ public class UserController {
                             user.setEmail(email);
                         }
                         if (newUser.getFullName() != null) {
-                            user.setFullName(newUser.getFullName().trim());
+                            String fullName = newUser.getFullName().trim();
+                            if (fullName.isEmpty()) {
+                                throw new IllegalArgumentException("Họ tên không được để trống");
+                            }
+                            user.setFullName(fullName);
                         }
                         if (newUser.getRole() != null) {
                             user.setRole(newUser.getRole());

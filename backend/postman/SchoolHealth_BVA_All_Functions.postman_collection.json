@@ -579,7 +579,11 @@
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "200,400,500"
+              "value": "400"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
             },
             {
               "key": "testType",
@@ -587,11 +591,34 @@
             },
             {
               "key": "equivalenceClass",
-              "value": "02_users_bva.bva_user_04_update_empty_fullname"
+              "value": "user.fullName.empty_on_update"
             },
             {
               "key": "partition",
-              "value": "B: EP/BVA partition documented by request name and input payload"
+              "value": "Invalid boundary: fullName is empty on update"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-USER-04';",
+                  "const type = 'B';",
+                  "console.log(`[${tc}] [${type}] Cap nhat fullName rong`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Họ tên không được để trống');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
             }
           ],
           "request": {

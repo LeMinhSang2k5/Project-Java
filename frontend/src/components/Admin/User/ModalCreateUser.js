@@ -39,7 +39,7 @@ function ModalCreateUser({ show, onClose, onUserAdded }) {
       case "PARENT":
         return "parent";
       case "MANAGER":
-        return "manager";
+        return "/managers";
       case "SCHOOL_NURSE":
         return "/nurses";
       case "ADMIN":
@@ -66,20 +66,31 @@ function ModalCreateUser({ show, onClose, onUserAdded }) {
       if (form.role === "STUDENT") {
         payload = {
           ...payload,
+          role: "STUDENT",
           code: form.code,
           studentClass: form.studentClass,
           dateOfBirth: form.dateOfBirth
         };
       }
-      if (form.role === "PARENT" || form.role === "MANAGER" || form.role === "SCHOOL_NURSE") {
+      if (form.role === "PARENT") {
         payload = {
           ...payload,
+          role: "PARENT",
+          phoneNumber: form.phoneNumber
+        };
+      }
+      if (form.role === "MANAGER") {
+        payload = {
+          ...payload,
+          role: "MANAGER",
           phoneNumber: form.phoneNumber
         };
       }
       if (form.role === "SCHOOL_NURSE") {
         payload = {
           ...payload,
+          role: "SCHOOL_NURSE",
+          phoneNumber: form.phoneNumber,
           department: form.department
         };
       }
