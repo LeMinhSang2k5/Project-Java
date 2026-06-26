@@ -8,14 +8,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
+import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/api/parent")
 @CrossOrigin(origins = "http://localhost:3000")
 public class ParentController {
+
+    private static final Pattern PHONE_PATTERN = Pattern.compile("^0\\d{9}$");
+    private static final String PHONE_VALIDATION_MESSAGE =
+            "Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng 0";
 
     @Autowired
     private ParentService parentService;
@@ -30,9 +35,23 @@ public class ParentController {
             return ResponseEntity.badRequest()
                     .body(Map.of("message", "Khi tạo phụ huynh, role chỉ được phép là PARENT"));
         }
+        if (parent.getPhoneNumber() == null || parent.getPhoneNumber().trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "Số điện thoại không được để trống"));
+        }
+        String phoneNumber = parent.getPhoneNumber().trim();
+        if (!isValidPhoneNumber(phoneNumber)) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", PHONE_VALIDATION_MESSAGE));
+        }
+        parent.setPhoneNumber(phoneNumber);
 
         Parent saved = parentService.saveParent(parent);
         return ResponseEntity.ok(saved);
+    }
+
+    private boolean isValidPhoneNumber(String phoneNumber) {
+        return phoneNumber != null && PHONE_PATTERN.matcher(phoneNumber).matches();
     }
 
     @GetMapping("/{parentId}/students")

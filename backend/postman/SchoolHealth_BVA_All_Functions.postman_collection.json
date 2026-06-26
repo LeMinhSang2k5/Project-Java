@@ -51,105 +51,6 @@
       "name": "01 Auth - BVA",
       "item": [
         {
-          "name": "BVA-AUTH-00 [Setup] Sync Admin Password",
-          "variable": [
-            {
-              "key": "expectedStatus",
-              "value": "200"
-            },
-            {
-              "key": "testType",
-              "value": "N"
-            },
-            {
-              "key": "equivalenceClass",
-              "value": "auth.setup.sync_admin_password"
-            },
-            {
-              "key": "partition",
-              "value": "Precondition: admin@school.com password = loginPassword (123456)"
-            },
-            {
-              "key": "expectJson",
-              "value": "true"
-            }
-          ],
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "const baseUrl = pm.environment.get('baseUrl');",
-                  "const email = pm.environment.get('loginEmail');",
-                  "const password = pm.environment.get('loginPassword');",
-                  "",
-                  "async function ensureAdminLoginReady() {",
-                  "    const listRes = await pm.sendRequest({ url: `${baseUrl}/api/users?page=0`, method: 'GET' });",
-                  "    const users = (listRes.json().content || []);",
-                  "    let user = users.find((u) => u.email === email);",
-                  "",
-                  "    if (!user) {",
-                  "        const createRes = await pm.sendRequest({",
-                  "            url: `${baseUrl}/api/user`,",
-                  "            method: 'POST',",
-                  "            header: { 'Content-Type': 'application/json' },",
-                  "            body: {",
-                  "                mode: 'raw',",
-                  "                raw: JSON.stringify({ email, password, fullName: 'Admin User', role: 'ADMIN', active: true })",
-                  "            }",
-                  "        });",
-                  "        if (createRes.code === 200) {",
-                  "            console.log('[BVA-AUTH-03] Setup: created admin user');",
-                  "            return;",
-                  "        }",
-                  "    }",
-                  "",
-                  "    if (user) {",
-                  "        await pm.sendRequest({",
-                  "            url: `${baseUrl}/api/user/${user.id}`,",
-                  "            method: 'PUT',",
-                  "            header: { 'Content-Type': 'application/json' },",
-                  "            body: {",
-                  "                mode: 'raw',",
-                  "                raw: JSON.stringify({",
-                  "                    email,",
-                  "                    password,",
-                  "                    fullName: user.fullName || 'Admin User',",
-                  "                    role: user.role || 'ADMIN',",
-                  "                    active: true",
-                  "                })",
-                  "            }",
-                  "        });",
-                  "        console.log(`[BVA-AUTH-03] Setup: synced password for user id=${user.id}`);",
-                  "    }",
-                  "}",
-                  "",
-                  "await ensureAdminLoginReady();"
-                ]
-              }
-            },
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('[BVA-AUTH-00] Setup request completed', function () {",
-                  "    pm.expect([200, 404]).to.include(pm.response.code);",
-                  "});",
-                  "console.log('[BVA-AUTH-00] Admin password synced for AUTH-03');"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/api/users?page=0"
-          },
-          "response": []
-        },
-        {
           "name": "BVA-AUTH-01 Login Empty Email",
           "variable": [
             {
@@ -910,19 +811,46 @@
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "200,400,500"
+              "value": "400"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
             },
             {
               "key": "testType",
-              "value": "N"
+              "value": "B"
             },
             {
               "key": "equivalenceClass",
-              "value": "04_parents_bva.bva_par_02_create_phone_9_digits"
+              "value": "parent.phone.nine_digits"
             },
             {
               "key": "partition",
-              "value": "N: EP/BVA partition documented by request name and input payload"
+              "value": "Invalid boundary: phoneNumber has 9 digits (min-1 for 10-digit rule)"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-PAR-02';",
+                  "const type = 'B';",
+                  "console.log(`[${tc}] [${type}] Tao phu huynh SĐT 9 chu so`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng 0');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
             }
           ],
           "request": {
