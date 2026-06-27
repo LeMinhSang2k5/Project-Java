@@ -1130,7 +1130,11 @@
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "400,404,500"
+              "value": "400"
+            },
+            {
+              "key": "expectJson",
+              "value": "true"
             },
             {
               "key": "testType",
@@ -1138,11 +1142,34 @@
             },
             {
               "key": "equivalenceClass",
-              "value": "03_students_bva.bva_stu_03_create_invalid_parent_id"
+              "value": "student.parentId.not_found"
             },
             {
               "key": "partition",
-              "value": "A: EP/BVA partition documented by request name and input payload"
+              "value": "Invalid EP: parentId does not exist"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-STU-03';",
+                  "const type = 'A';",
+                  "console.log(`[${tc}] [${type}] Tao hoc sinh voi parentId khong ton tai`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Không tìm thấy phụ huynh');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
             }
           ],
           "request": {
@@ -1166,7 +1193,7 @@
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "400,404,500"
+              "value": "404"
             },
             {
               "key": "testType",
@@ -1174,11 +1201,30 @@
             },
             {
               "key": "equivalenceClass",
-              "value": "03_students_bva.bva_stu_04_get_student_invalid_id"
+              "value": "student.id.not_found"
             },
             {
               "key": "partition",
-              "value": "A: EP/BVA partition documented by request name and input payload"
+              "value": "Invalid EP: student id does not exist"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-STU-04';",
+                  "const type = 'A';",
+                  "console.log(`[${tc}] [${type}] Lay hoc sinh ID khong ton tai`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 404`, function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
             }
           ],
           "request": {
@@ -1193,7 +1239,7 @@
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "200,400,404,500"
+              "value": "404"
             },
             {
               "key": "testType",
@@ -1201,11 +1247,30 @@
             },
             {
               "key": "equivalenceClass",
-              "value": "03_students_bva.bva_stu_05_get_students_by_invalid_parent"
+              "value": "student.by_parent.parent_not_found"
             },
             {
               "key": "partition",
-              "value": "A: EP/BVA partition documented by request name and input payload"
+              "value": "Invalid EP: parentId does not exist"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-STU-05';",
+                  "const type = 'A';",
+                  "console.log(`[${tc}] [${type}] Lay hoc sinh theo parentId khong ton tai`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 404`, function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
             }
           ],
           "request": {

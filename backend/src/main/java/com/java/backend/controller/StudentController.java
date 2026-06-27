@@ -1,6 +1,8 @@
 package com.java.backend.controller;
 
 import com.java.backend.entity.Student;
+import com.java.backend.exception.ParentNotFoundException;
+import com.java.backend.exception.StudentNotFoundException;
 import com.java.backend.service.StudentService;
 import com.java.backend.enums.Gender;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,6 +110,11 @@ public class StudentController {
                         .body(Map.of("message", "Khi tạo học sinh, role chỉ được phép là STUDENT"));
             }
 
+            if (parentId != null && !studentService.parentExists(parentId)) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "Không tìm thấy phụ huynh với ID: " + parentId));
+            }
+
             // Tạo Student object
             Student student = studentService.createStudent(email, password, fullName, studentClass, code, gender,
                     dateOfBirth, city, district, grade);
@@ -147,13 +154,9 @@ public class StudentController {
     public ResponseEntity<?> getStudent(@PathVariable Long id) {
         try {
             Student student = studentService.getStudentById(id);
-            if (student != null) {
-                return ResponseEntity.ok(student);
-            } else {
-                Map<String, String> error = new HashMap<>();
-                error.put("message", "Không tìm thấy học sinh với ID: " + id);
-                return ResponseEntity.notFound().build();
-            }
+            return ResponseEntity.ok(student);
+        } catch (StudentNotFoundException e) {
+            return ResponseEntity.notFound().build();
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("message", "Lỗi khi lấy thông tin học sinh: " + e.getMessage());
@@ -225,11 +228,19 @@ public class StudentController {
             }
 
             if (parentId != null) {
+                if (!studentService.parentExists(parentId)) {
+                    return ResponseEntity.badRequest()
+                            .body(Map.of("message", "Không tìm thấy phụ huynh với ID: " + parentId));
+                }
                 studentService.linkStudentToParent(saved.getId(), parentId);
                 saved = studentService.getStudentById(saved.getId());
             }
 
             return ResponseEntity.ok(saved);
+        } catch (StudentNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (ParentNotFoundException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("message", "Lỗi khi cập nhật học sinh: " + e.getMessage());
@@ -244,6 +255,8 @@ public class StudentController {
             Map<String, String> success = new HashMap<>();
             success.put("message", "Xóa học sinh thành công");
             return ResponseEntity.ok(success);
+        } catch (StudentNotFoundException e) {
+            return ResponseEntity.notFound().build();
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("message", "Lỗi khi xóa học sinh: " + e.getMessage());
@@ -257,6 +270,8 @@ public class StudentController {
         try {
             List<Student> students = studentService.getStudentsByParent(parentId);
             return ResponseEntity.ok(students);
+        } catch (ParentNotFoundException e) {
+            return ResponseEntity.notFound().build();
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("message", "Lỗi khi lấy danh sách học sinh: " + e.getMessage());

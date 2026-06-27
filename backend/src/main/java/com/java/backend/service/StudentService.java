@@ -1,6 +1,8 @@
 package com.java.backend.service;
 
 import com.java.backend.entity.Student;
+import com.java.backend.exception.ParentNotFoundException;
+import com.java.backend.exception.StudentNotFoundException;
 import com.java.backend.repository.StudentRepository;
 import com.java.backend.repository.UserRepository;
 import com.java.backend.repository.ParentRepository;
@@ -69,7 +71,11 @@ public class StudentService {
 
     public Student getStudentById(Long id) {
         return studentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Student not found with id: " + id));
+                .orElseThrow(() -> new StudentNotFoundException(id));
+    }
+
+    public boolean parentExists(Long parentId) {
+        return parentRepository.existsById(parentId);
     }
 
     public Student updateStudent(Student student) {
@@ -84,36 +90,30 @@ public class StudentService {
     }
 
     public void deleteStudent(Long id) {
-        try {
-            if (!studentRepository.existsById(id)) {
-                throw new RuntimeException("Student not found with id: " + id);
-            }
-            studentRepository.deleteById(id);
-        } catch (Exception e) {
-            throw new RuntimeException("Lỗi khi xóa học sinh: " + e.getMessage(), e);
+        if (!studentRepository.existsById(id)) {
+            throw new StudentNotFoundException(id);
         }
+        studentRepository.deleteById(id);
     }
 
     // Method để lấy danh sách học sinh theo parent ID
     public List<Student> getStudentsByParent(Long parentId) {
+        if (!parentRepository.existsById(parentId)) {
+            throw new ParentNotFoundException(parentId);
+        }
         return studentRepository.findByParentId(parentId);
     }
 
     // Method để liên kết học sinh với phụ huynh
     public void linkStudentToParent(Long studentId, Long parentId) {
-        try {
-            Student student = studentRepository.findById(studentId)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy học sinh với ID: " + studentId));
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new StudentNotFoundException(studentId));
 
-            // Import Parent entity
-            com.java.backend.entity.Parent parent = parentRepository.findById(parentId)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy phụ huynh với ID: " + parentId));
+        com.java.backend.entity.Parent parent = parentRepository.findById(parentId)
+                .orElseThrow(() -> new ParentNotFoundException(parentId));
 
-            student.setParent(parent);
-            studentRepository.save(student);
-        } catch (Exception e) {
-            throw new RuntimeException("Lỗi khi liên kết học sinh với phụ huynh: " + e.getMessage(), e);
-        }
+        student.setParent(parent);
+        studentRepository.save(student);
     }
 
 }
