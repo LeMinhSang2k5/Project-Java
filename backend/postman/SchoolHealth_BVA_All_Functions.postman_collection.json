@@ -3753,7 +3753,7 @@
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "400,404,500"
+              "value": "404"
             },
             {
               "key": "testType",
@@ -3790,11 +3790,15 @@
                 "type": "text/javascript",
                 "exec": [
                   "const tc = 'BVA-HP-01';",
-                  "const type = pm.variables.get('testType') || 'N';",
+                  "const type = pm.variables.get('testType') || 'A';",
                   "console.log(`[${tc}] [${type}] Create Invalid Student ID`);",
                   "",
-                  "pm.test(`[${tc}] Status code hop le`, function () {",
-                  "    pm.expect([400, 404, 500]).to.include(pm.response.code);",
+                  "pm.test(`[${tc}] Status code la 404`, function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Không tìm thấy học sinh với ID: 999999999');",
                   "});",
                   "",
                   "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
@@ -3808,7 +3812,7 @@
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "200,201,400,500"
+              "value": "200"
             },
             {
               "key": "expectJson",
@@ -3837,11 +3841,15 @@
                   "const type = pm.variables.get('testType') || 'N';",
                   "console.log(`[${tc}] [${type}] Create Valid Health Profile`);",
                   "",
-                  "pm.test(`[${tc}] Status code hop le`, function () {",
-                  "    pm.expect([200, 201, 400, 500]).to.include(pm.response.code);",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "    pm.response.to.have.status(200);",
                   "});",
                   "",
-                  "if ([200,201].includes(pm.response.code)) pm.environment.set('healthProfileId', String(pm.response.json().id));",
+                  "pm.test(`[${tc}] Co id`, function () {",
+                  "    pm.expect(pm.response.json().id).to.be.a('number');",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) pm.environment.set('healthProfileId', String(pm.response.json().id));",
                   "",
                   "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
                 ]
@@ -3869,7 +3877,7 @@
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "200,400,404,500"
+              "value": "404"
             },
             {
               "key": "testType",
@@ -3897,11 +3905,15 @@
                 "type": "text/javascript",
                 "exec": [
                   "const tc = 'BVA-HP-03';",
-                  "const type = pm.variables.get('testType') || 'N';",
+                  "const type = pm.variables.get('testType') || 'A';",
                   "console.log(`[${tc}] [${type}] Get By Invalid Student`);",
                   "",
-                  "pm.test(`[${tc}] Status code hop le`, function () {",
-                  "    pm.expect([200, 404]).to.include(pm.response.code);",
+                  "pm.test(`[${tc}] Status code la 404`, function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Không tìm thấy hồ sơ sức khỏe cho học sinh với ID: 999999999');",
                   "});",
                   "",
                   "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
@@ -3915,7 +3927,7 @@
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "200,400,404,500"
+              "value": "404"
             },
             {
               "key": "testType",
@@ -3943,11 +3955,15 @@
                 "type": "text/javascript",
                 "exec": [
                   "const tc = 'BVA-HP-04';",
-                  "const type = pm.variables.get('testType') || 'N';",
+                  "const type = pm.variables.get('testType') || 'A';",
                   "console.log(`[${tc}] [${type}] Get Student ID By Invalid Parent`);",
                   "",
-                  "pm.test(`[${tc}] Status code hop le`, function () {",
-                  "    pm.expect([400, 404]).to.include(pm.response.code);",
+                  "pm.test(`[${tc}] Status code la 404`, function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Không tìm thấy phụ huynh với ID: 999999999');",
                   "});",
                   "",
                   "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
