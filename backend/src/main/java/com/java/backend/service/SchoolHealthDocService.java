@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.java.backend.entity.SchoolHealthDoc;
+import com.java.backend.exception.SchoolHealthDocNotFoundException;
 import com.java.backend.repository.SchoolHealthDocRepository;
 
 @Service
@@ -22,7 +23,7 @@ public class SchoolHealthDocService {
 
     public SchoolHealthDoc getSchoolHealthDocById(Long id) {
         return schoolHealthDocRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("School health doc not found with id: " + id));
+                .orElseThrow(() -> new SchoolHealthDocNotFoundException(id));
     }
 
     public SchoolHealthDoc createSchoolHealthDoc(SchoolHealthDoc schoolHealthDoc) {
@@ -38,7 +39,9 @@ public class SchoolHealthDocService {
     }
 
     public void deleteSchoolHealthDoc(Long id) {
-        SchoolHealthDoc schoolHealthDoc = getSchoolHealthDocById(id);
-        schoolHealthDocRepository.delete(schoolHealthDoc);
+        if (!schoolHealthDocRepository.existsById(id)) {
+            throw new SchoolHealthDocNotFoundException(id);
+        }
+        schoolHealthDocRepository.deleteById(id);
     }
 }

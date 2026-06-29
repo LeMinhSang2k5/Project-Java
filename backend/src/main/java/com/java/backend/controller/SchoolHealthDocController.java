@@ -1,6 +1,7 @@
 package com.java.backend.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.java.backend.entity.SchoolHealthDoc;
+import com.java.backend.exception.SchoolHealthDocNotFoundException;
 import com.java.backend.service.SchoolHealthDocService;
 
 @RestController
@@ -31,23 +33,56 @@ public class SchoolHealthDocController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<SchoolHealthDoc> getSchoolHealthDocById(@PathVariable Long id) {
-        return ResponseEntity.ok(schoolHealthDocService.getSchoolHealthDocById(id));
+    public ResponseEntity<?> getSchoolHealthDocById(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(schoolHealthDocService.getSchoolHealthDocById(id));
+        } catch (SchoolHealthDocNotFoundException e) {
+            return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
+        }
     }
 
     @PostMapping
-    public ResponseEntity<SchoolHealthDoc> createSchoolHealthDoc(@RequestBody SchoolHealthDoc schoolHealthDoc) {
+    public ResponseEntity<?> createSchoolHealthDoc(@RequestBody SchoolHealthDoc schoolHealthDoc) {
+        ResponseEntity<?> validationError = validateSchoolHealthDoc(schoolHealthDoc);
+        if (validationError != null) {
+            return validationError;
+        }
         return ResponseEntity.ok(schoolHealthDocService.createSchoolHealthDoc(schoolHealthDoc));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<SchoolHealthDoc> updateSchoolHealthDoc(@PathVariable Long id, @RequestBody SchoolHealthDoc schoolHealthDoc) {
-        return ResponseEntity.ok(schoolHealthDocService.updateSchoolHealthDoc(id, schoolHealthDoc));
+    public ResponseEntity<?> updateSchoolHealthDoc(@PathVariable Long id, @RequestBody SchoolHealthDoc schoolHealthDoc) {
+        ResponseEntity<?> validationError = validateSchoolHealthDoc(schoolHealthDoc);
+        if (validationError != null) {
+            return validationError;
+        }
+        try {
+            return ResponseEntity.ok(schoolHealthDocService.updateSchoolHealthDoc(id, schoolHealthDoc));
+        } catch (SchoolHealthDocNotFoundException e) {
+            return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
+        }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSchoolHealthDoc(@PathVariable Long id) {
-        schoolHealthDocService.deleteSchoolHealthDoc(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> deleteSchoolHealthDoc(@PathVariable Long id) {
+        try {
+            schoolHealthDocService.deleteSchoolHealthDoc(id);
+            return ResponseEntity.ok(Map.of("message", "Xóa tài liệu thành công"));
+        } catch (SchoolHealthDocNotFoundException e) {
+            return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    private ResponseEntity<?> validateSchoolHealthDoc(SchoolHealthDoc schoolHealthDoc) {
+        if (schoolHealthDoc.getTitle() == null || schoolHealthDoc.getTitle().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Tiêu đề không được để trống"));
+        }
+        if (schoolHealthDoc.getContent() == null || schoolHealthDoc.getContent().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Nội dung không được để trống"));
+        }
+        if (schoolHealthDoc.getUrl() == null || schoolHealthDoc.getUrl().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "URL không được để trống"));
+        }
+        return null;
     }
 }
