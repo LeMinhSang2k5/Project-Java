@@ -47,9 +47,8 @@ public class BlogController {
             if (blog.isPresent()) {
                 return ResponseEntity.ok(blog.get());
             } else {
-                Map<String, String> error = new HashMap<>();
-                error.put("message", "Không tìm thấy blog với ID: " + id);
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.status(404)
+                        .body(Map.of("message", "Không tìm thấy blog với ID: " + id));
             }
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
@@ -111,9 +110,8 @@ public class BlogController {
             return ResponseEntity.ok(updatedBlog);
         } catch (RuntimeException e) {
             if (e.getMessage().contains("not found")) {
-                Map<String, String> error = new HashMap<>();
-                error.put("message", "Không tìm thấy blog với ID: " + id);
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.status(404)
+                        .body(Map.of("message", "Không tìm thấy blog với ID: " + id));
             }
             Map<String, String> error = new HashMap<>();
             error.put("message", "Lỗi khi cập nhật blog: " + e.getMessage());
@@ -131,9 +129,8 @@ public class BlogController {
             // Kiểm tra blog có tồn tại không
             Optional<Blog> existingBlog = blogService.getBlogById(id);
             if (existingBlog.isEmpty()) {
-                Map<String, String> error = new HashMap<>();
-                error.put("message", "Không tìm thấy blog với ID: " + id);
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.status(404)
+                        .body(Map.of("message", "Không tìm thấy blog với ID: " + id));
             }
 
             blogService.deleteBlog(id);
