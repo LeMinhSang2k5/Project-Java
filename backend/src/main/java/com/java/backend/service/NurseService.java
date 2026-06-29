@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.java.backend.entity.Nurse;
+import com.java.backend.exception.NurseNotFoundException;
 import com.java.backend.repository.NurseRepository;
 import com.java.backend.enums.Role;
 
@@ -45,7 +46,7 @@ public class NurseService {
 
     public Nurse getNurseById(Long id) {
         return nurseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Nurse not found with id: " + id));
+                .orElseThrow(() -> new NurseNotFoundException(id));
     }
 
     public Nurse updateNurse(Nurse nurse) {
@@ -53,6 +54,9 @@ public class NurseService {
     }
 
     public void deleteNurse(Long id) {
+        if (!nurseRepository.existsById(id)) {
+            throw new NurseNotFoundException(id);
+        }
         nurseRepository.deleteById(id);
     }
 }

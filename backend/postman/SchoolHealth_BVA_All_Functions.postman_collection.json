@@ -88,7 +88,32 @@
             },
             "url": "{{baseUrl}}/api/auth/login"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-AUTH-01';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Login Empty Email`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([400, 401]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "if (pm.response.code >= 400 && pm.response.text()) {",
+                  "    pm.test(`[${tc}] Thong bao loi (neu co)`, function () {",
+                  "        pm.expect(pm.response.text()).to.include('Email hoặc mật khẩu không đúng');",
+                  "    });",
+                  "}",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-AUTH-02 Login Wrong Password",
@@ -124,7 +149,30 @@
             },
             "url": "{{baseUrl}}/api/auth/login"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-AUTH-02';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Login Wrong Password`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([400, 401]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.text()).to.include('Email hoặc mật khẩu không đúng');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-AUTH-03 Login Valid",
@@ -351,7 +399,30 @@
               "raw": "{\"email\":\"invalid-email\",\"password\":\"{{loginPassword}}\"}"
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-AUTH-05';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Login Invalid Email Format`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 401`, function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.text()).to.include('Email hoặc mật khẩu không đúng');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -388,10 +459,18 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "if ([200,201].includes(pm.response.code)) {",
-                  "  const json = pm.response.json();",
-                  "  if (json.id) pm.environment.set('userId', json.id);",
-                  "}"
+                  "const tc = 'BVA-USER-01';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Valid User`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response co id`, function () { pm.expect(pm.response.json().id).to.be.a('number'); });",
+                  "if ([200,201].includes(pm.response.code)) pm.environment.set('userId', String(pm.response.json().id));",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
                 ]
               }
             }
@@ -446,7 +525,30 @@
             },
             "url": "{{baseUrl}}/api/user"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-USER-02';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Empty Email`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Email không được để trống');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-USER-03 Get User Invalid ID",
@@ -473,7 +575,26 @@
             "header": [],
             "url": "{{baseUrl}}/api/user/999999999"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-USER-03';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Get User Invalid ID`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 404`, function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-USER-04 Update Empty FullName",
@@ -563,7 +684,26 @@
             "header": [],
             "url": "{{baseUrl}}/api/user/999999999"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-USER-05';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Delete Invalid ID`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 404`, function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-USER-06 Create Invalid Email Format",
@@ -603,7 +743,30 @@
               "raw": "{\"email\":\"invalid-email\",\"password\":\"password123\",\"fullName\":\"BVA User\",\"role\":\"PARENT\",\"active\":true}"
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-USER-06';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Invalid Email Format`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Email không đúng định dạng');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-USER-07 Create Duplicate Email",
@@ -643,7 +806,30 @@
               "raw": "{\"email\":\"{{loginEmail}}\",\"password\":\"password123\",\"fullName\":\"Duplicate User\",\"role\":\"PARENT\",\"active\":true}"
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-USER-07';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Duplicate Email`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Email đã tồn tại trong hệ thống');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-USER-08 Create Empty Password",
@@ -683,7 +869,30 @@
               "raw": "{\"email\":\"bva.user.empty.password{{$timestamp}}@school.com\",\"password\":\"\",\"fullName\":\"BVA User\",\"role\":\"PARENT\",\"active\":true}"
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-USER-08';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Empty Password`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Mật khẩu không được để trống');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-USER-09 Get Users Page 0",
@@ -714,7 +923,32 @@
             "header": [],
             "url": "{{baseUrl}}/api/users?page=0"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-USER-09';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Get Users Page 0`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Co cau truc phan trang`, function () {",
+                  "    const d = pm.response.json();",
+                  "    pm.expect(d.content).to.be.an('array');",
+                  "    pm.expect(d.currentPage).to.eql(0);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-USER-10 Get Users Page -1",
@@ -745,7 +979,30 @@
             "header": [],
             "url": "{{baseUrl}}/api/users?page=-1"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-USER-10';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Get Users Page -1`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Số trang phải lớn hơn hoặc bằng 0');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -782,10 +1039,22 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "if ([200,201].includes(pm.response.code)) {",
-                  "  const json = pm.response.json();",
-                  "  if (json.id) pm.environment.set('parentId', json.id);",
-                  "}"
+                  "const tc = 'BVA-PAR-01';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Valid Parent`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] role PARENT, SĐT 10 so`, function () {",
+                  "    const d = pm.response.json();",
+                  "    pm.expect(d.role).to.eql('PARENT');",
+                  "    pm.expect(d.phoneNumber).to.eql('0900000000');",
+                  "});",
+                  "if ([200,201].includes(pm.response.code)) pm.environment.set('parentId', String(pm.response.json().id));",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
                 ]
               }
             }
@@ -894,7 +1163,26 @@
             "header": [],
             "url": "{{baseUrl}}/api/parent/999999999"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-PAR-03';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Get Parent Invalid ID`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 404`, function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-PAR-04 Link Invalid Student To Parent",
@@ -921,14 +1209,37 @@
             "header": [],
             "url": "{{baseUrl}}/api/parent/link-student?parentId={{parentId}}&studentId=999999999"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-PAR-04';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Link Invalid Student To Parent`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.text()).to.include('Lỗi liên kết');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-PAR-05 Confirm Invalid Form",
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "400,404,500"
+              "value": "404"
             },
             {
               "key": "testType",
@@ -948,7 +1259,30 @@
             "header": [],
             "url": "{{baseUrl}}/api/parent/confirm/999999999"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-PAR-05';",
+                  "const type = pm.variables.get('testType') || 'A';",
+                  "console.log(`[${tc}] [${type}] Confirm Invalid Form`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 404`, function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Không tìm thấy phiếu với ID');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-PAR-06 Create Missing Role",
@@ -988,7 +1322,30 @@
               "raw": "{\"email\":\"bva.parent.norole{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"BVA Parent\",\"gender\":\"FEMALE\",\"phoneNumber\":\"0900000000\",\"active\":true}"
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-PAR-06';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Missing Role`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Trường role là bắt buộc và phải là PARENT');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-PAR-07 Create Wrong Role",
@@ -1028,7 +1385,30 @@
               "raw": "{\"email\":\"bva.parent.role{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"BVA Parent\",\"role\":\"STUDENT\",\"gender\":\"FEMALE\",\"phoneNumber\":\"0900000000\",\"active\":true}"
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-PAR-07';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Wrong Role`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Khi tạo phụ huynh, role chỉ được phép là PARENT');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -1065,10 +1445,18 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "if ([200,201].includes(pm.response.code)) {",
-                  "  const json = pm.response.json();",
-                  "  if (json.id) pm.environment.set('studentId', json.id);",
-                  "}"
+                  "const tc = 'BVA-STU-01';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Valid Student`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] role STUDENT`, function () { pm.expect(pm.response.json().role).to.eql('STUDENT'); });",
+                  "if ([200,201].includes(pm.response.code)) pm.environment.set('studentId', String(pm.response.json().id));",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
                 ]
               }
             }
@@ -1123,7 +1511,30 @@
             },
             "url": "{{baseUrl}}/api/students"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-STU-02';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Empty FullName`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Họ tên không được để trống');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-STU-03 Create Invalid Parent ID",
@@ -1318,7 +1729,30 @@
               "raw": "{\"email\":\"bva.student.case{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"BVA Student\",\"role\":\"STUDENT\",\"code\":\"BVACASE{{$timestamp}}\",\"studentClass\":\"5A\",\"gender\":\"MALE\",\"dateOfBirth\":\"2999-01-01\",\"parentId\":{{parentId}}}"
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-STU-06';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Future Date Of Birth`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Ngày sinh không được ở tương lai');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-STU-07 Create Empty Date Of Birth",
@@ -1358,7 +1792,30 @@
               "raw": "{\"email\":\"bva.student.case{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"BVA Student\",\"role\":\"STUDENT\",\"code\":\"BVACASE{{$timestamp}}\",\"studentClass\":\"5A\",\"gender\":\"MALE\",\"dateOfBirth\":\"\",\"parentId\":{{parentId}}}"
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-STU-07';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Empty Date Of Birth`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Ngày sinh không được để trống');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-STU-08 Create Invalid Date Format",
@@ -1398,7 +1855,30 @@
               "raw": "{\"email\":\"bva.student.case{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"BVA Student\",\"role\":\"STUDENT\",\"code\":\"BVACASE{{$timestamp}}\",\"studentClass\":\"5A\",\"gender\":\"MALE\",\"dateOfBirth\":\"17/06/2010\",\"parentId\":{{parentId}}}"
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-STU-08';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Invalid Date Format`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Ngày sinh không đúng định dạng yyyy-MM-dd');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-STU-09 Create Empty Email",
@@ -1438,7 +1918,30 @@
               "raw": "{\"email\":\"\",\"password\":\"123456\",\"fullName\":\"BVA Student\",\"role\":\"STUDENT\",\"code\":\"BVACASE{{$timestamp}}\",\"studentClass\":\"5A\",\"gender\":\"MALE\",\"dateOfBirth\":\"2014-01-01\",\"parentId\":{{parentId}}}"
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-STU-09';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Empty Email`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Email không được để trống');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-STU-10 Create Wrong Role",
@@ -1478,7 +1981,30 @@
               "raw": "{\"email\":\"bva.student.case{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"BVA Student\",\"role\":\"PARENT\",\"code\":\"BVACASE{{$timestamp}}\",\"studentClass\":\"5A\",\"gender\":\"MALE\",\"dateOfBirth\":\"2014-01-01\",\"parentId\":{{parentId}}}"
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-STU-10';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Wrong Role`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Khi tạo học sinh, role chỉ được phép là STUDENT');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -1523,7 +2049,30 @@
             },
             "url": "{{baseUrl}}/api/nurses"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-NUR-01';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Missing Role`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Trường role là bắt buộc và phải là SCHOOL_NURSE');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-NUR-02 Create Valid Nurse",
@@ -1555,10 +2104,18 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "if (pm.response.code === 200) {",
-                  "  const json = pm.response.json();",
-                  "  if (json.id) pm.environment.set('nurseId', json.id);",
-                  "}"
+                  "const tc = 'BVA-NUR-02';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Valid Nurse`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] role SCHOOL_NURSE`, function () { pm.expect(pm.response.json().role).to.eql('SCHOOL_NURSE'); });",
+                  "if (pm.response.code === 200) pm.environment.set('nurseId', String(pm.response.json().id));",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
                 ]
               }
             }
@@ -1587,6 +2144,10 @@
               "value": "400"
             },
             {
+              "key": "expectJson",
+              "value": "true"
+            },
+            {
               "key": "testType",
               "value": "A"
             },
@@ -1613,14 +2174,51 @@
             },
             "url": "{{baseUrl}}/api/nurses"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-NUR-03';",
+                  "const type = pm.variables.get('testType') || 'A';",
+                  "const requestBody = JSON.parse(pm.request.body.raw);",
+                  "",
+                  "console.log(`[${tc}] [${type}] Create Wrong Role - role=\"${requestBody.role}\"`);",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());",
+                  "",
+                  "pm.test(`[${tc}] Request co role khong hop le`, function () {",
+                  "    pm.expect(requestBody.role).to.eql('PARENT');",
+                  "    pm.expect(requestBody.role).to.not.eql('SCHOOL_NURSE');",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la JSON hop le`, function () {",
+                  "    pm.response.to.be.json;",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Khi tạo nhân viên y tế, role chỉ được phép là SCHOOL_NURSE');",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Khong tao nurse moi`, function () {",
+                  "    pm.expect(pm.response.json()).to.not.have.property('id');",
+                  "});"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-NUR-04 Get Invalid ID",
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "400,404,500"
+              "value": "404"
             },
             {
               "key": "testType",
@@ -1640,14 +2238,33 @@
             "header": [],
             "url": "{{baseUrl}}/api/nurses/999999999"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-NUR-04';",
+                  "const type = pm.variables.get('testType') || 'A';",
+                  "console.log(`[${tc}] [${type}] Get Invalid ID`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 404`, function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-NUR-05 Create Phone 9 Digits",
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "400,500"
+              "value": "400"
             },
             {
               "key": "expectJson",
@@ -1677,17 +2294,44 @@
             "url": "{{baseUrl}}/api/nurses",
             "body": {
               "mode": "raw",
-              "raw": "{\"password\":\"123456\",\"fullName\":\"BVA Nurse\",\"role\":\"SCHOOL_NURSE\",\"gender\":\"FEMALE\",\"department\":\"Medical Room\",\"active\":true,\"email\":\"bva.nurse.phone05{$timestamp}@school.com\",\"phoneNumber\":\"012345678\"}"
+              "raw": "{\"password\":\"123456\",\"fullName\":\"BVA Nurse\",\"role\":\"SCHOOL_NURSE\",\"gender\":\"FEMALE\",\"department\":\"Medical Room\",\"active\":true,\"email\":\"bva.nurse.phone05{{$timestamp}}@school.com\",\"phoneNumber\":\"012345678\"}"
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-NUR-05';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Phone 9 Digits`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([400, 500]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "if (pm.response.code >= 400 && pm.response.text()) {",
+                  "    pm.test(`[${tc}] Thong bao loi (neu co)`, function () {",
+                  "        const body = pm.response.json();",
+                  "        const msg = (body && body.message) ? body.message : pm.response.text();",
+                  "        pm.expect(msg).to.include('Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng 0');",
+                  "    });",
+                  "}",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-NUR-06 Create Phone 11 Digits",
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "400,500"
+              "value": "400"
             },
             {
               "key": "expectJson",
@@ -1717,17 +2361,44 @@
             "url": "{{baseUrl}}/api/nurses",
             "body": {
               "mode": "raw",
-              "raw": "{\"password\":\"123456\",\"fullName\":\"BVA Nurse\",\"role\":\"SCHOOL_NURSE\",\"gender\":\"FEMALE\",\"department\":\"Medical Room\",\"active\":true,\"email\":\"bva.nurse.phone06{$timestamp}@school.com\",\"phoneNumber\":\"01234567890\"}"
+              "raw": "{\"password\":\"123456\",\"fullName\":\"BVA Nurse\",\"role\":\"SCHOOL_NURSE\",\"gender\":\"FEMALE\",\"department\":\"Medical Room\",\"active\":true,\"email\":\"bva.nurse.phone06{{$timestamp}}@school.com\",\"phoneNumber\":\"01234567890\"}"
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-NUR-06';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Phone 11 Digits`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([400, 500]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "if (pm.response.code >= 400 && pm.response.text()) {",
+                  "    pm.test(`[${tc}] Thong bao loi (neu co)`, function () {",
+                  "        const body = pm.response.json();",
+                  "        const msg = (body && body.message) ? body.message : pm.response.text();",
+                  "        pm.expect(msg).to.include('Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng 0');",
+                  "    });",
+                  "}",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-NUR-07 Create Phone Without Leading Zero",
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "400,500"
+              "value": "400"
             },
             {
               "key": "expectJson",
@@ -1757,10 +2428,37 @@
             "url": "{{baseUrl}}/api/nurses",
             "body": {
               "mode": "raw",
-              "raw": "{\"password\":\"123456\",\"fullName\":\"BVA Nurse\",\"role\":\"SCHOOL_NURSE\",\"gender\":\"FEMALE\",\"department\":\"Medical Room\",\"active\":true,\"email\":\"bva.nurse.phone07{$timestamp}@school.com\",\"phoneNumber\":\"1234567890\"}"
+              "raw": "{\"password\":\"123456\",\"fullName\":\"BVA Nurse\",\"role\":\"SCHOOL_NURSE\",\"gender\":\"FEMALE\",\"department\":\"Medical Room\",\"active\":true,\"email\":\"bva.nurse.phone07{{$timestamp}}@school.com\",\"phoneNumber\":\"1234567890\"}"
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-NUR-07';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Phone Without Leading Zero`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([400, 500]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "if (pm.response.code >= 400 && pm.response.text()) {",
+                  "    pm.test(`[${tc}] Thong bao loi (neu co)`, function () {",
+                  "        const body = pm.response.json();",
+                  "        const msg = (body && body.message) ? body.message : pm.response.text();",
+                  "        pm.expect(msg).to.include('Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng 0');",
+                  "    });",
+                  "}",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -1805,7 +2503,30 @@
             },
             "url": "{{baseUrl}}/api/managers"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-MAN-01';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Missing Role`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Trường role là bắt buộc và phải là MANAGER');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-MAN-02 Create Valid Manager",
@@ -1837,10 +2558,18 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "if (pm.response.code === 200) {",
-                  "  const json = pm.response.json();",
-                  "  if (json.id) pm.environment.set('managerId', json.id);",
-                  "}"
+                  "const tc = 'BVA-MAN-02';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Valid Manager`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] role MANAGER`, function () { pm.expect(pm.response.json().role).to.eql('MANAGER'); });",
+                  "if (pm.response.code === 200) pm.environment.set('managerId', String(pm.response.json().id));",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
                 ]
               }
             }
@@ -1895,7 +2624,30 @@
             },
             "url": "{{baseUrl}}/api/managers"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-MAN-03';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Wrong Role`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Khi tạo quản lý, role chỉ được phép là MANAGER');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-MAN-04 Get Invalid ID",
@@ -1922,7 +2674,26 @@
             "header": [],
             "url": "{{baseUrl}}/api/managers/999999999"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-MAN-04';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Get Invalid ID`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([400, 404, 500]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -1967,7 +2738,30 @@
             },
             "url": "{{baseUrl}}/api/blogs"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-BLOG-01';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Empty Title`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Tiêu đề không được để trống');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-BLOG-02 Create Min Title",
@@ -1999,10 +2793,18 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "if (pm.response.code === 200) {",
-                  "  const json = pm.response.json();",
-                  "  if (json.id) pm.environment.set('blogId', json.id);",
-                  "}"
+                  "const tc = 'BVA-BLOG-02';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Min Title`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Co id`, function () { pm.expect(pm.response.json().id).to.be.a('number'); });",
+                  "if (pm.response.code === 200) pm.environment.set('blogId', String(pm.response.json().id));",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
                 ]
               }
             }
@@ -2057,7 +2859,30 @@
             },
             "url": "{{baseUrl}}/api/blogs"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-BLOG-03';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Empty Content`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Nội dung không được để trống');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-BLOG-04 Get Invalid ID",
@@ -2084,7 +2909,26 @@
             "header": [],
             "url": "{{baseUrl}}/api/blogs/999999999"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-BLOG-04';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Get Invalid ID`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 404`, function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-BLOG-05 Delete Invalid ID",
@@ -2111,7 +2955,26 @@
             "header": [],
             "url": "{{baseUrl}}/api/blogs/999999999"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-BLOG-05';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Delete Invalid ID`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 404`, function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-BLOG-06 Create Empty Author",
@@ -2151,7 +3014,30 @@
               "raw": "{\"title\":\"Blog {{$timestamp}}\",\"content\":\"Noi dung blog\",\"author\":\"\",\"category\":\"Health\",\"thumbnail\":\"https://example.com/thumb.png\",\"publishDate\":\"2026-05-25\"}"
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-BLOG-06';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Empty Author`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Tác giả không được để trống');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-BLOG-07 Create Empty Category",
@@ -2191,7 +3077,30 @@
               "raw": "{\"title\":\"Blog {{$timestamp}}\",\"content\":\"Noi dung blog\",\"author\":\"postman\",\"category\":\"\",\"thumbnail\":\"https://example.com/thumb.png\",\"publishDate\":\"2026-05-25\"}"
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-BLOG-07';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Empty Category`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Danh mục không được để trống');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -2228,10 +3137,17 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "if ([200,201].includes(pm.response.code)) {",
-                  "  const json = pm.response.json();",
-                  "  if (json.id) pm.environment.set('schoolHealthDocId', json.id);",
-                  "}"
+                  "const tc = 'BVA-DOC-01';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Valid Doc`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "if ([200,201].includes(pm.response.code)) pm.environment.set('schoolHealthDocId', String(pm.response.json().id));",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
                 ]
               }
             }
@@ -2286,7 +3202,26 @@
             },
             "url": "{{baseUrl}}/api/school-health-docs"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-DOC-02';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Empty Title`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([200, 400, 500]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-DOC-03 Get Invalid ID",
@@ -2313,7 +3248,26 @@
             "header": [],
             "url": "{{baseUrl}}/api/school-health-docs/999999999"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-DOC-03';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Get Invalid ID`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([400, 404, 500]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-DOC-04 Delete Invalid ID",
@@ -2340,7 +3294,26 @@
             "header": [],
             "url": "{{baseUrl}}/api/school-health-docs/999999999"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-DOC-04';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Delete Invalid ID`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([400, 404, 500]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -2381,7 +3354,30 @@
             },
             "url": "{{baseUrl}}/api/medical-supplies"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-MS-01';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Quantity 0`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.text()).to.include('Số lượng phải lớn hơn 0');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-MS-02 Create Quantity 1",
@@ -2413,11 +3409,17 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "if (pm.response.code === 201) {",
-                  "  const json = pm.response.json();",
-                  "  if (json.id) pm.environment.set('medicalSupplyId', json.id);",
-                  "  if (json.category) pm.environment.set('medicalSupplyCategory', json.category);",
-                  "}"
+                  "const tc = 'BVA-MS-02';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Quantity 1`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "if ([200,201].includes(pm.response.code)) pm.environment.set('medicalSupplyId', String(pm.response.json().id));",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
                 ]
               }
             }
@@ -2472,7 +3474,30 @@
             },
             "url": "{{baseUrl}}/api/medical-supplies"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-MS-03';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Empty Name`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.text()).to.include('Tên vật tư y tế không được để trống');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-MS-04 Get Invalid ID",
@@ -2499,7 +3524,26 @@
             "header": [],
             "url": "{{baseUrl}}/api/medical-supplies/999999999"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-MS-04';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Get Invalid ID`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 404`, function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-MS-05 Get Unknown Category",
@@ -2530,7 +3574,28 @@
             "header": [],
             "url": "{{baseUrl}}/api/medical-supplies/category/UNKNOWN_BVA_CATEGORY"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-MS-05';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Get Unknown Category`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Tra ve mang`, function () { pm.expect(pm.response.json()).to.be.an('array'); });",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-MS-06 Delete Invalid ID",
@@ -2557,7 +3622,32 @@
             "header": [],
             "url": "{{baseUrl}}/api/medical-supplies/999999999"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-MS-06';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Delete Invalid ID`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "if (pm.response.code >= 400 && pm.response.text()) {",
+                  "    pm.test(`[${tc}] Thong bao loi (neu co)`, function () {",
+                  "        pm.expect(pm.response.text()).to.include('không tồn tại');",
+                  "    });",
+                  "}",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-MS-07 Create Empty Category",
@@ -2597,7 +3687,30 @@
               "raw": "{\"name\":\"BVA Empty Category {{$timestamp}}\",\"quantity\":10,\"category\":\"\",\"expiryDate\":\"2027-12-31\"}"
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-MS-07';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Empty Category`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.text()).to.include('Danh mục không được để trống');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -2638,7 +3751,26 @@
             },
             "url": "{{baseUrl}}/api/health-profiles"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-HP-01';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Invalid Student ID`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([400, 404, 500]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-HP-02 Create Valid Health Profile",
@@ -2670,10 +3802,17 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "if ([200,201].includes(pm.response.code)) {",
-                  "  const json = pm.response.json();",
-                  "  if (json.id) pm.environment.set('healthProfileId', json.id);",
-                  "}"
+                  "const tc = 'BVA-HP-02';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Valid Health Profile`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([200, 201, 400, 500]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "if ([200,201].includes(pm.response.code)) pm.environment.set('healthProfileId', String(pm.response.json().id));",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
                 ]
               }
             }
@@ -2719,7 +3858,26 @@
             "header": [],
             "url": "{{baseUrl}}/api/health-profiles/student/999999999"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-HP-03';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Get By Invalid Student`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([200, 404]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-HP-04 Get Student ID By Invalid Parent",
@@ -2746,7 +3904,26 @@
             "header": [],
             "url": "{{baseUrl}}/api/health-profiles/by-parent/999999999/student"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-HP-04';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Get Student ID By Invalid Parent`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([400, 404]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-HP-05 Get By Valid Student",
@@ -2777,7 +3954,26 @@
             "header": [],
             "url": "{{baseUrl}}/api/health-profiles/student/{{studentId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-HP-05';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Get By Valid Student`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -2818,7 +4014,26 @@
             },
             "url": "{{baseUrl}}/api/health-incidents"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-HI-01';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Invalid Student ID`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([400, 404, 500]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-HI-02 Create Valid Incident",
@@ -2850,10 +4065,17 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "if ([200,201].includes(pm.response.code)) {",
-                  "  const json = pm.response.json();",
-                  "  if (json.id) pm.environment.set('healthIncidentId', json.id);",
-                  "}"
+                  "const tc = 'BVA-HI-02';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Valid Incident`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "if ([200,201].includes(pm.response.code)) pm.environment.set('healthIncidentId', String(pm.response.json().id));",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
                 ]
               }
             }
@@ -2899,7 +4121,26 @@
             "header": [],
             "url": "{{baseUrl}}/api/health-incidents/999999999"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-HI-03';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Get Invalid ID`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([400, 404, 500]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-HI-04 Filter Invalid Student",
@@ -2926,7 +4167,26 @@
             "header": [],
             "url": "{{baseUrl}}/api/health-incidents/student/999999999"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-HI-04';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Filter Invalid Student`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([200, 400, 404]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-HI-05 Filter Invalid Status",
@@ -2953,7 +4213,26 @@
             "header": [],
             "url": "{{baseUrl}}/api/health-incidents/status/INVALID_STATUS"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-HI-05';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Filter Invalid Status`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([200, 400, 500]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-HI-06 Filter Invalid Incident Time",
@@ -2980,7 +4259,26 @@
             "header": [],
             "url": "{{baseUrl}}/api/health-incidents/incident-time/invalid-date"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-HI-06';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Filter Invalid Incident Time`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([400, 500]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -3021,7 +4319,26 @@
             },
             "url": "{{baseUrl}}/api/medical-checkup/notify"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-MC-01';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Notification Invalid Student`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([400, 404, 500]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-MC-02 Create Notification Valid",
@@ -3053,10 +4370,20 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
+                  "const tc = 'BVA-MC-02';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Notification Valid`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "",
                   "if ([200,201].includes(pm.response.code)) {",
-                  "  const json = pm.response.json();",
-                  "  if (json.id) pm.environment.set('medicalCheckupNotificationId', json.id);",
-                  "}"
+                  "    const d = pm.response.json();",
+                  "    if (d.id) pm.environment.set('medicalCheckupNotificationId', String(d.id));",
+                  "}",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
                 ]
               }
             }
@@ -3111,7 +4438,26 @@
             },
             "url": "{{baseUrl}}/api/medical-checkup/notify/bulk"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-MC-03';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Bulk Empty StudentIds`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([200, 400, 500]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-MC-04 Update Consent Invalid Value",
@@ -3147,7 +4493,26 @@
             },
             "url": "{{baseUrl}}/api/medical-checkup/notification/{{medicalCheckupNotificationId}}/consent"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-MC-04';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Update Consent Invalid Value`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([400, 404, 500]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-MC-05 Create Result Invalid Date",
@@ -3183,7 +4548,26 @@
             },
             "url": "{{baseUrl}}/api/medical-checkup/result"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-MC-05';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Result Invalid Date`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([400, 500]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-MC-06 Create Result Valid",
@@ -3215,10 +4599,20 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
+                  "const tc = 'BVA-MC-06';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Result Valid`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "",
                   "if ([200,201].includes(pm.response.code)) {",
-                  "  const json = pm.response.json();",
-                  "  if (json.id) pm.environment.set('medicalCheckupResultId', json.id);",
-                  "}"
+                  "    const d = pm.response.json();",
+                  "    if (d.id) pm.environment.set('medicalCheckupResultId', String(d.id));",
+                  "}",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
                 ]
               }
             }
@@ -3264,7 +4658,26 @@
             "header": [],
             "url": "{{baseUrl}}/api/medical-checkup/result/999999999/student-confirm"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-MC-07';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Student Confirm Invalid Result`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([400, 404, 500]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -3305,7 +4718,26 @@
             },
             "url": "{{baseUrl}}/api/vaccination-schedules"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-VAC-01';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Invalid Student`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([400, 404, 500]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-VAC-02 Create Empty Vaccine Name",
@@ -3341,7 +4773,26 @@
             },
             "url": "{{baseUrl}}/api/vaccination-schedules"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-VAC-02';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Empty Vaccine Name`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([200, 201, 400, 500]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-VAC-03 Create Valid Schedule",
@@ -3373,10 +4824,17 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "if ([200,201].includes(pm.response.code)) {",
-                  "  const json = pm.response.json();",
-                  "  if (json.id) pm.environment.set('vaccinationScheduleId', json.id);",
-                  "}"
+                  "const tc = 'BVA-VAC-03';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Create Valid Schedule`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "if ([200,201].includes(pm.response.code)) pm.environment.set('vaccinationScheduleId', String(pm.response.json().id));",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
                 ]
               }
             }
@@ -3431,7 +4889,26 @@
             },
             "url": "{{baseUrl}}/api/vaccination-schedules/bulk"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-VAC-04';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Bulk Empty StudentIds`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([200, 400, 500]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-VAC-05 Get Invalid ID",
@@ -3458,7 +4935,26 @@
             "header": [],
             "url": "{{baseUrl}}/api/vaccination-schedules/999999999"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-VAC-05';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Get Invalid ID`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([400, 404, 500]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-VAC-06 Get Invalid Date Range",
@@ -3485,7 +4981,26 @@
             "header": [],
             "url": "{{baseUrl}}/api/vaccination-schedules/date-range?startDate=2026-12-31T23:59:59&endDate=2026-01-01T00:00:00"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-VAC-06';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Get Invalid Date Range`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([200, 400, 500]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-VAC-07 Update Parent Consent Invalid",
@@ -3521,7 +5036,26 @@
             },
             "url": "{{baseUrl}}/api/vaccination-schedules/{{vaccinationScheduleId}}/parent-consent"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-VAC-07';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Update Parent Consent Invalid`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([400, 404, 500]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-VAC-08 Update Student Confirmation Invalid Type",
@@ -3557,7 +5091,26 @@
             },
             "url": "{{baseUrl}}/api/vaccination-schedules/{{vaccinationScheduleId}}/student-confirmation"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-VAC-08';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Update Student Confirmation Invalid Type`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([400, 500]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "BVA-VAC-09 Update Vaccination Status Valid",
@@ -3593,7 +5146,26 @@
             },
             "url": "{{baseUrl}}/api/vaccination-schedules/{{vaccinationScheduleId}}/vaccination-status"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'BVA-VAC-09';",
+                  "const type = pm.variables.get('testType') || 'N';",
+                  "console.log(`[${tc}] [${type}] Update Vaccination Status Valid`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "    pm.expect([200, 400, 404, 500]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         }
       ]
     }

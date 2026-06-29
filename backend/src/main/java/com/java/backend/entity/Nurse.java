@@ -77,9 +77,4 @@ public class Nurse extends User {
     public void ensureRoleOnUpdate() {
         super.setRole(Role.SCHOOL_NURSE);
     }
-
-    @Override
-    public void setRole(Role role) {
-        super.setRole(Role.SCHOOL_NURSE);
-    }
 }

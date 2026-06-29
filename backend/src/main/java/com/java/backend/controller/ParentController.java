@@ -3,6 +3,8 @@ package com.java.backend.controller;
 import com.java.backend.entity.Parent;
 import com.java.backend.entity.Student;
 import com.java.backend.enums.Role;
+import com.java.backend.repository.MedicalCheckupNotificationRepository;
+import com.java.backend.repository.VaccinationScheduleRepository;
 import com.java.backend.service.ParentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,10 @@ public class ParentController {
 
     @Autowired
     private ParentService parentService;
+    @Autowired
+    private MedicalCheckupNotificationRepository medicalCheckupNotificationRepository;
+    @Autowired
+    private VaccinationScheduleRepository vaccinationScheduleRepository;
 
     @PostMapping
     public ResponseEntity<?> createParent(@RequestBody Parent parent) {
@@ -101,8 +107,15 @@ public class ParentController {
     // Endpoint để xác nhận phiếu tiêm chủng/kiểm tra y tế
     @PostMapping("/confirm/{formId}")
     public ResponseEntity<Map<String, String>> confirmForm(@PathVariable Long formId) {
+        boolean exists = medicalCheckupNotificationRepository.existsById(formId)
+                || vaccinationScheduleRepository.existsById(formId);
+        if (!exists) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Không tìm thấy phiếu với ID: " + formId);
+            return ResponseEntity.status(404).body(error);
+        }
         try {
-            // Mock logic - trong thực tế sẽ cập nhật database
+            // TODO: cập nhật trạng thái xác nhận thực tế theo loại biểu mẫu.
             Map<String, String> response = new HashMap<>();
             response.put("message", "Xác nhận thành công cho phiếu ID: " + formId);
             return ResponseEntity.ok(response);
