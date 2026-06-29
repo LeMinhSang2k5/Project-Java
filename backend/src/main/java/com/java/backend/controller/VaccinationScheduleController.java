@@ -1,14 +1,15 @@
 package com.java.backend.controller;
 
 import com.java.backend.entity.VaccinationSchedule;
-import com.java.backend.service.VaccinationScheduleService;
-import com.java.backend.service.StudentService;
 import com.java.backend.enums.ConsentStatus;
+import com.java.backend.service.VaccinationScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -20,132 +21,96 @@ public class VaccinationScheduleController {
     @Autowired
     private VaccinationScheduleService service;
 
-    @Autowired
-    private StudentService studentService;
-
-    // ✅ Get all
     @GetMapping
     public List<VaccinationSchedule> getAllSchedules() {
         return service.getAll();
     }
 
-    // ✅ Get by ID
     @GetMapping("/{id}")
     public ResponseEntity<VaccinationSchedule> getSchedule(@PathVariable Long id) {
-        VaccinationSchedule schedule = service.getById(id);
-        if (schedule != null) {
-            return ResponseEntity.ok(schedule);
-        }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(service.getByIdOrThrow(id));
     }
 
-    // ✅ Create
     @PostMapping
-    public VaccinationSchedule createSchedule(@RequestBody VaccinationSchedule schedule) {
-        return service.save(schedule);
+    public ResponseEntity<VaccinationSchedule> createSchedule(@RequestBody VaccinationSchedule schedule) {
+        if (schedule.getParentConsent() == null) {
+            schedule.setParentConsent(ConsentStatus.PENDING);
+        }
+        VaccinationSchedule saved = service.save(schedule);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-    // ✅ Update
     @PutMapping("/{id}")
-    public ResponseEntity<VaccinationSchedule> updateSchedule(@PathVariable Long id,
+    public ResponseEntity<VaccinationSchedule> updateSchedule(
+            @PathVariable Long id,
             @RequestBody VaccinationSchedule schedule) {
-        VaccinationSchedule existingSchedule = service.getById(id);
-        if (existingSchedule != null) {
-            schedule.setId(id);
-            return ResponseEntity.ok(service.save(schedule));
-        }
-        return ResponseEntity.notFound().build();
+        service.getByIdOrThrow(id);
+        schedule.setId(id);
+        return ResponseEntity.ok(service.save(schedule));
     }
 
-    // ✅ Delete
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSchedule(@PathVariable Long id) {
-        VaccinationSchedule schedule = service.getById(id);
-        if (schedule != null) {
-            service.delete(id);
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<Map<String, String>> deleteSchedule(@PathVariable Long id) {
+        service.delete(id);
+        return ResponseEntity.ok(Map.of("message", "Xóa lịch tiêm chủng thành công"));
     }
 
-    // Lấy lịch tiêm chủng theo học sinh
     @GetMapping("/student/{studentId}")
     public List<VaccinationSchedule> getByStudentId(@PathVariable Long studentId) {
         return service.getByStudentId(studentId);
     }
 
-    // Lấy lịch tiêm chủng cần xác nhận từ phụ huynh
     @GetMapping("/pending-parent-consent")
     public List<VaccinationSchedule> getPendingParentConsent() {
         return service.getPendingParentConsent();
     }
 
-    // Lấy lịch tiêm chủng cần xác nhận từ học sinh
     @GetMapping("/pending-student-confirmation")
     public List<VaccinationSchedule> getPendingStudentConfirmation() {
         return service.getPendingStudentConfirmation();
     }
 
-    // Lấy lịch tiêm chủng theo trạng thái xác nhận của phụ huynh
     @GetMapping("/parent-consent/{consent}")
     public List<VaccinationSchedule> getByParentConsent(@PathVariable ConsentStatus consent) {
         return service.getByParentConsent(consent);
     }
 
-    // Lấy lịch tiêm chủng chưa được tiêm
     @GetMapping("/not-vaccinated")
     public List<VaccinationSchedule> getNotVaccinated() {
         return service.getNotVaccinated();
     }
 
-    // Lấy lịch tiêm chủng đã được tiêm
     @GetMapping("/vaccinated")
     public List<VaccinationSchedule> getVaccinated() {
         return service.getVaccinated();
     }
 
-    // Xác nhận từ phụ huynh
     @PutMapping("/{id}/parent-consent")
     public ResponseEntity<VaccinationSchedule> updateParentConsent(
             @PathVariable Long id,
             @RequestBody Map<String, String> request) {
-        try {
-            ConsentStatus consent = ConsentStatus.valueOf(request.get("consent"));
-            VaccinationSchedule schedule = service.updateParentConsent(id, consent);
-            if (schedule != null) {
-                return ResponseEntity.ok(schedule);
-            }
-            return ResponseEntity.notFound().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        ConsentStatus consent = service.parseParentConsent(request.get("consent"));
+        return ResponseEntity.ok(service.updateParentConsent(id, consent));
     }
 
-    // Xác nhận từ học sinh
     @PutMapping("/{id}/student-confirmation")
     public ResponseEntity<VaccinationSchedule> updateStudentConfirmation(
             @PathVariable Long id,
             @RequestBody Map<String, Boolean> request) {
-        VaccinationSchedule schedule = service.updateStudentConfirmation(id, request.get("confirmed"));
-        if (schedule != null) {
-            return ResponseEntity.ok(schedule);
-        }
-        return ResponseEntity.notFound().build();
+        Boolean confirmed = request.get("confirmed");
+        service.validateBooleanField(confirmed, "Giá trị xác nhận");
+        return ResponseEntity.ok(service.updateStudentConfirmation(id, confirmed));
     }
 
-    // Cập nhật trạng thái tiêm chủng
     @PutMapping("/{id}/vaccination-status")
     public ResponseEntity<VaccinationSchedule> updateVaccinationStatus(
             @PathVariable Long id,
             @RequestBody Map<String, Boolean> request) {
-        VaccinationSchedule schedule = service.updateVaccinationStatus(id, request.get("isVaccinated"));
-        if (schedule != null) {
-            return ResponseEntity.ok(schedule);
-        }
-        return ResponseEntity.notFound().build();
+        Boolean isVaccinated = request.get("isVaccinated");
+        service.validateBooleanField(isVaccinated, "Trạng thái tiêm chủng");
+        return ResponseEntity.ok(service.updateVaccinationStatus(id, isVaccinated));
     }
 
-    // Lấy lịch tiêm chủng theo khoảng thời gian
     @GetMapping("/date-range")
     public List<VaccinationSchedule> getByDateRange(
             @RequestParam String startDate,
@@ -155,46 +120,38 @@ public class VaccinationScheduleController {
         return service.getByDateRange(start, end);
     }
 
-    // Tạo nhiều lịch tiêm chủng cho nhiều học sinh
     @PostMapping("/bulk")
     public ResponseEntity<?> createBulkSchedules(@RequestBody Map<String, Object> payload) {
-        try {
-            // Lấy danh sách studentIds
-            List<Integer> studentIds = (List<Integer>) payload.get("studentIds");
-            String vaccineName = (String) payload.get("vaccineName");
-            String scheduledDateTime = (String) payload.get("scheduledDateTime");
-            String notes = payload.get("notes") != null ? (String) payload.get("notes") : null;
-            String location = payload.get("location") != null ? (String) payload.get("location") : null;
-
-            if (studentIds == null || studentIds.isEmpty() || vaccineName == null || scheduledDateTime == null) {
-                return ResponseEntity.badRequest().body("Thiếu thông tin bắt buộc");
-            }
-
-            List<VaccinationSchedule> createdSchedules = new java.util.ArrayList<>();
-            for (Integer id : studentIds) {
-                Long studentId = id.longValue();
-                var student = studentService.getStudentById(studentId);
-                VaccinationSchedule schedule = new VaccinationSchedule();
-                schedule.setStudentId(studentId);
-                schedule.setStudentName(student.getFullName());
-                schedule.setStudentCode(student.getCode());
-                schedule.setVaccineName(vaccineName);
-                schedule.setScheduledDateTime(java.time.LocalDateTime.parse(scheduledDateTime));
-                schedule.setNotes(notes);
-                schedule.setLocation(location);
-                schedule.setVaccinated(false);
-                schedule.setParentConsent(com.java.backend.enums.ConsentStatus.PENDING);
-                schedule.setStudentConfirmation(false);
-                createdSchedules.add(service.save(schedule));
-            }
-            return ResponseEntity.ok(createdSchedules);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body("Lỗi khi tạo lịch tiêm chủng hàng loạt: " + e.getMessage());
+        Object studentIdsObj = payload.get("studentIds");
+        if (!(studentIdsObj instanceof List<?> studentIds) || studentIds.isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "Danh sách studentIds không được để trống"));
         }
+
+        String vaccineName = (String) payload.get("vaccineName");
+        String scheduledDateTime = (String) payload.get("scheduledDateTime");
+        if (vaccineName == null || vaccineName.trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "Tên vaccine không được để trống"));
+        }
+        if (scheduledDateTime == null || scheduledDateTime.trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "Ngày giờ tiêm không được để trống"));
+        }
+
+        String notes = payload.get("notes") != null ? (String) payload.get("notes") : null;
+        String location = payload.get("location") != null ? (String) payload.get("location") : null;
+        LocalDateTime parsedDateTime = LocalDateTime.parse(scheduledDateTime);
+
+        List<VaccinationSchedule> createdSchedules = new ArrayList<>();
+        for (Object studentIdObj : studentIds) {
+            Long studentId = Long.valueOf(studentIdObj.toString());
+            createdSchedules.add(service.createFromStudent(
+                    studentId, vaccineName, parsedDateTime, notes, location));
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdSchedules);
     }
 
-    // Lấy lịch tiêm chủng cần xác nhận từ phụ huynh theo parentId
     @GetMapping("/pending-parent-consent/{parentId}")
     public List<VaccinationSchedule> getPendingParentConsentByParentId(@PathVariable Long parentId) {
         return service.getPendingParentConsentByParentId(parentId);

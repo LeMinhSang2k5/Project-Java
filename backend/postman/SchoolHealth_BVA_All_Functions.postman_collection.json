@@ -4837,7 +4837,7 @@
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "400,404,500"
+              "value": "404"
             },
             {
               "key": "testType",
@@ -4874,11 +4874,15 @@
                 "type": "text/javascript",
                 "exec": [
                   "const tc = 'BVA-VAC-01';",
-                  "const type = pm.variables.get('testType') || 'N';",
+                  "const type = pm.variables.get('testType') || 'A';",
                   "console.log(`[${tc}] [${type}] Create Invalid Student`);",
                   "",
-                  "pm.test(`[${tc}] Status code hop le`, function () {",
-                  "    pm.expect([400, 404, 500]).to.include(pm.response.code);",
+                  "pm.test(`[${tc}] Status code la 404`, function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Không tìm thấy học sinh với ID: 999999999');",
                   "});",
                   "",
                   "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
@@ -4892,7 +4896,7 @@
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "200,201,400,500"
+              "value": "400"
             },
             {
               "key": "testType",
@@ -4929,11 +4933,15 @@
                 "type": "text/javascript",
                 "exec": [
                   "const tc = 'BVA-VAC-02';",
-                  "const type = pm.variables.get('testType') || 'N';",
+                  "const type = pm.variables.get('testType') || 'B';",
                   "console.log(`[${tc}] [${type}] Create Empty Vaccine Name`);",
                   "",
-                  "pm.test(`[${tc}] Status code hop le`, function () {",
-                  "    pm.expect([200, 201, 400, 500]).to.include(pm.response.code);",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Tên vaccine không được để trống');",
                   "});",
                   "",
                   "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
@@ -4947,7 +4955,7 @@
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "200,201"
+              "value": "201"
             },
             {
               "key": "expectJson",
@@ -4976,11 +4984,16 @@
                   "const type = pm.variables.get('testType') || 'N';",
                   "console.log(`[${tc}] [${type}] Create Valid Schedule`);",
                   "",
-                  "pm.test(`[${tc}] Status code hop le`, function () {",
-                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "pm.test(`[${tc}] Status code la 201`, function () {",
+                  "    pm.response.to.have.status(201);",
                   "});",
                   "",
-                  "if ([200,201].includes(pm.response.code)) pm.environment.set('vaccinationScheduleId', String(pm.response.json().id));",
+                  "pm.test(`[${tc}] Tao lich tiem thanh cong`, function () {",
+                  "    const d = pm.response.json();",
+                  "    pm.expect(d.id).to.be.a('number');",
+                  "    pm.expect(d.studentId).to.eql(Number(pm.environment.get('studentId')));",
+                  "    pm.environment.set('vaccinationScheduleId', String(d.id));",
+                  "});",
                   "",
                   "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
                 ]
@@ -5008,7 +5021,7 @@
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "200,400,500"
+              "value": "400"
             },
             {
               "key": "testType",
@@ -5045,11 +5058,15 @@
                 "type": "text/javascript",
                 "exec": [
                   "const tc = 'BVA-VAC-04';",
-                  "const type = pm.variables.get('testType') || 'N';",
+                  "const type = pm.variables.get('testType') || 'B';",
                   "console.log(`[${tc}] [${type}] Bulk Empty StudentIds`);",
                   "",
-                  "pm.test(`[${tc}] Status code hop le`, function () {",
-                  "    pm.expect([200, 400, 500]).to.include(pm.response.code);",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Danh sách studentIds không được để trống');",
                   "});",
                   "",
                   "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
@@ -5063,7 +5080,7 @@
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "400,404,500"
+              "value": "404"
             },
             {
               "key": "testType",
@@ -5091,11 +5108,15 @@
                 "type": "text/javascript",
                 "exec": [
                   "const tc = 'BVA-VAC-05';",
-                  "const type = pm.variables.get('testType') || 'N';",
+                  "const type = pm.variables.get('testType') || 'A';",
                   "console.log(`[${tc}] [${type}] Get Invalid ID`);",
                   "",
-                  "pm.test(`[${tc}] Status code hop le`, function () {",
-                  "    pm.expect([400, 404, 500]).to.include(pm.response.code);",
+                  "pm.test(`[${tc}] Status code la 404`, function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Không tìm thấy lịch tiêm chủng với ID: 999999999');",
                   "});",
                   "",
                   "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
@@ -5109,7 +5130,7 @@
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "200,400,500"
+              "value": "400"
             },
             {
               "key": "testType",
@@ -5137,11 +5158,15 @@
                 "type": "text/javascript",
                 "exec": [
                   "const tc = 'BVA-VAC-06';",
-                  "const type = pm.variables.get('testType') || 'N';",
+                  "const type = pm.variables.get('testType') || 'A';",
                   "console.log(`[${tc}] [${type}] Get Invalid Date Range`);",
                   "",
-                  "pm.test(`[${tc}] Status code hop le`, function () {",
-                  "    pm.expect([200, 400, 500]).to.include(pm.response.code);",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Ngày bắt đầu không được sau ngày kết thúc');",
                   "});",
                   "",
                   "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
@@ -5155,7 +5180,7 @@
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "400,404,500"
+              "value": "400"
             },
             {
               "key": "testType",
@@ -5192,11 +5217,15 @@
                 "type": "text/javascript",
                 "exec": [
                   "const tc = 'BVA-VAC-07';",
-                  "const type = pm.variables.get('testType') || 'N';",
+                  "const type = pm.variables.get('testType') || 'A';",
                   "console.log(`[${tc}] [${type}] Update Parent Consent Invalid`);",
                   "",
-                  "pm.test(`[${tc}] Status code hop le`, function () {",
-                  "    pm.expect([400, 404, 500]).to.include(pm.response.code);",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Giá trị đồng ý không hợp lệ');",
                   "});",
                   "",
                   "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
@@ -5210,7 +5239,7 @@
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "400,500"
+              "value": "400"
             },
             {
               "key": "testType",
@@ -5247,11 +5276,15 @@
                 "type": "text/javascript",
                 "exec": [
                   "const tc = 'BVA-VAC-08';",
-                  "const type = pm.variables.get('testType') || 'N';",
+                  "const type = pm.variables.get('testType') || 'A';",
                   "console.log(`[${tc}] [${type}] Update Student Confirmation Invalid Type`);",
                   "",
-                  "pm.test(`[${tc}] Status code hop le`, function () {",
-                  "    pm.expect([400, 500]).to.include(pm.response.code);",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.match(/không hợp lệ|định dạng không đúng/i);",
                   "});",
                   "",
                   "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
@@ -5265,7 +5298,7 @@
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "200,400,404,500"
+              "value": "200"
             },
             {
               "key": "testType",
@@ -5305,8 +5338,13 @@
                   "const type = pm.variables.get('testType') || 'N';",
                   "console.log(`[${tc}] [${type}] Update Vaccination Status Valid`);",
                   "",
-                  "pm.test(`[${tc}] Status code hop le`, function () {",
-                  "    pm.expect([200, 400, 404, 500]).to.include(pm.response.code);",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Cap nhat trang thai tiem thanh cong`, function () {",
+                  "    const d = pm.response.json();",
+                  "    pm.expect(d.isVaccinated).to.eql(true);",
                   "});",
                   "",
                   "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
