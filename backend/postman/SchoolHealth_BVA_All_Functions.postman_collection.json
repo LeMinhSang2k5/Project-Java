@@ -3122,7 +3122,7 @@
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "200,201"
+              "value": "200"
             },
             {
               "key": "expectJson",
@@ -3151,11 +3151,15 @@
                   "const type = pm.variables.get('testType') || 'N';",
                   "console.log(`[${tc}] [${type}] Create Valid Doc`);",
                   "",
-                  "pm.test(`[${tc}] Status code hop le`, function () {",
-                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "    pm.response.to.have.status(200);",
                   "});",
                   "",
-                  "if ([200,201].includes(pm.response.code)) pm.environment.set('schoolHealthDocId', String(pm.response.json().id));",
+                  "pm.test(`[${tc}] Co id`, function () {",
+                  "    pm.expect(pm.response.json().id).to.be.a('number');",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) pm.environment.set('schoolHealthDocId', String(pm.response.json().id));",
                   "",
                   "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
                 ]
@@ -3183,7 +3187,7 @@
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "200,400,500"
+              "value": "400"
             },
             {
               "key": "testType",
@@ -3220,11 +3224,15 @@
                 "type": "text/javascript",
                 "exec": [
                   "const tc = 'BVA-DOC-02';",
-                  "const type = pm.variables.get('testType') || 'N';",
+                  "const type = pm.variables.get('testType') || 'B';",
                   "console.log(`[${tc}] [${type}] Create Empty Title`);",
                   "",
-                  "pm.test(`[${tc}] Status code hop le`, function () {",
-                  "    pm.expect([200, 400, 500]).to.include(pm.response.code);",
+                  "pm.test(`[${tc}] Status code la 400`, function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Tiêu đề không được để trống');",
                   "});",
                   "",
                   "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
@@ -3238,7 +3246,7 @@
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "400,404,500"
+              "value": "404"
             },
             {
               "key": "testType",
@@ -3266,11 +3274,15 @@
                 "type": "text/javascript",
                 "exec": [
                   "const tc = 'BVA-DOC-03';",
-                  "const type = pm.variables.get('testType') || 'N';",
+                  "const type = pm.variables.get('testType') || 'A';",
                   "console.log(`[${tc}] [${type}] Get Invalid ID`);",
                   "",
-                  "pm.test(`[${tc}] Status code hop le`, function () {",
-                  "    pm.expect([400, 404, 500]).to.include(pm.response.code);",
+                  "pm.test(`[${tc}] Status code la 404`, function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Không tìm thấy tài liệu với ID: 999999999');",
                   "});",
                   "",
                   "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
@@ -3284,7 +3296,7 @@
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "400,404,500"
+              "value": "404"
             },
             {
               "key": "testType",
@@ -3312,11 +3324,15 @@
                 "type": "text/javascript",
                 "exec": [
                   "const tc = 'BVA-DOC-04';",
-                  "const type = pm.variables.get('testType') || 'N';",
+                  "const type = pm.variables.get('testType') || 'A';",
                   "console.log(`[${tc}] [${type}] Delete Invalid ID`);",
                   "",
-                  "pm.test(`[${tc}] Status code hop le`, function () {",
-                  "    pm.expect([400, 404, 500]).to.include(pm.response.code);",
+                  "pm.test(`[${tc}] Status code la 404`, function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Không tìm thấy tài liệu với ID: 999999999');",
                   "});",
                   "",
                   "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
@@ -3339,7 +3355,7 @@
             },
             {
               "key": "testType",
-              "value": "N"
+              "value": "B"
             },
             {
               "key": "equivalenceClass",
@@ -3372,7 +3388,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "const tc = 'BVA-MS-01';",
-                  "const type = pm.variables.get('testType') || 'N';",
+                  "const type = pm.variables.get('testType') || 'B';",
                   "console.log(`[${tc}] [${type}] Create Quantity 0`);",
                   "",
                   "pm.test(`[${tc}] Status code la 400`, function () {",
@@ -3423,11 +3439,15 @@
                   "const type = pm.variables.get('testType') || 'N';",
                   "console.log(`[${tc}] [${type}] Create Quantity 1`);",
                   "",
-                  "pm.test(`[${tc}] Status code hop le`, function () {",
-                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "pm.test(`[${tc}] Status code la 201`, function () {",
+                  "    pm.response.to.have.status(201);",
                   "});",
                   "",
-                  "if ([200,201].includes(pm.response.code)) pm.environment.set('medicalSupplyId', String(pm.response.json().id));",
+                  "pm.test(`[${tc}] Co id`, function () {",
+                  "    pm.expect(pm.response.json().id).to.be.a('number');",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) pm.environment.set('medicalSupplyId', String(pm.response.json().id));",
                   "",
                   "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
                 ]
@@ -3492,7 +3512,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "const tc = 'BVA-MS-03';",
-                  "const type = pm.variables.get('testType') || 'N';",
+                  "const type = pm.variables.get('testType') || 'B';",
                   "console.log(`[${tc}] [${type}] Create Empty Name`);",
                   "",
                   "pm.test(`[${tc}] Status code la 400`, function () {",
@@ -3542,13 +3562,16 @@
                 "type": "text/javascript",
                 "exec": [
                   "const tc = 'BVA-MS-04';",
-                  "const type = pm.variables.get('testType') || 'N';",
+                  "const type = pm.variables.get('testType') || 'A';",
                   "console.log(`[${tc}] [${type}] Get Invalid ID`);",
                   "",
                   "pm.test(`[${tc}] Status code la 404`, function () {",
                   "    pm.response.to.have.status(404);",
                   "});",
                   "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Không tìm thấy vật tư y tế với ID: 999999999');",
+                  "});",
                   "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
                 ]
               }
@@ -3640,18 +3663,16 @@
                 "type": "text/javascript",
                 "exec": [
                   "const tc = 'BVA-MS-06';",
-                  "const type = pm.variables.get('testType') || 'N';",
+                  "const type = pm.variables.get('testType') || 'A';",
                   "console.log(`[${tc}] [${type}] Delete Invalid ID`);",
                   "",
                   "pm.test(`[${tc}] Status code la 400`, function () {",
                   "    pm.response.to.have.status(400);",
                   "});",
                   "",
-                  "if (pm.response.code >= 400 && pm.response.text()) {",
-                  "    pm.test(`[${tc}] Thong bao loi (neu co)`, function () {",
-                  "        pm.expect(pm.response.text()).to.include('không tồn tại');",
-                  "    });",
-                  "}",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('không tồn tại');",
+                  "});",
                   "",
                   "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
                 ]
@@ -3705,7 +3726,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "const tc = 'BVA-MS-07';",
-                  "const type = pm.variables.get('testType') || 'N';",
+                  "const type = pm.variables.get('testType') || 'B';",
                   "console.log(`[${tc}] [${type}] Create Empty Category`);",
                   "",
                   "pm.test(`[${tc}] Status code la 400`, function () {",

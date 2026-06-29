@@ -1,6 +1,7 @@
 package com.java.backend.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,21 +29,19 @@ public class MedicalSupplyController {
     @Autowired
     private MedicalSupplyService medicalSupplyService;
 
-    // Tạo mới vật tư y tế
     @PostMapping
     public ResponseEntity<?> createMedicalSupply(@RequestBody MedicalSupply medicalSupply) {
         try {
             MedicalSupply savedSupply = medicalSupplyService.createMedicalSupply(medicalSupply);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedSupply);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Lỗi server: " + e.getMessage());
+                    .body(Map.of("message", "Lỗi server: " + e.getMessage()));
         }
     }
 
-    // Lấy tất cả vật tư y tế
     @GetMapping
     public ResponseEntity<List<MedicalSupply>> getAllMedicalSupplies() {
         try {
@@ -53,12 +52,12 @@ public class MedicalSupplyController {
         }
     }
 
-    // Tìm kiếm vật tư y tế theo tên
     @GetMapping("/search")
     public ResponseEntity<?> searchMedicalSupplies(@RequestParam String name) {
         try {
             if (name == null || name.trim().isEmpty()) {
-                return ResponseEntity.badRequest().body("Tên tìm kiếm không được để trống");
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "Tên tìm kiếm không được để trống"));
             }
             List<MedicalSupply> supplies = medicalSupplyService.searchMedicalSupplies(name.trim());
             return ResponseEntity.ok(supplies);
@@ -67,7 +66,6 @@ public class MedicalSupplyController {
         }
     }
 
-    // Lấy vật tư y tế theo danh mục
     @GetMapping("/category/{category}")
     public ResponseEntity<List<MedicalSupply>> getMedicalSuppliesByCategory(@PathVariable String category) {
         try {
@@ -78,7 +76,6 @@ public class MedicalSupplyController {
         }
     }
 
-    // Lấy vật tư y tế có số lượng thấp
     @GetMapping("/low-stock/{threshold}")
     public ResponseEntity<List<MedicalSupply>> getLowStockSupplies(@PathVariable Integer threshold) {
         try {
@@ -89,47 +86,47 @@ public class MedicalSupplyController {
         }
     }
 
-    // Lấy vật tư y tế theo ID
     @GetMapping("/{id}")
     public ResponseEntity<?> getMedicalSupplyById(@PathVariable Long id) {
         try {
             Optional<MedicalSupply> supply = medicalSupplyService.getMedicalSupplyById(id);
             if (supply.isPresent()) {
                 return ResponseEntity.ok(supply.get());
-            } else {
-                return ResponseEntity.notFound().build();
             }
+            return ResponseEntity.status(404)
+                    .body(Map.of("message", "Không tìm thấy vật tư y tế với ID: " + id));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Lỗi server: " + e.getMessage());
+                    .body(Map.of("message", "Lỗi server: " + e.getMessage()));
         }
     }
 
-    // Cập nhật vật tư y tế
     @PutMapping("/{id}")
     public ResponseEntity<?> updateMedicalSupply(@PathVariable Long id, @RequestBody MedicalSupply medicalSupply) {
         try {
             MedicalSupply updatedSupply = medicalSupplyService.updateMedicalSupply(id, medicalSupply);
             return ResponseEntity.ok(updatedSupply);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            if (e.getMessage() != null && e.getMessage().contains("không tồn tại")) {
+                return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
+            }
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Lỗi server: " + e.getMessage());
+                    .body(Map.of("message", "Lỗi server: " + e.getMessage()));
         }
     }
 
-    // Xóa vật tư y tế
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteMedicalSupply(@PathVariable Long id) {
         try {
             medicalSupplyService.deleteMedicalSupply(id);
-            return ResponseEntity.ok("Vật tư y tế đã được xóa thành công");
+            return ResponseEntity.ok(Map.of("message", "Vật tư y tế đã được xóa thành công"));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Lỗi server: " + e.getMessage());
+                    .body(Map.of("message", "Lỗi server: " + e.getMessage()));
         }
     }
 }
