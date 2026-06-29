@@ -2,6 +2,7 @@ package com.java.backend.controller;
 
 import com.java.backend.entity.Manager;
 import com.java.backend.enums.Role;
+import com.java.backend.exception.ManagerNotFoundException;
 import com.java.backend.service.ManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -9,11 +10,16 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/api/managers")
 @CrossOrigin(origins = "http://localhost:3000")
 public class ManagerController {
+
+    private static final Pattern PHONE_PATTERN = Pattern.compile("^0\\d{9}$");
+    private static final String PHONE_VALIDATION_MESSAGE =
+            "Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng 0";
 
     @Autowired
     private ManagerService managerService;
@@ -28,6 +34,16 @@ public class ManagerController {
             return ResponseEntity.badRequest()
                     .body(Map.of("message", "Khi tạo quản lý, role chỉ được phép là MANAGER"));
         }
+        if (manager.getPhoneNumber() == null || manager.getPhoneNumber().trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "Số điện thoại không được để trống"));
+        }
+        String phoneNumber = manager.getPhoneNumber().trim();
+        if (!isValidPhoneNumber(phoneNumber)) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", PHONE_VALIDATION_MESSAGE));
+        }
+        manager.setPhoneNumber(phoneNumber);
 
         Manager saved = managerService.saveManager(manager);
         return ResponseEntity.ok(saved);
@@ -39,18 +55,43 @@ public class ManagerController {
     }
 
     @GetMapping("/{id}")
-    public Manager getManager(@PathVariable Long id) {
-        return managerService.getManagerById(id);
+    public ResponseEntity<?> getManager(@PathVariable Long id) {
+        try {
+            Manager manager = managerService.getManagerById(id);
+            return ResponseEntity.ok(manager);
+        } catch (ManagerNotFoundException e) {
+            return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
+        }
     }
 
     @PutMapping("/{id}")
-    public Manager updateManager(@PathVariable Long id, @RequestBody Manager manager) {
+    public ResponseEntity<?> updateManager(@PathVariable Long id, @RequestBody Manager manager) {
+        if (manager.getPhoneNumber() != null) {
+            String phoneNumber = manager.getPhoneNumber().trim();
+            if (phoneNumber.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Số điện thoại không được để trống"));
+            }
+            if (!isValidPhoneNumber(phoneNumber)) {
+                return ResponseEntity.badRequest().body(Map.of("message", PHONE_VALIDATION_MESSAGE));
+            }
+            manager.setPhoneNumber(phoneNumber);
+        }
         manager.setId(id);
-        return managerService.updateManager(manager);
+        Manager updated = managerService.updateManager(manager);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteManager(@PathVariable Long id) {
-        managerService.deleteManager(id);
+    public ResponseEntity<?> deleteManager(@PathVariable Long id) {
+        try {
+            managerService.deleteManager(id);
+            return ResponseEntity.ok().build();
+        } catch (ManagerNotFoundException e) {
+            return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    private boolean isValidPhoneNumber(String phoneNumber) {
+        return phoneNumber != null && PHONE_PATTERN.matcher(phoneNumber).matches();
     }
 }

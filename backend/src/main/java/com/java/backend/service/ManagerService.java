@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.java.backend.entity.Manager;
 import com.java.backend.enums.Role;
+import com.java.backend.exception.ManagerNotFoundException;
 import com.java.backend.repository.ManagerRepository;
 
 @Service
@@ -26,7 +27,7 @@ public class ManagerService {
 
     public Manager getManagerById(Long id) {
         return managerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Manager not found with id: " + id));
+                .orElseThrow(() -> new ManagerNotFoundException(id));
     }
 
     public Manager updateManager(Manager manager) {
@@ -34,6 +35,9 @@ public class ManagerService {
     }
 
     public void deleteManager(Long id) {
+        if (!managerRepository.existsById(id)) {
+            throw new ManagerNotFoundException(id);
+        }
         managerRepository.deleteById(id);
     }
 }

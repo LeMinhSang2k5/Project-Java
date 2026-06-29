@@ -2654,7 +2654,7 @@
           "variable": [
             {
               "key": "expectedStatus",
-              "value": "400,404,500"
+              "value": "404"
             },
             {
               "key": "testType",
@@ -2682,11 +2682,15 @@
                 "type": "text/javascript",
                 "exec": [
                   "const tc = 'BVA-MAN-04';",
-                  "const type = pm.variables.get('testType') || 'N';",
+                  "const type = pm.variables.get('testType') || 'A';",
                   "console.log(`[${tc}] [${type}] Get Invalid ID`);",
                   "",
-                  "pm.test(`[${tc}] Status code hop le`, function () {",
-                  "    pm.expect([400, 404, 500]).to.include(pm.response.code);",
+                  "pm.test(`[${tc}] Status code la 404`, function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao loi dung`, function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Không tìm thấy manager với ID: 999999999');",
                   "});",
                   "",
                   "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
