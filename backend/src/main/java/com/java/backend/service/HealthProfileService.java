@@ -1,5 +1,8 @@
 package com.java.backend.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.java.backend.entity.HealthProfile;
 import com.java.backend.entity.Student;
 import com.java.backend.exception.HealthProfileNotFoundException;
@@ -15,6 +18,8 @@ import java.util.List;
 
 @Service
 public class HealthProfileService {
+    private static final Logger logger = LoggerFactory.getLogger(HealthProfileService.class);
+
 
     @Autowired
     private HealthProfileRepository healthProfileRepository;
@@ -58,7 +63,7 @@ public class HealthProfileService {
     @Transactional
     public HealthProfile updateHealthProfile(HealthProfile healthProfile) {
         try {
-            System.out.println("Starting update for health profile ID: " + healthProfile.getId());
+            logger.info("Starting update for health profile ID: {}", healthProfile.getId());
             
             if (!healthProfileRepository.existsById(healthProfile.getId())) {
                 throw new HealthProfileNotFoundException(healthProfile.getId());
@@ -67,42 +72,42 @@ public class HealthProfileService {
             HealthProfile existingProfile = healthProfileRepository.findById(healthProfile.getId())
                     .orElseThrow(() -> new HealthProfileNotFoundException(healthProfile.getId()));
             
-            System.out.println("Found existing profile: " + existingProfile.getId());
+            logger.info("Found existing profile: {}", existingProfile.getId());
             
             // Cập nhật các field với null check
             if (healthProfile.getStudentName() != null) {
                 existingProfile.setStudentName(healthProfile.getStudentName());
-                System.out.println("Updated studentName: " + healthProfile.getStudentName());
+                logger.info("Updated studentName: {}", healthProfile.getStudentName());
             }
             
             if (healthProfile.getClassName() != null) {
                 existingProfile.setClassName(healthProfile.getClassName());
-                System.out.println("Updated className: " + healthProfile.getClassName());
+                logger.info("Updated className: {}", healthProfile.getClassName());
             }
             
             if (healthProfile.getGrade() != null) {
                 existingProfile.setGrade(healthProfile.getGrade());
-                System.out.println("Updated grade: " + healthProfile.getGrade());
+                logger.info("Updated grade: {}", healthProfile.getGrade());
             }
             
             if (healthProfile.getGender() != null) {
                 existingProfile.setGender(healthProfile.getGender());
-                System.out.println("Updated gender: " + healthProfile.getGender());
+                logger.info("Updated gender: {}", healthProfile.getGender());
             }
             
             if (healthProfile.getDateOfBirth() != null) {
                 existingProfile.setDateOfBirth(healthProfile.getDateOfBirth());
-                System.out.println("Updated dateOfBirth: " + healthProfile.getDateOfBirth());
+                logger.info("Updated dateOfBirth: {}", healthProfile.getDateOfBirth());
             }
             
             if (healthProfile.getCity() != null) {
                 existingProfile.setCity(healthProfile.getCity());
-                System.out.println("Updated city: " + healthProfile.getCity());
+                logger.info("Updated city: {}", healthProfile.getCity());
             }
             
             if (healthProfile.getDistrict() != null) {
                 existingProfile.setDistrict(healthProfile.getDistrict());
-                System.out.println("Updated district: " + healthProfile.getDistrict());
+                logger.info("Updated district: {}", healthProfile.getDistrict());
             }
             
             // Cập nhật các field text (có thể null)
@@ -113,15 +118,15 @@ public class HealthProfileService {
             existingProfile.setVisionDetails(healthProfile.getVisionDetails());
             existingProfile.setHearingDetails(healthProfile.getHearingDetails());
             
-            System.out.println("Updated text fields - allergies: " + healthProfile.getAllergies());
-            System.out.println("Updated text fields - chronicDiseases: " + healthProfile.getChronicDiseases());
+            logger.info("Updated text fields - allergies: {}", healthProfile.getAllergies());
+            logger.info("Updated text fields - chronicDiseases: {}", healthProfile.getChronicDiseases());
             
             // Cập nhật student relationship nếu có
             if (healthProfile.getStudent() != null && healthProfile.getStudent().getId() != null) {
                 Student student = studentRepository.findById(healthProfile.getStudent().getId())
                         .orElseThrow(() -> new StudentNotFoundException(healthProfile.getStudent().getId()));
                 existingProfile.setStudent(student);
-                System.out.println("Updated student relationship: " + student.getId());
+                logger.info("Updated student relationship: {}", student.getId());
                 
                 // Đồng bộ thông tin từ HealthProfile vào Student
                 syncStudentInfoFromHealthProfile(student, existingProfile);
@@ -130,15 +135,15 @@ public class HealthProfileService {
             
             // Lưu vào database
             HealthProfile saved = healthProfileRepository.save(existingProfile);
-            System.out.println("Health profile updated successfully with ID: " + saved.getId());
-            System.out.println("Final studentName: " + saved.getStudentName());
-            System.out.println("Final className: " + saved.getClassName());
-            System.out.println("Final grade: " + saved.getGrade());
+            logger.info("Health profile updated successfully with ID: {}", saved.getId());
+            logger.info("Final studentName: {}", saved.getStudentName());
+            logger.info("Final className: {}", saved.getClassName());
+            logger.info("Final grade: {}", saved.getGrade());
             
             return saved;
         } catch (Exception e) {
-            System.err.println("Error updating health profile: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error updating health profile: {}", e.getMessage());
+            logger.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -174,7 +179,7 @@ public class HealthProfileService {
                 student.setGender(gender);
             } catch (IllegalArgumentException e) {
                 // Nếu không parse được enum, giữ nguyên giá trị hiện tại
-                System.out.println("Invalid gender value: " + healthProfile.getGender());
+                logger.info("Invalid gender value: {}", healthProfile.getGender());
             }
         }
         
@@ -194,6 +199,6 @@ public class HealthProfileService {
             student.setGrade(healthProfile.getGrade());
         }
         
-        System.out.println("Student info synchronized from health profile");
+        logger.info("Student info synchronized from health profile");
     }
 }

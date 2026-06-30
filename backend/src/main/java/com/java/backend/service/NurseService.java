@@ -1,5 +1,8 @@
 package com.java.backend.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +15,8 @@ import com.java.backend.enums.Role;
 
 @Service
 public class NurseService {
+    private static final Logger logger = LoggerFactory.getLogger(NurseService.class);
+
 
     @Autowired
     private NurseRepository nurseRepository;
@@ -25,11 +30,11 @@ public class NurseService {
                 nurse.setActive(true);
             }
 
-            System.out.println("Saving nurse: " + nurse.getEmail() + ", Role: " + nurse.getRole());
+            logger.info("Saving nurse: {}", nurse.getEmail() + ", Role: " + nurse.getRole());
             return nurseRepository.save(nurse);
         } catch (Exception e) {
-            System.err.println("Error saving nurse: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error saving nurse: {}", e.getMessage());
+            logger.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -38,8 +43,8 @@ public class NurseService {
         try {
             return nurseRepository.findAll();
         } catch (Exception e) {
-            System.err.println("Error getting all nurses: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error getting all nurses: {}", e.getMessage());
+            logger.error(e.getMessage(), e);
             throw e;
         }
     }

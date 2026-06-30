@@ -1,5 +1,8 @@
 package com.java.backend.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.java.backend.entity.VaccinationSchedule;
 import com.java.backend.enums.ConsentStatus;
 import com.java.backend.service.VaccinationScheduleService;
@@ -17,6 +20,8 @@ import java.util.Map;
 @RequestMapping("/api/vaccination-schedules")
 @CrossOrigin(origins = "http://localhost:3000")
 public class VaccinationScheduleController {
+    private static final Logger logger = LoggerFactory.getLogger(VaccinationScheduleController.class);
+
 
     @Autowired
     private VaccinationScheduleService service;

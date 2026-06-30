@@ -25,6 +25,9 @@ public class BlogService {
 
     // Tạo blog mới (đơn giản hóa)
     public Blog createBlog(Blog blog) {
+        if (blog == null) {
+            throw new IllegalArgumentException("Blog cannot be null");
+        }
         try {
             // Đặt ID về null để JPA tự động tạo ID
             blog.setId(null);
@@ -37,6 +40,12 @@ public class BlogService {
     }
 
     public Blog updateBlog(Long id, Blog blogDetails) {
+        if (id == null) {
+            throw new IllegalArgumentException("Blog id cannot be null");
+        }
+        if (blogDetails == null) {
+            throw new IllegalArgumentException("Blog details cannot be null");
+        }
         Blog existingBlog = blogRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Blog not found with id " + id));
 

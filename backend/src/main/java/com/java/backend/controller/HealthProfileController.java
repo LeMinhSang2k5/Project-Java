@@ -1,5 +1,8 @@
 package com.java.backend.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.java.backend.entity.HealthProfile;
 import com.java.backend.entity.Student;
 import com.java.backend.exception.HealthProfileNotFoundException;
@@ -18,6 +21,8 @@ import java.util.Map;
 @RequestMapping("/api/health-profiles")
 @CrossOrigin(origins = "http://localhost:3000")
 public class HealthProfileController {
+    private static final Logger logger = LoggerFactory.getLogger(HealthProfileController.class);
+
 
     @Autowired
     private HealthProfileService healthProfileService;
@@ -70,11 +75,17 @@ public class HealthProfileController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateHealthProfile(@PathVariable Long id,
+    public ResponseEntity<Object> updateHealthProfile(@PathVariable Long id,
             @RequestBody HealthProfile healthProfile) {
         try {
             healthProfile.setId(id);
+            // Validate student ID if provided
+            if (healthProfile.getStudent() != null && healthProfile.getStudent().getId() != null) {
+                logger.info("Updating health profile for student ID: {}", healthProfile.getStudent().getId());
+            }
+            // Gọi service để cập nhật - service sẽ xử lý logic cập nhật đúng cách
             HealthProfile updated = healthProfileService.updateHealthProfile(healthProfile);
+            logger.info("Controller: Health profile updated successfully with ID: {}", updated.getId());
             return ResponseEntity.ok(updated);
         } catch (HealthProfileNotFoundException | StudentNotFoundException e) {
             return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));

@@ -9,10 +9,16 @@ import com.java.backend.entity.HealthIncident;
 
 public interface HealthIncidentRepository extends JpaRepository<HealthIncident, Long> {
     List<HealthIncident> findByStudent_Id(Long studentId);
+
     List<HealthIncident> findByReportedBy_Id(Long reportedById);
+
     List<HealthIncident> findByIncidentTime(LocalDateTime incidentTime);
+
     List<HealthIncident> findByStatus(HealthIncident.IncidentStatus status);
-    List<HealthIncident> findByIncidentType(HealthIncident.IncidentType incidentType);
+
+    List<HealthIncident> findByIncidentType(String incidentType);
+
     List<HealthIncident> findByIncidentTimeAndStatus(LocalDateTime incidentTime, HealthIncident.IncidentStatus status);
+
     List<HealthIncident> findByStudent_IdAndIncidentTime(Long studentId, LocalDateTime incidentTime);
 }

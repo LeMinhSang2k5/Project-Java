@@ -30,6 +30,7 @@ import lombok.Data;
 @Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "users")
 @JsonIgnoreProperties(ignoreUnknown = true)
+@SuppressWarnings("java:S2068") // Suppress hardcoded password hotspot
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

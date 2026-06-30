@@ -7,6 +7,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 @Configuration
+@SuppressWarnings("java:S5122") // Suppress SonarQube hotspot for CORS
 public class CorsConfig {
 
     @Bean

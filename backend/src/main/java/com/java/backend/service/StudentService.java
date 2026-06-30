@@ -1,5 +1,8 @@
 package com.java.backend.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.java.backend.entity.Student;
 import com.java.backend.exception.ParentNotFoundException;
 import com.java.backend.exception.StudentNotFoundException;
@@ -15,6 +18,8 @@ import java.util.List;
 
 @Service
 public class StudentService {
+    private static final Logger logger = LoggerFactory.getLogger(StudentService.class);
+
 
     @Autowired
     private StudentRepository studentRepository;
@@ -59,8 +64,8 @@ public class StudentService {
             }
             return studentRepository.save(student);
         } catch (Exception e) {
-            System.err.println("StudentService Error: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("StudentService Error: {}", e.getMessage());
+            logger.error(e.getMessage(), e);
             throw new RuntimeException("Lỗi khi lưu học sinh: " + e.getMessage(), e);
         }
     }

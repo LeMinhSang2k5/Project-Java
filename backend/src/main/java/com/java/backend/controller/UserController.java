@@ -37,7 +37,7 @@ public class UserController {
     private UserRepository userRepository;
 
     @PostMapping("/user")
-    ResponseEntity<?> newUser(@RequestBody User newUser) {
+    ResponseEntity<Object> newUser(@RequestBody User newUser) {
         try {
             // Validate required fields
             if (newUser.getEmail() == null || newUser.getEmail().trim().isEmpty()) {
@@ -82,7 +82,7 @@ public class UserController {
     }
 
     @GetMapping("/users")
-    ResponseEntity<?> getAllUsers(@RequestParam(defaultValue = "0") int page) {
+    ResponseEntity<Object> getAllUsers(@RequestParam(defaultValue = "0") int page) {
         try {
             if (page < 0) {
                 return ResponseEntity.badRequest()
@@ -108,7 +108,7 @@ public class UserController {
     }
 
     @GetMapping("/user/{id}")
-    ResponseEntity<?> getUserById(@PathVariable Long id) {
+    ResponseEntity<Object> getUserById(@PathVariable Long id) {
         try {
             User user = userRepository.findById(id)
                     .orElseThrow(() -> new UserNotFoundException(id));
@@ -127,7 +127,7 @@ public class UserController {
     }
 
     @PutMapping("/user/{id}")
-    ResponseEntity<?> updateUser(@RequestBody User newUser, @PathVariable Long id) {
+    ResponseEntity<Object> updateUser(@RequestBody User newUser, @PathVariable Long id) {
         try {
             User updatedUser = userRepository.findById(id)
                     .map(user -> {
@@ -181,7 +181,7 @@ public class UserController {
     }
 
     @DeleteMapping("/user/{id}")
-    ResponseEntity<?> deleteUser(@PathVariable Long id) {
+    ResponseEntity<Object> deleteUser(@PathVariable Long id) {
         try {
             if (!userRepository.existsById(id)) {
                 throw new UserNotFoundException(id);

@@ -1,5 +1,8 @@
 package com.java.backend.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.java.backend.entity.Student;
 import com.java.backend.exception.ParentNotFoundException;
 import com.java.backend.exception.StudentNotFoundException;
@@ -17,13 +20,16 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/students") // Sửa lại endpoint để đồng bộ với frontend gọi /api/students
 @CrossOrigin(origins = "http://localhost:3000")
+@SuppressWarnings("java:S2068") // Suppress hardcoded password hotspot
 public class StudentController {
+    private static final Logger logger = LoggerFactory.getLogger(StudentController.class);
+
 
     @Autowired
     private StudentService studentService;
 
     @PostMapping
-    public ResponseEntity<?> createStudent(@RequestBody Map<String, Object> requestData) {
+    public ResponseEntity<Object> createStudent(@RequestBody Map<String, Object> requestData) {
         try {
             String email = (String) requestData.get("email");
             String password = (String) requestData.get("password");
@@ -130,8 +136,8 @@ public class StudentController {
 
             return ResponseEntity.ok(saved);
         } catch (Exception e) {
-            System.err.println("Error creating student: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error creating student: {}", e.getMessage());
+            logger.error(e.getMessage(), e);
             Map<String, String> error = new HashMap<>();
             error.put("message", "Lỗi khi tạo học sinh: " + e.getMessage());
             return ResponseEntity.internalServerError().body(error);
@@ -139,7 +145,7 @@ public class StudentController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllStudents() {
+    public ResponseEntity<Object> getAllStudents() {
         try {
             List<Student> students = studentService.getAllStudents();
             return ResponseEntity.ok(students);
@@ -151,7 +157,7 @@ public class StudentController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getStudent(@PathVariable Long id) {
+    public ResponseEntity<Object> getStudent(@PathVariable Long id) {
         try {
             Student student = studentService.getStudentById(id);
             return ResponseEntity.ok(student);
@@ -165,7 +171,7 @@ public class StudentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateStudent(@PathVariable Long id, @RequestBody Map<String, Object> requestData) {
+    public ResponseEntity<Object> updateStudent(@PathVariable Long id, @RequestBody Map<String, Object> requestData) {
         try {
             // Lấy student hiện tại
             Student existing = studentService.getStudentById(id);
@@ -249,7 +255,7 @@ public class StudentController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteStudent(@PathVariable Long id) {
+    public ResponseEntity<Object> deleteStudent(@PathVariable Long id) {
         try {
             studentService.deleteStudent(id);
             Map<String, String> success = new HashMap<>();
@@ -266,7 +272,7 @@ public class StudentController {
 
     // Endpoint để lấy danh sách học sinh theo parent ID
     @GetMapping("/by-parent/{parentId}")
-    public ResponseEntity<?> getStudentsByParent(@PathVariable Long parentId) {
+    public ResponseEntity<Object> getStudentsByParent(@PathVariable Long parentId) {
         try {
             List<Student> students = studentService.getStudentsByParent(parentId);
             return ResponseEntity.ok(students);

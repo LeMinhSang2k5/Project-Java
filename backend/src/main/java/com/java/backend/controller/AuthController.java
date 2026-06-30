@@ -52,7 +52,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody User user) {
+    public ResponseEntity<Object> login(@RequestBody User user) {
         try {
             User userLogin = authService.login(user.getEmail(), user.getPassword());
             String accessToken = jwtUtil.generateToken(

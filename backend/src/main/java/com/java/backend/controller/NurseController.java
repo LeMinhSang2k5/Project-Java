@@ -1,5 +1,8 @@
 package com.java.backend.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.java.backend.entity.Nurse;
 import com.java.backend.enums.Role;
 import com.java.backend.exception.NurseNotFoundException;
@@ -16,6 +19,8 @@ import java.util.regex.Pattern;
 @RequestMapping("/api/nurses")
 @CrossOrigin(origins = "http://localhost:3000")
 public class NurseController {
+    private static final Logger logger = LoggerFactory.getLogger(NurseController.class);
+
     private static final Pattern PHONE_PATTERN = Pattern.compile("^0\\d{9}$");
     private static final String PHONE_VALIDATION_MESSAGE =
             "Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng 0";
@@ -24,7 +29,7 @@ public class NurseController {
     private NurseService nurseService;
 
     @PostMapping
-    public ResponseEntity<?> createNurse(@RequestBody Nurse nurse) {
+    public ResponseEntity<Object> createNurse(@RequestBody Nurse nurse) {
         try {
             if (nurse.getRole() == null) {
                 return ResponseEntity.badRequest()
@@ -45,44 +50,44 @@ public class NurseController {
             }
             nurse.setPhoneNumber(phoneNumber);
 
-            System.out.println("Received nurse data: " + nurse.getEmail() + ", " + nurse.getFullName());
+            logger.info("Received nurse data: {}", nurse.getEmail() + ", " + nurse.getFullName());
             Nurse saved = nurseService.saveNurse(nurse);
             return ResponseEntity.ok(saved);
         } catch (Exception e) {
-            System.err.println("Error creating nurse: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error creating nurse: {}", e.getMessage());
+            logger.error(e.getMessage(), e);
             return ResponseEntity.status(500).body("Error creating nurse: " + e.getMessage());
         }
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllNurses() {
+    public ResponseEntity<Object> getAllNurses() {
         try {
             List<Nurse> nurses = nurseService.getAllNurses();
             return ResponseEntity.ok(nurses);
         } catch (Exception e) {
-            System.err.println("Error getting nurses: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error getting nurses: {}", e.getMessage());
+            logger.error(e.getMessage(), e);
             return ResponseEntity.status(500).body("Error getting nurses: " + e.getMessage());
         }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getNurse(@PathVariable Long id) {
+    public ResponseEntity<Object> getNurse(@PathVariable Long id) {
         try {
             Nurse nurse = nurseService.getNurseById(id);
             return ResponseEntity.ok(nurse);
         } catch (NurseNotFoundException e) {
             return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
         } catch (Exception e) {
-            System.err.println("Error getting nurse: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error getting nurse: {}", e.getMessage());
+            logger.error(e.getMessage(), e);
             return ResponseEntity.status(500).body("Error getting nurse: " + e.getMessage());
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateNurse(@PathVariable Long id, @RequestBody Nurse nurse) {
+    public ResponseEntity<Object> updateNurse(@PathVariable Long id, @RequestBody Nurse nurse) {
         try {
             if (nurse.getPhoneNumber() != null) {
                 String phoneNumber = nurse.getPhoneNumber().trim();
@@ -98,22 +103,22 @@ public class NurseController {
             Nurse updated = nurseService.updateNurse(nurse);
             return ResponseEntity.ok(updated);
         } catch (Exception e) {
-            System.err.println("Error updating nurse: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error updating nurse: {}", e.getMessage());
+            logger.error(e.getMessage(), e);
             return ResponseEntity.status(500).body("Error updating nurse: " + e.getMessage());
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteNurse(@PathVariable Long id) {
+    public ResponseEntity<Object> deleteNurse(@PathVariable Long id) {
         try {
             nurseService.deleteNurse(id);
             return ResponseEntity.ok().build();
         } catch (NurseNotFoundException e) {
             return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
         } catch (Exception e) {
-            System.err.println("Error deleting nurse: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error deleting nurse: {}", e.getMessage());
+            logger.error(e.getMessage(), e);
             return ResponseEntity.status(500).body("Error deleting nurse: " + e.getMessage());
         }
     }

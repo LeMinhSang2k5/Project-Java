@@ -25,7 +25,7 @@ public class ManagerController {
     private ManagerService managerService;
 
     @PostMapping
-    public ResponseEntity<?> createManager(@RequestBody Manager manager) {
+    public ResponseEntity<Object> createManager(@RequestBody Manager manager) {
         if (manager.getRole() == null) {
             return ResponseEntity.badRequest()
                     .body(Map.of("message", "Trường role là bắt buộc và phải là MANAGER"));
@@ -55,7 +55,7 @@ public class ManagerController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getManager(@PathVariable Long id) {
+    public ResponseEntity<Object> getManager(@PathVariable Long id) {
         try {
             Manager manager = managerService.getManagerById(id);
             return ResponseEntity.ok(manager);
@@ -65,7 +65,7 @@ public class ManagerController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateManager(@PathVariable Long id, @RequestBody Manager manager) {
+    public ResponseEntity<Object> updateManager(@PathVariable Long id, @RequestBody Manager manager) {
         if (manager.getPhoneNumber() != null) {
             String phoneNumber = manager.getPhoneNumber().trim();
             if (phoneNumber.isEmpty()) {
@@ -82,7 +82,7 @@ public class ManagerController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteManager(@PathVariable Long id) {
+    public ResponseEntity<Object> deleteManager(@PathVariable Long id) {
         try {
             managerService.deleteManager(id);
             return ResponseEntity.ok().build();

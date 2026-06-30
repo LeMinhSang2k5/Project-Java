@@ -32,7 +32,7 @@ public class ParentController {
     private VaccinationScheduleRepository vaccinationScheduleRepository;
 
     @PostMapping
-    public ResponseEntity<?> createParent(@RequestBody Parent parent) {
+    public ResponseEntity<Object> createParent(@RequestBody Parent parent) {
         if (parent.getRole() == null) {
             return ResponseEntity.badRequest()
                     .body(Map.of("message", "Trường role là bắt buộc và phải là PARENT"));
@@ -61,7 +61,7 @@ public class ParentController {
     }
 
     @GetMapping("/{parentId}/students")
-    public ResponseEntity<?> getStudentsOfParent(@PathVariable Long parentId) {
+    public ResponseEntity<Object> getStudentsOfParent(@PathVariable Long parentId) {
         try {
             List<Student> students = parentService.getStudentsOfParent(parentId);
             if (students != null && !students.isEmpty()) {
@@ -85,7 +85,7 @@ public class ParentController {
     }
 
     @PutMapping("/link-student")
-    public ResponseEntity<?> linkStudentToParent(@RequestParam Long parentId, @RequestParam Long studentId) {
+    public ResponseEntity<Object> linkStudentToParent(@RequestParam Long parentId, @RequestParam Long studentId) {
         try {
             parentService.linkStudentToParent(parentId, studentId);
             return ResponseEntity.ok("Liên kết học sinh với phụ huynh thành công");
@@ -95,7 +95,7 @@ public class ParentController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteParent(@PathVariable Long id) {
+    public ResponseEntity<Object> deleteParent(@PathVariable Long id) {
         try {
             parentService.deleteParent(id);
             return ResponseEntity.ok("Xóa thành công");
@@ -107,14 +107,14 @@ public class ParentController {
     // Endpoint để xác nhận phiếu tiêm chủng/kiểm tra y tế
     @PostMapping("/confirm/{formId}")
     public ResponseEntity<Map<String, String>> confirmForm(@PathVariable Long formId) {
-        boolean exists = medicalCheckupNotificationRepository.existsById(formId)
-                || vaccinationScheduleRepository.existsById(formId);
-        if (!exists) {
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "Không tìm thấy phiếu với ID: " + formId);
-            return ResponseEntity.status(404).body(error);
-        }
         try {
+            boolean exists = medicalCheckupNotificationRepository.existsById(formId)
+                    || vaccinationScheduleRepository.existsById(formId);
+            if (!exists) {
+                Map<String, String> error = new HashMap<>();
+                error.put("message", "Không tìm thấy phiếu với ID: " + formId);
+                return ResponseEntity.status(404).body(error);
+            }
             // TODO: cập nhật trạng thái xác nhận thực tế theo loại biểu mẫu.
             Map<String, String> response = new HashMap<>();
             response.put("message", "Xác nhận thành công cho phiếu ID: " + formId);

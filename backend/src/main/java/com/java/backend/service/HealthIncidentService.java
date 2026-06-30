@@ -130,7 +130,7 @@ public class HealthIncidentService {
     }
 
     public List<HealthIncident> getHealthIncidentsByIncidentType(HealthIncident.IncidentType incidentType) {
-        return healthIncidentRepository.findByIncidentType(incidentType);
+        return healthIncidentRepository.findByIncidentType(incidentType == null ? null : incidentType.name());
     }
 
     public List<HealthIncident> getHealthIncidentsByIncidentTimeAndStatus(

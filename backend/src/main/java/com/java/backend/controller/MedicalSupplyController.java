@@ -30,7 +30,7 @@ public class MedicalSupplyController {
     private MedicalSupplyService medicalSupplyService;
 
     @PostMapping
-    public ResponseEntity<?> createMedicalSupply(@RequestBody MedicalSupply medicalSupply) {
+    public ResponseEntity<Object> createMedicalSupply(@RequestBody MedicalSupply medicalSupply) {
         try {
             MedicalSupply savedSupply = medicalSupplyService.createMedicalSupply(medicalSupply);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedSupply);
@@ -53,7 +53,7 @@ public class MedicalSupplyController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<?> searchMedicalSupplies(@RequestParam String name) {
+    public ResponseEntity<Object> searchMedicalSupplies(@RequestParam String name) {
         try {
             if (name == null || name.trim().isEmpty()) {
                 return ResponseEntity.badRequest()
@@ -87,7 +87,7 @@ public class MedicalSupplyController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getMedicalSupplyById(@PathVariable Long id) {
+    public ResponseEntity<Object> getMedicalSupplyById(@PathVariable Long id) {
         try {
             Optional<MedicalSupply> supply = medicalSupplyService.getMedicalSupplyById(id);
             if (supply.isPresent()) {
@@ -102,7 +102,7 @@ public class MedicalSupplyController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateMedicalSupply(@PathVariable Long id, @RequestBody MedicalSupply medicalSupply) {
+    public ResponseEntity<Object> updateMedicalSupply(@PathVariable Long id, @RequestBody MedicalSupply medicalSupply) {
         try {
             MedicalSupply updatedSupply = medicalSupplyService.updateMedicalSupply(id, medicalSupply);
             return ResponseEntity.ok(updatedSupply);
@@ -118,7 +118,7 @@ public class MedicalSupplyController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteMedicalSupply(@PathVariable Long id) {
+    public ResponseEntity<Object> deleteMedicalSupply(@PathVariable Long id) {
         try {
             medicalSupplyService.deleteMedicalSupply(id);
             return ResponseEntity.ok(Map.of("message", "Vật tư y tế đã được xóa thành công"));

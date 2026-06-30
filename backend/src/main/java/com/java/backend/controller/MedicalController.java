@@ -20,7 +20,7 @@ public class MedicalController {
 
     // Tạo yêu cầu thuốc mới
     @PostMapping
-    public ResponseEntity<?> createMedicalRequest(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<Object> createMedicalRequest(@RequestBody Map<String, Object> request) {
         try {
             Long studentId = Long.valueOf(request.get("studentId").toString());
             Long parentId = Long.valueOf(request.get("parentId").toString());
@@ -78,7 +78,7 @@ public class MedicalController {
 
     // Cập nhật trạng thái yêu cầu thuốc
     @PutMapping("/{id}/status")
-    public ResponseEntity<?> updateMedicalRequestStatus(@PathVariable Long id, @RequestBody Map<String, String> request) {
+    public ResponseEntity<Object> updateMedicalRequestStatus(@PathVariable Long id, @RequestBody Map<String, String> request) {
         try {
             String status = request.get("status");
             String approvedBy = request.get("approvedBy");
@@ -94,7 +94,7 @@ public class MedicalController {
 
     // Cập nhật yêu cầu thuốc
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateMedicalRequest(@PathVariable Long id, @RequestBody Map<String, String> request) {
+    public ResponseEntity<Object> updateMedicalRequest(@PathVariable Long id, @RequestBody Map<String, String> request) {
         try {
             String medicalName = request.get("medicalName");
             String dosage = request.get("dosage");
@@ -111,7 +111,7 @@ public class MedicalController {
 
     // Xóa yêu cầu thuốc
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteMedicalRequest(@PathVariable Long id) {
+    public ResponseEntity<Object> deleteMedicalRequest(@PathVariable Long id) {
         try {
             medicalService.deleteMedicalRequest(id);
             Map<String, String> success = new HashMap<>();

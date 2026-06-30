@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,7 +30,7 @@ public class BlogController {
     private BlogService blogService;
 
     @GetMapping
-    public ResponseEntity<?> getAllBlogs() {
+    public ResponseEntity<Object> getAllBlogs() {
         try {
             List<Blog> blogs = blogService.getAllBlogs();
             return ResponseEntity.ok(blogs);
@@ -41,7 +42,7 @@ public class BlogController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getBlogById(@PathVariable Long id) {
+    public ResponseEntity<Object> getBlogById(@PathVariable Long id) {
         try {
             Optional<Blog> blog = blogService.getBlogById(id);
             if (blog.isPresent()) {
@@ -58,8 +59,13 @@ public class BlogController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createBlog(@RequestBody Blog blog) {
+    public ResponseEntity<Object> createBlog(@RequestBody(required = false) Blog blog) {
         try {
+            if (blog == null) {
+                Map<String, String> error = new HashMap<>();
+                error.put("message", "Body không được để trống");
+                return ResponseEntity.badRequest().body(error);
+            }
             // Kiểm tra dữ liệu đầu vào
             if (blog.getTitle() == null || blog.getTitle().trim().isEmpty()) {
                 Map<String, String> error = new HashMap<>();
@@ -83,7 +89,7 @@ public class BlogController {
             }
 
             Blog createdBlog = blogService.createBlog(blog);
-            return ResponseEntity.ok(createdBlog);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdBlog);
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("message", "Lỗi khi tạo blog: " + e.getMessage());
@@ -92,8 +98,13 @@ public class BlogController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateBlog(@PathVariable Long id, @RequestBody Blog blog) {
+    public ResponseEntity<Object> updateBlog(@PathVariable Long id, @RequestBody(required = false) Blog blog) {
         try {
+            if (blog == null) {
+                Map<String, String> error = new HashMap<>();
+                error.put("message", "Body không được để trống");
+                return ResponseEntity.badRequest().body(error);
+            }
             // Kiểm tra dữ liệu đầu vào
             if (blog.getTitle() == null || blog.getTitle().trim().isEmpty()) {
                 Map<String, String> error = new HashMap<>();
@@ -124,7 +135,7 @@ public class BlogController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteBlog(@PathVariable Long id) {
+    public ResponseEntity<Object> deleteBlog(@PathVariable Long id) {
         try {
             // Kiểm tra blog có tồn tại không
             Optional<Blog> existingBlog = blogService.getBlogById(id);
