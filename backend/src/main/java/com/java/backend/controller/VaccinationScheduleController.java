@@ -22,7 +22,6 @@ import java.util.Map;
 public class VaccinationScheduleController {
     private static final Logger logger = LoggerFactory.getLogger(VaccinationScheduleController.class);
 
-
     @Autowired
     private VaccinationScheduleService service;
 

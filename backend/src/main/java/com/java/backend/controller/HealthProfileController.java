@@ -23,7 +23,6 @@ import java.util.Map;
 public class HealthProfileController {
     private static final Logger logger = LoggerFactory.getLogger(HealthProfileController.class);
 
-
     @Autowired
     private HealthProfileService healthProfileService;
 
@@ -70,7 +69,8 @@ public class HealthProfileController {
         } catch (ParentNotFoundException e) {
             return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Lỗi khi lấy học sinh theo phụ huynh: " + e.getMessage()));
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "Lỗi khi lấy học sinh theo phụ huynh: " + e.getMessage()));
         }
     }
 
@@ -90,7 +90,8 @@ public class HealthProfileController {
         } catch (HealthProfileNotFoundException | StudentNotFoundException e) {
             return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Lỗi khi cập nhật hồ sơ sức khỏe: " + e.getMessage()));
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "Lỗi khi cập nhật hồ sơ sức khỏe: " + e.getMessage()));
         }
     }
 
