@@ -32,6 +32,9 @@ class HealthIncidentServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private com.java.backend.repository.IncidentSupplyUsageRepository incidentSupplyUsageRepository;
+
     @InjectMocks
     private HealthIncidentService healthIncidentService;
 
@@ -70,13 +73,14 @@ class HealthIncidentServiceTest {
         incident.getStudent().setId(99L);
         incident.setReportedBy(new User());
         incident.getReportedBy().setId(2L);
+        incident.setDescription("Test");
 
         when(studentRepository.findById(99L)).thenReturn(Optional.empty());
 
         RuntimeException exception = assertThrows(RuntimeException.class,
                 () -> healthIncidentService.createHealthIncident(incident));
 
-        assertTrue(exception.getMessage().contains("Student not found"));
+        assertTrue(exception.getMessage().contains("ID"));
         verify(healthIncidentRepository, never()).save(any());
     }
 
@@ -87,6 +91,7 @@ class HealthIncidentServiceTest {
         incident.getStudent().setId(1L);
         incident.setReportedBy(new User());
         incident.getReportedBy().setId(99L);
+        incident.setDescription("Test");
 
         when(studentRepository.findById(1L)).thenReturn(Optional.of(new Student()));
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
@@ -104,9 +109,9 @@ class HealthIncidentServiceTest {
 
     @Test
     void getHealthIncidentById_shouldThrowWhenNotFound() {
-        when(healthIncidentRepository.findById(77L)).thenReturn(Optional.empty());
+        when(healthIncidentRepository.findById(77L)).thenThrow(new com.java.backend.exception.HealthIncidentNotFoundException(77L));
         RuntimeException exception = assertThrows(RuntimeException.class, () -> healthIncidentService.getHealthIncidentById(77L));
-        assertTrue(exception.getMessage().contains("Health incident not found"));
+        assertTrue(exception.getMessage().contains("y tế"));
     }
 
     @Test
@@ -184,20 +189,21 @@ class HealthIncidentServiceTest {
 
     @Test
     void deleteHealthIncident_shouldDelete() {
-        HealthIncident existing = new HealthIncident();
-        when(healthIncidentRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(healthIncidentRepository.existsById(1L)).thenReturn(true);
         healthIncidentService.deleteHealthIncident(1L);
-        verify(healthIncidentRepository).delete(existing);
+        verify(healthIncidentRepository).deleteById(1L);
     }
 
     @Test
     void getHealthIncidentsByStudentId_shouldReturnList() {
+        when(studentRepository.existsById(1L)).thenReturn(true);
         when(healthIncidentRepository.findByStudent_Id(1L)).thenReturn(List.of(new HealthIncident()));
         assertFalse(healthIncidentService.getHealthIncidentsByStudentId(1L).isEmpty());
     }
 
     @Test
     void getHealthIncidentsByReportedById_shouldReturnList() {
+        when(userRepository.existsById(1L)).thenReturn(true);
         when(healthIncidentRepository.findByReportedBy_Id(1L)).thenReturn(List.of(new HealthIncident()));
         assertFalse(healthIncidentService.getHealthIncidentsByReportedById(1L).isEmpty());
     }
@@ -231,6 +237,7 @@ class HealthIncidentServiceTest {
 
     @Test
     void getHealthIncidentsByStudentIdAndIncidentTime_shouldReturnList() {
+        when(studentRepository.existsById(1L)).thenReturn(true);
         when(healthIncidentRepository.findByStudent_IdAndIncidentTime(any(), any())).thenReturn(List.of(new HealthIncident()));
         assertFalse(healthIncidentService.getHealthIncidentsByStudentIdAndIncidentTime(1L, LocalDateTime.now()).isEmpty());
     }

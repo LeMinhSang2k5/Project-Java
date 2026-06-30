@@ -85,7 +85,7 @@ class HealthIncidentControllerTest {
     void deleteHealthIncident_Success() throws Exception {
         doNothing().when(healthIncidentService).deleteHealthIncident(1L);
         mockMvc.perform(delete("/api/health-incidents/1"))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
     }
 
     @Test

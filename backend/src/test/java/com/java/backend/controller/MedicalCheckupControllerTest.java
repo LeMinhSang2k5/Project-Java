@@ -49,7 +49,9 @@ class MedicalCheckupControllerTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(controller)
+                .setControllerAdvice(new com.java.backend.exception.MedicalCheckupExceptionHandler())
+                .build();
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
 
@@ -68,7 +70,7 @@ class MedicalCheckupControllerTest {
         mockMvc.perform(post("/api/medical-checkup/notify")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(notification)))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -101,7 +103,7 @@ class MedicalCheckupControllerTest {
 
     @Test
     void updateNotificationConsent_Found() throws Exception {
-        when(service.getNotification(1L)).thenReturn(notification);
+        when(service.getNotificationOrThrow(1L)).thenReturn(notification);
         when(service.saveNotification(any())).thenReturn(notification);
 
         mockMvc.perform(put("/api/medical-checkup/notification/1/consent")
@@ -112,13 +114,12 @@ class MedicalCheckupControllerTest {
 
     @Test
     void updateNotificationConsent_NotFound() throws Exception {
-        when(service.getNotification(1L)).thenReturn(null);
+        when(service.getNotificationOrThrow(1L)).thenThrow(new com.java.backend.exception.MedicalCheckupNotificationNotFoundException(1L));
 
         mockMvc.perform(put("/api/medical-checkup/notification/1/consent")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("\"APPROVED\""))
-                .andExpect(status().isOk())
-                .andExpect(content().string(""));
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -139,12 +140,13 @@ class MedicalCheckupControllerTest {
         mockMvc.perform(post("/api/medical-checkup/notify/bulk")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(payload)))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 
     @Test
     void createBulkNotifications_StudentHasNoParent() throws Exception {
         Student student = new Student();
+        // missing parent
         
         when(studentService.getStudentById(1L)).thenReturn(student);
 
@@ -156,8 +158,7 @@ class MedicalCheckupControllerTest {
         mockMvc.perform(post("/api/medical-checkup/notify/bulk")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(payload)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -166,7 +167,7 @@ class MedicalCheckupControllerTest {
         mockMvc.perform(post("/api/medical-checkup/result")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(result)))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -180,7 +181,7 @@ class MedicalCheckupControllerTest {
     @Test
     void getResultsByStudent_Success() throws Exception {
         when(service.getResultsByStudent(1L)).thenReturn(Arrays.asList(result));
-        when(studentService.getStudentById(1L)).thenReturn(null);
+        when(studentService.getStudentById(1L)).thenThrow(new com.java.backend.exception.StudentNotFoundException(1L));
         mockMvc.perform(get("/api/medical-checkup/results?studentId=1"))
                 .andExpect(status().isOk());
     }
@@ -194,7 +195,7 @@ class MedicalCheckupControllerTest {
 
     @Test
     void updateResult_Found() throws Exception {
-        when(service.getResult(1L)).thenReturn(result);
+        when(service.getResultOrThrow(1L)).thenReturn(result);
         when(service.saveResult(any())).thenReturn(result);
 
         mockMvc.perform(put("/api/medical-checkup/result/1")
@@ -205,18 +206,17 @@ class MedicalCheckupControllerTest {
 
     @Test
     void updateResult_NotFound() throws Exception {
-        when(service.getResult(1L)).thenReturn(null);
+        when(service.getResultOrThrow(1L)).thenThrow(new com.java.backend.exception.MedicalCheckupResultNotFoundException(1L));
 
         mockMvc.perform(put("/api/medical-checkup/result/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(result)))
-                .andExpect(status().isOk())
-                .andExpect(content().string(""));
+                .andExpect(status().isNotFound());
     }
 
     @Test
     void studentConfirmResult_Found() throws Exception {
-        when(service.getResult(1L)).thenReturn(result);
+        when(service.getResultOrThrow(1L)).thenReturn(result);
         when(service.saveResult(any())).thenReturn(result);
 
         mockMvc.perform(put("/api/medical-checkup/result/1/student-confirm"))
@@ -225,10 +225,9 @@ class MedicalCheckupControllerTest {
 
     @Test
     void studentConfirmResult_NotFound() throws Exception {
-        when(service.getResult(1L)).thenReturn(null);
+        when(service.getResultOrThrow(1L)).thenThrow(new com.java.backend.exception.MedicalCheckupResultNotFoundException(1L));
 
         mockMvc.perform(put("/api/medical-checkup/result/1/student-confirm"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(""));
+                .andExpect(status().isNotFound());
     }
 }

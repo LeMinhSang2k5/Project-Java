@@ -34,6 +34,9 @@ class MedicalCheckupServiceTest {
     @Mock
     private StudentRepository studentRepo;
 
+    @Mock
+    private com.java.backend.repository.ParentRepository parentRepository;
+
     @InjectMocks
     private MedicalCheckupService service;
 
@@ -44,10 +47,16 @@ class MedicalCheckupServiceTest {
     @BeforeEach
     void setUp() {
         notification = new MedicalCheckupNotification();
-        // notification.setId(1L); // Entity doesn't have setId method
+        notification.setStudentId(1L);
+        notification.setParentId(1L);
+        notification.setScheduledDate(java.time.LocalDateTime.now());
+        notification.setContent("Test content");
         
         result = new MedicalCheckupResult();
         result.setId(1L);
+        result.setStudentId(1L);
+        result.setCheckupDate(java.time.LocalDateTime.now());
+        result.setResult("Good");
         
         student = new Student();
         student.setId(1L);
@@ -57,6 +66,8 @@ class MedicalCheckupServiceTest {
 
     @Test
     void saveNotification_Success() {
+        when(studentRepo.existsById(1L)).thenReturn(true);
+        when(parentRepository.existsById(1L)).thenReturn(true);
         when(notificationRepo.save(any(MedicalCheckupNotification.class))).thenReturn(notification);
         MedicalCheckupNotification saved = service.saveNotification(notification);
         assertNotNull(saved);
@@ -108,6 +119,7 @@ class MedicalCheckupServiceTest {
 
     @Test
     void saveResult_Success() {
+        when(studentRepo.existsById(1L)).thenReturn(true);
         when(resultRepo.save(any(MedicalCheckupResult.class))).thenReturn(result);
         MedicalCheckupResult saved = service.saveResult(result);
         assertNotNull(saved);

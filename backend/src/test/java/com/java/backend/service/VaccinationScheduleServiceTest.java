@@ -25,6 +25,9 @@ class VaccinationScheduleServiceTest {
     @Mock
     private VaccinationScheduleRepository repository;
 
+    @Mock
+    private com.java.backend.repository.StudentRepository studentRepository;
+
     @InjectMocks
     private VaccinationScheduleService service;
 
@@ -54,12 +57,15 @@ class VaccinationScheduleServiceTest {
     @Test
     void getById_NotFound() {
         when(repository.findById(1L)).thenReturn(Optional.empty());
-        VaccinationSchedule result = service.getById(1L);
-        assertNull(result);
+        assertNull(service.getById(1L));
     }
 
     @Test
     void save_Success() {
+        schedule.setStudentName("Test Student");
+        schedule.setScheduledDateTime(LocalDateTime.now());
+        schedule.setVaccineName("COVID-19");
+        when(studentRepository.existsById(10L)).thenReturn(true);
         when(repository.save(any(VaccinationSchedule.class))).thenReturn(schedule);
         VaccinationSchedule result = service.save(schedule);
         assertNotNull(result);
@@ -68,6 +74,7 @@ class VaccinationScheduleServiceTest {
 
     @Test
     void delete_Success() {
+        when(repository.findById(1L)).thenReturn(Optional.of(schedule));
         doNothing().when(repository).deleteById(1L);
         service.delete(1L);
         verify(repository, times(1)).deleteById(1L);
@@ -130,8 +137,7 @@ class VaccinationScheduleServiceTest {
     @Test
     void updateParentConsent_NotFound() {
         when(repository.findById(1L)).thenReturn(Optional.empty());
-        VaccinationSchedule result = service.updateParentConsent(1L, ConsentStatus.APPROVED);
-        assertNull(result);
+        assertThrows(com.java.backend.exception.VaccinationScheduleNotFoundException.class, () -> service.updateParentConsent(1L, ConsentStatus.APPROVED));
     }
 
     @Test
@@ -149,8 +155,7 @@ class VaccinationScheduleServiceTest {
     @Test
     void updateStudentConfirmation_NotFound() {
         when(repository.findById(1L)).thenReturn(Optional.empty());
-        VaccinationSchedule result = service.updateStudentConfirmation(1L, true);
-        assertNull(result);
+        assertThrows(com.java.backend.exception.VaccinationScheduleNotFoundException.class, () -> service.updateStudentConfirmation(1L, true));
     }
 
     @Test
@@ -168,8 +173,7 @@ class VaccinationScheduleServiceTest {
     @Test
     void updateVaccinationStatus_NotFound() {
         when(repository.findById(1L)).thenReturn(Optional.empty());
-        VaccinationSchedule result = service.updateVaccinationStatus(1L, true);
-        assertNull(result);
+        assertThrows(com.java.backend.exception.VaccinationScheduleNotFoundException.class, () -> service.updateVaccinationStatus(1L, true));
     }
 
     @Test

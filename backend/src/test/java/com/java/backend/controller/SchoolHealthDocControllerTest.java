@@ -41,6 +41,8 @@ class SchoolHealthDocControllerTest {
         doc = new SchoolHealthDoc();
         doc.setId(1L);
         doc.setTitle("Test Doc");
+        doc.setContent("Test Content");
+        doc.setUrl("http://example.com");
     }
 
     @Test

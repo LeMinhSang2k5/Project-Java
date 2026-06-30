@@ -73,7 +73,7 @@ class HealthProfileControllerTest {
 
     @Test
     void getByStudentId_Success() throws Exception {
-        when(healthProfileService.findByStudentId(1L)).thenReturn(Optional.of(healthProfile));
+        when(healthProfileService.findByStudentIdOrThrow(1L)).thenReturn(healthProfile);
         mockMvc.perform(get("/api/health-profiles/student/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1));
@@ -81,7 +81,7 @@ class HealthProfileControllerTest {
 
     @Test
     void getByStudentId_NotFound() throws Exception {
-        when(healthProfileService.findByStudentId(1L)).thenReturn(Optional.empty());
+        when(healthProfileService.findByStudentIdOrThrow(1L)).thenThrow(new com.java.backend.exception.HealthProfileNotFoundException(1L, true));
         mockMvc.perform(get("/api/health-profiles/student/1"))
                 .andExpect(status().isNotFound());
     }

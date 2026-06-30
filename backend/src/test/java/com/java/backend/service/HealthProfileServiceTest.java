@@ -73,7 +73,7 @@ class HealthProfileServiceTest {
     void saveHealthProfile_StudentNull() {
         HealthProfile profile = new HealthProfile();
         Exception exception = assertThrows(RuntimeException.class, () -> healthProfileService.saveHealthProfile(profile));
-        assertEquals("Student ID must be provided when creating HealthProfile.", exception.getMessage());
+        assertEquals("Phải cung cấp ID học sinh khi tạo hồ sơ sức khỏe", exception.getMessage());
     }
 
     @Test
@@ -81,14 +81,14 @@ class HealthProfileServiceTest {
         HealthProfile profile = new HealthProfile();
         profile.setStudent(new Student());
         Exception exception = assertThrows(RuntimeException.class, () -> healthProfileService.saveHealthProfile(profile));
-        assertEquals("Student ID must be provided when creating HealthProfile.", exception.getMessage());
+        assertEquals("Phải cung cấp ID học sinh khi tạo hồ sơ sức khỏe", exception.getMessage());
     }
 
     @Test
     void saveHealthProfile_StudentNotFound() {
         when(studentRepository.findById(1L)).thenReturn(Optional.empty());
         Exception exception = assertThrows(RuntimeException.class, () -> healthProfileService.saveHealthProfile(healthProfile));
-        assertEquals("Student not found with ID: 1", exception.getMessage());
+        assertEquals("Không tìm thấy học sinh với ID: 1", exception.getMessage());
     }
     
     @Test
@@ -195,15 +195,16 @@ class HealthProfileServiceTest {
 
     @Test
     void deleteHealthProfile_Success() {
+        when(healthProfileRepository.existsById(1L)).thenReturn(true);
         doNothing().when(healthProfileRepository).deleteById(1L);
         healthProfileService.deleteHealthProfile(1L);
         verify(healthProfileRepository).deleteById(1L);
     }
 
     @Test
-    void findByStudentId_Success() {
+    void findByStudentIdOrThrow_Success() {
         when(healthProfileRepository.findByStudent_Id(1L)).thenReturn(Optional.of(healthProfile));
-        Optional<HealthProfile> result = healthProfileService.findByStudentId(1L);
-        assertTrue(result.isPresent());
+        HealthProfile result = healthProfileService.findByStudentIdOrThrow(1L);
+        assertNotNull(result);
     }
 }

@@ -65,6 +65,14 @@ class SchoolHealthDocServiceTest {
     }
 
     @Test
+    void deleteSchoolHealthDoc_Success() {
+        when(repository.existsById(1L)).thenReturn(true);
+        doNothing().when(repository).deleteById(1L);
+        service.deleteSchoolHealthDoc(1L);
+        verify(repository, times(1)).deleteById(1L);
+    }
+
+    @Test
     void updateSchoolHealthDoc_Success() {
         when(repository.findById(1L)).thenReturn(Optional.of(doc));
         when(repository.save(any(SchoolHealthDoc.class))).thenReturn(doc);
@@ -82,11 +90,4 @@ class SchoolHealthDocServiceTest {
         assertEquals("newlink.com", doc.getUrl());
     }
 
-    @Test
-    void deleteSchoolHealthDoc_Success() {
-        when(repository.findById(1L)).thenReturn(Optional.of(doc));
-        doNothing().when(repository).delete(any(SchoolHealthDoc.class));
-        assertDoesNotThrow(() -> service.deleteSchoolHealthDoc(1L));
-        verify(repository, times(1)).delete(doc);
-    }
 }

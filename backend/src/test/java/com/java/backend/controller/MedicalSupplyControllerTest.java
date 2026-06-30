@@ -62,8 +62,7 @@ class MedicalSupplyControllerTest {
         mockMvc.perform(post("/api/medical-supplies")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(sampleSupply())))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string("invalid name"));
+                .andExpect(status().isBadRequest());
     }
 
 

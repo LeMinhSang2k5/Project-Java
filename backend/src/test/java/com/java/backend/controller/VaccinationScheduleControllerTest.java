@@ -49,7 +49,9 @@ class VaccinationScheduleControllerTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(controller)
+                .setControllerAdvice(new com.java.backend.exception.VaccinationScheduleExceptionHandler())
+                .build();
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
 
@@ -71,7 +73,7 @@ class VaccinationScheduleControllerTest {
 
     @Test
     void getSchedule_Success() throws Exception {
-        when(service.getById(1L)).thenReturn(schedule);
+        when(service.getByIdOrThrow(1L)).thenReturn(schedule);
 
         mockMvc.perform(get("/api/vaccination-schedules/1"))
                 .andExpect(status().isOk())
@@ -80,7 +82,7 @@ class VaccinationScheduleControllerTest {
 
     @Test
     void getSchedule_NotFound() throws Exception {
-        when(service.getById(1L)).thenReturn(null);
+        when(service.getByIdOrThrow(1L)).thenThrow(new com.java.backend.exception.VaccinationScheduleNotFoundException(1L));
 
         mockMvc.perform(get("/api/vaccination-schedules/1"))
                 .andExpect(status().isNotFound());
@@ -93,13 +95,13 @@ class VaccinationScheduleControllerTest {
         mockMvc.perform(post("/api/vaccination-schedules")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(schedule)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.vaccineName", is("COVID-19")));
     }
 
     @Test
     void updateSchedule_Success() throws Exception {
-        when(service.getById(1L)).thenReturn(schedule);
+        when(service.getByIdOrThrow(1L)).thenReturn(schedule);
         when(service.save(any(VaccinationSchedule.class))).thenReturn(schedule);
 
         mockMvc.perform(put("/api/vaccination-schedules/1")
@@ -110,7 +112,7 @@ class VaccinationScheduleControllerTest {
 
     @Test
     void updateSchedule_NotFound() throws Exception {
-        when(service.getById(1L)).thenReturn(null);
+        when(service.getByIdOrThrow(1L)).thenThrow(new com.java.backend.exception.VaccinationScheduleNotFoundException(1L));
 
         mockMvc.perform(put("/api/vaccination-schedules/1")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -120,7 +122,6 @@ class VaccinationScheduleControllerTest {
 
     @Test
     void deleteSchedule_Success() throws Exception {
-        when(service.getById(1L)).thenReturn(schedule);
         doNothing().when(service).delete(1L);
 
         mockMvc.perform(delete("/api/vaccination-schedules/1"))
@@ -129,7 +130,7 @@ class VaccinationScheduleControllerTest {
 
     @Test
     void deleteSchedule_NotFound() throws Exception {
-        when(service.getById(1L)).thenReturn(null);
+        doThrow(new com.java.backend.exception.VaccinationScheduleNotFoundException(1L)).when(service).delete(1L);
 
         mockMvc.perform(delete("/api/vaccination-schedules/1"))
                 .andExpect(status().isNotFound());
@@ -186,6 +187,7 @@ class VaccinationScheduleControllerTest {
 
     @Test
     void updateParentConsent_Success() throws Exception {
+        when(service.parseParentConsent("APPROVED")).thenReturn(ConsentStatus.APPROVED);
         when(service.updateParentConsent(eq(1L), eq(ConsentStatus.APPROVED))).thenReturn(schedule);
 
         Map<String, String> request = new HashMap<>();
@@ -199,7 +201,8 @@ class VaccinationScheduleControllerTest {
 
     @Test
     void updateParentConsent_NotFound() throws Exception {
-        when(service.updateParentConsent(eq(1L), eq(ConsentStatus.APPROVED))).thenReturn(null);
+        when(service.parseParentConsent("APPROVED")).thenReturn(ConsentStatus.APPROVED);
+        when(service.updateParentConsent(eq(1L), eq(ConsentStatus.APPROVED))).thenThrow(new com.java.backend.exception.VaccinationScheduleNotFoundException(1L));
 
         Map<String, String> request = new HashMap<>();
         request.put("consent", "APPROVED");
@@ -212,6 +215,7 @@ class VaccinationScheduleControllerTest {
 
     @Test
     void updateParentConsent_BadRequest() throws Exception {
+        when(service.parseParentConsent("INVALID_ENUM")).thenThrow(new IllegalArgumentException("Giá trị đồng ý không hợp lệ"));
         Map<String, String> request = new HashMap<>();
         request.put("consent", "INVALID_ENUM"); // This will cause IllegalArgumentException
 
@@ -236,7 +240,7 @@ class VaccinationScheduleControllerTest {
 
     @Test
     void updateStudentConfirmation_NotFound() throws Exception {
-        when(service.updateStudentConfirmation(1L, true)).thenReturn(null);
+        when(service.updateStudentConfirmation(eq(1L), eq(true))).thenThrow(new com.java.backend.exception.VaccinationScheduleNotFoundException(1L));
 
         Map<String, Boolean> request = new HashMap<>();
         request.put("confirmed", true);
@@ -262,7 +266,7 @@ class VaccinationScheduleControllerTest {
 
     @Test
     void updateVaccinationStatus_NotFound() throws Exception {
-        when(service.updateVaccinationStatus(1L, true)).thenReturn(null);
+        when(service.updateVaccinationStatus(eq(1L), eq(true))).thenThrow(new com.java.backend.exception.VaccinationScheduleNotFoundException(1L));
 
         Map<String, Boolean> request = new HashMap<>();
         request.put("isVaccinated", true);
@@ -285,12 +289,7 @@ class VaccinationScheduleControllerTest {
 
     @Test
     void createBulkSchedules_Success() throws Exception {
-        Student mockStudent = new Student();
-        mockStudent.setFullName("Nguyen Van A");
-        mockStudent.setCode("STU001");
-        
-        when(studentService.getStudentById(10L)).thenReturn(mockStudent);
-        when(service.save(any(VaccinationSchedule.class))).thenReturn(schedule);
+        when(service.createFromStudent(eq(10L), eq("COVID-19"), any(), any(), any())).thenReturn(schedule);
 
         Map<String, Object> payload = new HashMap<>();
         payload.put("studentIds", Arrays.asList(10));
@@ -302,7 +301,7 @@ class VaccinationScheduleControllerTest {
         mockMvc.perform(post("/api/vaccination-schedules/bulk")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(payload)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$", hasSize(1)));
     }
 
@@ -320,7 +319,7 @@ class VaccinationScheduleControllerTest {
 
     @Test
     void createBulkSchedules_Exception() throws Exception {
-        when(studentService.getStudentById(10L)).thenThrow(new RuntimeException("DB Error"));
+        when(service.createFromStudent(eq(10L), eq("COVID-19"), any(), any(), any())).thenThrow(new IllegalArgumentException("DB Error"));
 
         Map<String, Object> payload = new HashMap<>();
         payload.put("studentIds", Arrays.asList(10));
@@ -330,7 +329,7 @@ class VaccinationScheduleControllerTest {
         mockMvc.perform(post("/api/vaccination-schedules/bulk")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(payload)))
-                .andExpect(status().isInternalServerError())
+                .andExpect(status().isBadRequest())
                 .andExpect(content().string(containsString("DB Error")));
     }
 
