@@ -16,12 +16,31 @@ const AdminLayout = () => {
         }
     };
     const role = getUserRole();
+    const managerAllowedPaths = ['/manage-user', '/manager', '/manager/dashboard'];
 
-    if (role !== 'ADMIN') {
+    if (!role || (role !== 'ADMIN' && role !== 'MANAGER')) {
         return (
             <div className="unauthorized">
                 <h1>Unauthorized Access</h1>
                 <p>You do not have permission to access this page.</p>
+            </div>
+        );
+    }
+
+    if (role === 'MANAGER' && !managerAllowedPaths.some((path) => location.pathname.startsWith(path))) {
+        return (
+            <div className="unauthorized">
+                <h1>Unauthorized Access</h1>
+                <p>Manager chỉ được truy cập trang quản lý người dùng.</p>
+            </div>
+        );
+    }
+
+    if (role === 'MANAGER' && location.pathname === '/admin') {
+        return (
+            <div className="unauthorized">
+                <h1>Unauthorized Access</h1>
+                <p>Manager không có quyền truy cập dashboard admin.</p>
             </div>
         );
     }
@@ -40,7 +59,7 @@ const AdminLayout = () => {
 
     return (
         <div className="admin-layout">
-            <Sidebar  />
+            <Sidebar role={role} />
             <div className="admin-main">
                 <header className="admin-header">
                     <div className="header-left" >
@@ -72,7 +91,7 @@ const AdminLayout = () => {
                                     <div className="user-avatar">
                                         <FaUser />
                                     </div>
-                                    <span className="user-name">Admin</span>
+                                    <span className="user-name">{role === 'MANAGER' ? 'Manager' : 'Admin'}</span>
                                 </button>
                             </div>
                         </div>

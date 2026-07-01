@@ -1,13 +1,16 @@
 import React, { useState } from "react";
+import api from "../../config/api";
+import { toast } from "react-toastify";
 
 const MedicalSupply = () => {
     const [form, setForm] = useState({
         name: "",
         quantity: "",
-        unit: "",
-        category: "Thuốc"
+        category: "Thuốc",
+        expiryDate: ""
     });
     const [message, setMessage] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -17,27 +20,23 @@ const MedicalSupply = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage("");
+        setLoading(true);
         try {
-            const response = await fetch("http://localhost:8080/api/medical-supplies", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    name: form.name,
-                    quantity: Number(form.quantity),
-                    unit: form.unit,
-                    category: form.category
-                })
+            await api.post("/medical-supplies", {
+                name: form.name.trim(),
+                quantity: Number(form.quantity),
+                category: form.category,
+                expiryDate: form.expiryDate || null
             });
-            if (response.ok) {
-                setMessage("Thêm thành công!");
-                setForm({ name: "", quantity: "", unit: "", category: "Thuốc" });
-            } else {
-                setMessage("Có lỗi xảy ra khi thêm!");
-            }
+            setMessage("Thêm thành công!");
+            toast.success("Thêm vật tư y tế thành công!");
+            setForm({ name: "", quantity: "", category: "Thuốc", expiryDate: "" });
         } catch (error) {
-            setMessage("Không thể kết nối tới server!");
+            const errMsg = error.response?.data?.message || "Có lỗi xảy ra khi thêm!";
+            setMessage(errMsg);
+            toast.error(errMsg);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -48,7 +47,6 @@ const MedicalSupply = () => {
                 <div className="mb-3">
                     <label className="form-label">Tên</label>
                     <input
-                        type="text"
                         className="form-control"
                         name="name"
                         value={form.name}
@@ -59,24 +57,12 @@ const MedicalSupply = () => {
                 <div className="mb-3">
                     <label className="form-label">Số lượng</label>
                     <input
-                        type="number"
                         className="form-control"
                         name="quantity"
+                        type="number"
+                        min="1"
                         value={form.quantity}
                         onChange={handleChange}
-                        min="1"
-                        required
-                    />
-                </div>
-                <div className="mb-3">
-                    <label className="form-label">Đơn vị</label>
-                    <input
-                        type="text"
-                        className="form-control"
-                        name="unit"
-                        value={form.unit}
-                        onChange={handleChange}
-                        placeholder="viên, hộp, ml..."
                         required
                     />
                 </div>
@@ -92,9 +78,21 @@ const MedicalSupply = () => {
                         <option value="Vật tư y tế">Vật tư y tế</option>
                     </select>
                 </div>
-                <button type="submit" className="btn btn-success w-100">Thêm</button>
+                <div className="mb-3">
+                    <label className="form-label">Hạn sử dụng</label>
+                    <input
+                        className="form-control"
+                        name="expiryDate"
+                        type="date"
+                        value={form.expiryDate}
+                        onChange={handleChange}
+                    />
+                </div>
+                <button className="btn btn-primary w-100" type="submit" disabled={loading}>
+                    {loading ? "Đang lưu..." : "Thêm mới"}
+                </button>
+                {message && <p className="mt-3 text-center">{message}</p>}
             </form>
-            {message && <div className="alert alert-info mt-3">{message}</div>}
         </div>
     );
 };

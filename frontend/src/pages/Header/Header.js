@@ -8,7 +8,7 @@ import NavDropdown from 'react-bootstrap/NavDropdown';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import Button from 'react-bootstrap/Button';
 import { FaUser, FaSignOutAlt, FaUserCircle, FaCog } from 'react-icons/fa';
-import logo from '../../assets/img/logo_uth.png';
+import logo from '../../assets/img/next-svgrepo-com.svg';
 
 const Header = () => {
     const navigate = useNavigate();
@@ -76,10 +76,10 @@ const Header = () => {
             navigate('/student');
         }
         if (user.role === 'SCHOOL_NURSE') {
-            navigate('/school-nurse');
+            navigate('/nurse');
         }
         if (user.role === 'MANAGER') {
-            navigate('/manager');
+            navigate('/manage-user');
         }
         if (user.role === 'ADMIN') {
             navigate('/admin');

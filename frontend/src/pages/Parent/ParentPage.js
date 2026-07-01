@@ -10,13 +10,12 @@ import './ParentPage.scss';
 const ParentPage = () => {
   // State cho các tab
   const [key, setKey] = useState('students');
-  // State cho phiếu xác nhận
-  const [confirmForms, setConfirmForms] = useState([]);
-  const [loadingConfirm, setLoadingConfirm] = useState(false);
-  // State cho kết quả tiêm chủng và lịch tư vấn
-  const [results, setResults] = useState([]);
-  const [loadingResults, setLoadingResults] = useState(false);
   // State cho thông báo
+  const [vaccinationResults, setVaccinationResults] = useState([]);
+  const [loadingVaccinationResults, setLoadingVaccinationResults] = useState(false);
+  // State cho kết quả kiểm tra y tế
+  const [loadingMedicalCheckupResults, setLoadingMedicalCheckupResults] = useState(false);
+  const [medicalCheckupResults, setMedicalCheckupResults] = useState([]);
   const [alert, setAlert] = useState(null);
   // State cho thông tin phụ huynh
   const [parentInfo, setParentInfo] = useState(null);
@@ -37,26 +36,38 @@ const ParentPage = () => {
     }
   }, []);
 
-  // Lấy danh sách phiếu xác nhận từ API
+  // Lấy kết quả tiêm chủng theo học sinh của phụ huynh
   useEffect(() => {
-    if (key === 'confirmVaccination') {
-      setLoadingConfirm(true);
-      api.get('/parent/confirm-forms')
-        .then(res => setConfirmForms(res.data))
-        .catch(() => setAlert('Không thể tải danh sách phiếu xác nhận!'))
-        .finally(() => setLoadingConfirm(false));
-    }
-  }, [key]);
+    if (key !== 'vaccinationResults') return;
 
-  // Lấy kết quả tiêm chủng và lịch tư vấn
-  useEffect(() => {
-    if (key === 'results') {
-      setLoadingResults(true);
-      api.get('/parent/vaccination-results')
-        .then(res => setResults(res.data))
-        .catch(() => setAlert('Không thể tải kết quả tiêm chủng!'))
-        .finally(() => setLoadingResults(false));
+    const parentId = localStorage.getItem('parentId');
+    if (!parentId) {
+      setVaccinationResults([]);
+      return;
     }
+
+    setLoadingVaccinationResults(true);
+    api.get(`/students/by-parent/${parentId}`)
+      .then(async (res) => {
+        const students = Array.isArray(res.data) ? res.data : [];
+        const scheduleResponses = await Promise.all(
+          students.map((student) =>
+            api.get(`/vaccination-schedules/student/${student.id}`)
+              .then((scheduleRes) =>
+                (Array.isArray(scheduleRes.data) ? scheduleRes.data : [])
+                  .filter((schedule) => schedule.isVaccinated)
+                  .map((schedule) => ({
+                    ...schedule,
+                    studentName: student.fullName || schedule.studentName
+                  }))
+              )
+              .catch(() => [])
+          )
+        );
+        setVaccinationResults(scheduleResponses.flat());
+      })
+      .catch(() => setAlert('Không thể tải kết quả tiêm chủng!'))
+      .finally(() => setLoadingVaccinationResults(false));
   }, [key]);
 
   // Lấy lịch tiêm chủng cần xác nhận
@@ -81,8 +92,13 @@ const ParentPage = () => {
       setLoadingMedicalCheckup(true);
       const parentId = localStorage.getItem('parentId');
       if (parentId) {
-        api.get(`/medical-checkup/notifications?parentId=${parentId}&status=PENDING`)
-          .then(res => setMedicalCheckupNotifications(res.data))
+        api.get(`/medical-checkup/notifications?parentId=${parentId}`)
+          .then(res => {
+            const notifications = Array.isArray(res.data) ? res.data : [];
+            setMedicalCheckupNotifications(
+              notifications.filter((item) => item.status === 'PENDING')
+            );
+          })
           .catch(() => setAlert('Không thể tải phiếu kiểm tra y tế!'))
           .finally(() => setLoadingMedicalCheckup(false));
       } else {
@@ -93,25 +109,20 @@ const ParentPage = () => {
   }, [key]);
 
   useEffect(() => {
-    if (key === 'medicalCheckupResults') {
-      setLoadingResults(true);
-      const parentId = localStorage.getItem('parentId');
-      api.get(`/medical-checkup/results?parentId=${parentId}`)
-        .then(res => setResults(res.data))
-        .catch(() => setAlert('Không thể tải kết quả kiểm tra y tế!'))
-        .finally(() => setLoadingResults(false));
-    }
-  }, [key]);
+    if (key !== 'medicalCheckupResults') return;
 
-  // Xác nhận phiếu tiêm chủng/kiểm tra y tế
-  const handleConfirm = (formId) => {
-    api.post(`/parent/confirm/${formId}`)
-      .then(() => {
-        setAlert('Xác nhận thành công!');
-        setConfirmForms(forms => forms.filter(f => f.id !== formId));
-      })
-      .catch(() => setAlert('Xác nhận thất bại!'));
-  };
+    const parentId = localStorage.getItem('parentId');
+    if (!parentId) {
+      setMedicalCheckupResults([]);
+      return;
+    }
+
+    setLoadingMedicalCheckupResults(true);
+    api.get(`/medical-checkup/results?parentId=${parentId}`)
+      .then(res => setMedicalCheckupResults(Array.isArray(res.data) ? res.data : []))
+      .catch(() => setAlert('Không thể tải kết quả kiểm tra y tế!'))
+      .finally(() => setLoadingMedicalCheckupResults(false));
+  }, [key]);
 
   // Xác nhận lịch tiêm chủng
   const handleVaccinationConsent = async (scheduleId, consent) => {
@@ -181,6 +192,9 @@ const ParentPage = () => {
                   Gửi thuốc cho học sinh</ListGroup.Item>
                 <ListGroup.Item action active={key==='vaccinationSchedules'} onClick={()=>setKey('vaccinationSchedules')}>
                 Xác nhận lịch tiêm chủng</ListGroup.Item>
+                <ListGroup.Item action active={key==='vaccinationResults'} onClick={()=>setKey('vaccinationResults')}>
+                  Kết quả tiêm chủng
+                </ListGroup.Item>
                 <ListGroup.Item action active={key==='medicalCheckupNotify'} onClick={()=>setKey('medicalCheckupNotify')}>
                   Xác nhận kiểm tra y tế
                 </ListGroup.Item>
@@ -265,64 +279,35 @@ const ParentPage = () => {
                 </Card.Body>
               </Card>
             )}
-            {key === 'confirmVaccination' && (
+            {key === 'vaccinationResults' && (
               <Card>
+                <Card.Header>
+                  <h5 className="mb-0">Kết quả tiêm chủng của học sinh</h5>
+                </Card.Header>
                 <Card.Body>
-                  {loadingConfirm ? <Spinner animation="border" /> : (
+                  {loadingVaccinationResults ? (
+                    <Spinner animation="border" />
+                  ) : vaccinationResults.length === 0 ? (
+                    <Alert variant="info">Chưa có kết quả tiêm chủng nào.</Alert>
+                  ) : (
                     <Table striped bordered hover>
                       <thead>
                         <tr>
                           <th>Học sinh</th>
-                          <th>Loại phiếu</th>
-                          <th>Nội dung</th>
-                          <th>Ngày gửi</th>
-                          <th>Hành động</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {confirmForms.length === 0 ? (
-                          <tr><td colSpan={5} className="text-center">Không có phiếu cần xác nhận</td></tr>
-                        ) : confirmForms.map(form => (
-                          <tr key={form.id}>
-                            <td>{form.studentName}</td>
-                            <td>{form.type}</td>
-                            <td>{form.content}</td>
-                            <td>{form.sentDate}</td>
-                            <td>
-                              <Button variant="success" size="sm" onClick={() => handleConfirm(form.id)}>Xác nhận</Button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </Table>
-                  )}
-                </Card.Body>
-              </Card>
-            )}
-            {key === 'results' && (
-              <Card>
-                <Card.Body>
-                  {loadingResults ? <Spinner animation="border" /> : (
-                    <Table striped bordered hover>
-                      <thead>
-                        <tr>
-                          <th>Học sinh</th>
-                          <th>Kết quả tiêm chủng</th>
+                          <th>Vaccine</th>
                           <th>Ngày tiêm</th>
                           <th>Ghi chú</th>
-                          <th>Lịch hẹn tư vấn</th>
+                          <th>Trạng thái</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {results.length === 0 ? (
-                          <tr><td colSpan={5} className="text-center">Chưa có kết quả nào</td></tr>
-                        ) : results.map(result => (
+                        {vaccinationResults.map((result) => (
                           <tr key={result.id}>
                             <td>{result.studentName}</td>
-                            <td>{result.vaccinationResult}</td>
-                            <td>{result.vaccinationDate}</td>
-                            <td>{result.notes}</td>
-                            <td>{result.consultationDate ? result.consultationDate : 'Không có'}</td>
+                            <td>{result.vaccineName}</td>
+                            <td>{formatDateTime(result.scheduledDateTime)}</td>
+                            <td>{result.notes || 'Không có'}</td>
+                            <td>{result.isVaccinated ? 'Đã tiêm' : 'Chưa tiêm'}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -398,9 +383,9 @@ const ParentPage = () => {
                   <h5 className="mb-0">Kết quả kiểm tra y tế của học sinh</h5>
                 </Card.Header>
                 <Card.Body>
-                  {loadingResults ? (
+                  {loadingMedicalCheckupResults ? (
                     <Spinner animation="border" />
-                  ) : results.length === 0 ? (
+                  ) : medicalCheckupResults.length === 0 ? (
                     <Alert variant="info">Chưa có kết quả kiểm tra y tế nào.</Alert>
                   ) : (
                     <Table striped bordered hover>
@@ -415,7 +400,7 @@ const ParentPage = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {results.map(r => (
+                        {medicalCheckupResults.map(r => (
                           <tr key={r.id}>
                             <td>{r.studentName || r.studentId}</td>
                             <td>{r.checkupDate ? new Date(r.checkupDate).toLocaleString('vi-VN') : ''}</td>

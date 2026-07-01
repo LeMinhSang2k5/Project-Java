@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../config/api";
 import "./Login.scss";
 import { toast } from "react-toastify";
 const Login = () => {
@@ -17,13 +17,7 @@ const Login = () => {
     try {
        localStorage.removeItem("parentId");
       localStorage.removeItem("studentId");
-      const response = await axios.post(
-        "http://localhost:8080/api/auth/login",
-        {
-          email,
-          password,
-        }
-      );
+      const response = await api.post("/auth/login", { email, password });
 
       console.log("Login successful:", response.data);
 
@@ -42,11 +36,13 @@ const Login = () => {
       if (role === "ADMIN") {
         navigate("/admin");
       } else if (role === "SCHOOL_NURSE") {
-        navigate("/school-nurse/dashboard");
+        navigate("/nurse");
       } else if (role === "MANAGER") {
-        navigate("/manager/dashboard");
+        navigate("/manage-user");
       } else if (role === "PARENT") {
         navigate("/parent");
+      } else if (role === "STUDENT") {
+        navigate("/student");
       } else {
         navigate("/");
       }

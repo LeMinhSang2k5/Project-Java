@@ -3,7 +3,7 @@ import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 import ModalCreateBlog from './ModalCreateBlog';
 import ModalDeleteBlog from './ModalDeleteBlog';
 import { Button } from 'react-bootstrap';
-import axios from 'axios';
+import api from '../../../config/api';
 import ModalUpdateBlog from './ModalUpdateBlog';
 
 const ManageBlog = () => {
@@ -25,7 +25,7 @@ const ManageBlog = () => {
 
     const fetchBlogs = async () => {
         try {
-            const response = await axios.get('http://localhost:8080/api/blogs');
+            const response = await api.get('/blogs');
             setBlogs(response.data);
         } catch (error) {
             console.error('Error fetching blogs:', error);

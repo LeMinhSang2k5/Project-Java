@@ -40,15 +40,25 @@ const ManageUser = () => {
   const [showImportExcel, setShowImportExcel] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedRole, setSelectedRole] = useState('');
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalItems, setTotalItems] = useState(0);
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (page = 0) => {
     try {
       setLoading(true);
-      const response = await api.get('/users');
-      setUsers(response.data);
+      setError(null);
+      const response = await api.get(`/users?page=${page}`);
+      const data = response.data;
+      const userList = Array.isArray(data) ? data : (data?.content ?? []);
+      setUsers(userList);
+      setCurrentPage(data?.currentPage ?? page);
+      setTotalPages(data?.totalPages ?? 1);
+      setTotalItems(data?.totalItems ?? userList.length);
     } catch (error) {
       toast.error('Lỗi khi tải danh sách người dùng');
       setError('Lỗi khi tải danh sách người dùng');
+      setUsers([]);
     } finally {
       setLoading(false);
     }
@@ -59,21 +69,21 @@ const ManageUser = () => {
   }, []);
 
   const handleUserAdded = () => {
-    fetchUsers();
+    fetchUsers(currentPage);
   };
 
   const handleUserUpdated = () => {
-    fetchUsers();
+    fetchUsers(currentPage);
     toast.success('Cập nhật người dùng thành công!');
   };
 
   const handleUserDeleted = () => {
-    fetchUsers();
+    fetchUsers(currentPage);
     toast.success('Xóa người dùng thành công!');
   };
 
   const handleUserImported = () => {
-    fetchUsers();
+    fetchUsers(currentPage);
   };
 
   // Lọc users theo role được chọn
@@ -153,6 +163,31 @@ const ManageUser = () => {
           ))}
         </tbody>
       </table>
+
+      <div className="d-flex justify-content-between align-items-center mt-3">
+        <small className="text-muted">
+          Tổng {totalItems} người dùng — Trang {currentPage + 1}/{totalPages || 1}
+        </small>
+        <div>
+          <Button
+            variant="outline-secondary"
+            size="sm"
+            className="me-2"
+            disabled={currentPage <= 0}
+            onClick={() => fetchUsers(currentPage - 1)}
+          >
+            Trang trước
+          </Button>
+          <Button
+            variant="outline-secondary"
+            size="sm"
+            disabled={currentPage >= totalPages - 1}
+            onClick={() => fetchUsers(currentPage + 1)}
+          >
+            Trang sau
+          </Button>
+        </div>
+      </div>
 
       {/* Modal Thêm */}
       <ModalCreateUser

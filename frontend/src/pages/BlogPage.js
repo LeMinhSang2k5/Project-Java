@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './BlogPage.scss';
 import { Pagination } from 'react-bootstrap';
-import axios from 'axios';
+import api from '../config/api';
 import { toast } from 'react-toastify';
 
 const BlogPage = () => {
@@ -14,7 +14,7 @@ const BlogPage = () => {
   const fetchBlogs = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:8080/api/blogs');
+      const response = await api.get('/blogs');
       setBlogs(response.data);
       setError(null);
     } catch (error) {

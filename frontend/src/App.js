@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import Loader from './pages/Pagination/Loader';
 import './App.scss';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import UserLayout from './components/User/UserLayout';
 import AdminLayout from './components/Admin/AdminLayout';
 import HomePage from './components/Home/HomePage';
@@ -94,6 +94,14 @@ function App() {
             </Route>
 
             <Route path="/login" element={<Login />} />
+
+            {/* Legacy redirects */}
+            <Route path="/school-nurse" element={<Navigate to="/nurse" replace />} />
+            <Route path="/school-nurse/dashboard" element={<Navigate to="/nurse" replace />} />
+            <Route path="/manager" element={<Navigate to="/manage-user" replace />} />
+            <Route path="/manager/dashboard" element={<Navigate to="/manage-user" replace />} />
+            <Route path="/nurse/reports" element={<Navigate to="/nurse" replace />} />
+            <Route path="/admin/settings" element={<Navigate to="/admin" replace />} />
         </Routes>
       </BrowserRouter>
       <ToastContainer

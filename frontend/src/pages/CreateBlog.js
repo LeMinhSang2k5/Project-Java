@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../config/api";
+import { toast } from "react-toastify";
 
 const CreateBlog = () => {
     const navigate = useNavigate();
@@ -22,24 +24,16 @@ const CreateBlog = () => {
         e.preventDefault();
         setMessage("");
         try {
-            const response = await fetch("http://localhost:8080/api/blogs", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    ...form,
-                    publishDate: form.publishDate // yyyy-MM-dd
-                })
+            await api.post("/blogs", {
+                ...form,
+                publishDate: form.publishDate
             });
-            if (response.ok) {
-                setMessage("Đăng bài thành công!");
-                setTimeout(() => navigate("/blog"), 1200);
-            } else {
-                setMessage("Đăng bài thất bại!");
-            }
+            setMessage("Đăng bài thành công!");
+            toast.success("Đăng bài thành công!");
+            setTimeout(() => navigate("/blog"), 1200);
         } catch (error) {
-            setMessage("Có lỗi xảy ra!");
+            setMessage("Đăng bài thất bại!");
+            toast.error("Đăng bài thất bại!");
         }
     };
 

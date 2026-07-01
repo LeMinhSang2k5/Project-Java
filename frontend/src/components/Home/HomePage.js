@@ -2,7 +2,7 @@ import React from 'react';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import { FaHeartbeat, FaUserMd, FaExclamationTriangle, FaCalendarAlt, FaPills, FaComments, FaChartBar, FaAppleAlt, FaDumbbell, FaBed, FaBrain, FaPhone } from 'react-icons/fa';
 import './HomePage.scss';
-import logo from '../../assets/img/logo_uth.png';
+import logo from '../../assets/img/next-svgrepo-com.svg';
 
 function HomePage() {
   return (

@@ -1,6 +1,6 @@
 import React from 'react';
 import './About.scss';
-import logo from '../assets/img/logo_uth.png';
+import logo from '../assets/img/next-svgrepo-com.svg';
 
 const AboutPage = () => {
     return (

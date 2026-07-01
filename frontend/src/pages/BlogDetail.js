@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '../config/api';
 import { toast } from 'react-toastify';
 import './BlogDetail.scss';
 
@@ -14,7 +14,7 @@ const BlogDetail = () => {
     const fetchBlogDetail = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`http://localhost:8080/api/blogs/${id}`);
+        const response = await api.get(`/blogs/${id}`);
         setBlog(response.data);
         setError(null);
       } catch (error) {

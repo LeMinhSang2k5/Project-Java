@@ -7,7 +7,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Nav from 'react-bootstrap/Nav';
 import { NavLink } from 'react-router-dom';
-import logo from '../../assets/img/logo_uth.png';
+import logo from '../../assets/img/next-svgrepo-com.svg';
 import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaEnvelope, FaPhone, FaMapMarkerAlt, FaGithub, FaHeart, FaArrowUp } from 'react-icons/fa';
 
 const Footer = () => {

@@ -37,13 +37,13 @@ function ModalCreateUser({ show, onClose, onUserAdded }) {
       case "STUDENT":
         return "/students";
       case "PARENT":
-        return "parent";
+        return "/parent";
       case "MANAGER":
         return "/managers";
       case "SCHOOL_NURSE":
         return "/nurses";
       case "ADMIN":
-        return "admin";
+        return "/user";
       default:
         return "user";
     }
@@ -94,9 +94,15 @@ function ModalCreateUser({ show, onClose, onUserAdded }) {
           department: form.department
         };
       }
+      if (form.role === "ADMIN") {
+        payload = {
+          ...payload,
+          role: "ADMIN",
+          active: form.isActive
+        };
+      }
 
-      // Không gửi trường role, isActive, ...
-      const response = await api.post(endpoint, payload);
+      const response = await api.post(endpoint.startsWith('/') ? endpoint : `/${endpoint}`, payload);
 
       if (response.data) {
         // Toast thông báo chi tiết theo role

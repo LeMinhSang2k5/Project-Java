@@ -1,29 +1,28 @@
-import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { 
   FaUsers, 
   FaBlog, 
   FaMedkit, 
   FaChartBar, 
   FaCalendarCheck,
-  FaCog,
-  FaSignOutAlt,
-  FaBars,
-  FaTimes
+  FaSignOutAlt
 } from 'react-icons/fa';
 import './Admin.scss';
 
-const Sidebar = (props) => {
-    const isCollapsed = props.isOpen;
+const Sidebar = ({ role = 'ADMIN' }) => {
     const location = useLocation();
-    const navigate = useNavigate();
-    const menuItems = [
-        { path: '/admin', icon: FaChartBar, label: 'Dashboard', exact: true },
-        { path: '/manage-user', icon: FaUsers, label: 'Quản lý người dùng' },
-        { path: '/manage-blog', icon: FaBlog, label: 'Quản lý Blog' },
-        { path: '/manage-medical-supply', icon: FaMedkit, label: 'Quản lý vật tư y tế' },
-        { path: '/manage-health-profile', icon: FaCalendarCheck, label: 'Quản lý hồ sơ sức khỏe' }
+    const isManager = role === 'MANAGER';
+
+    const allMenuItems = [
+        { path: '/admin', icon: FaChartBar, label: 'Dashboard', exact: true, roles: ['ADMIN'] },
+        { path: '/manage-user', icon: FaUsers, label: 'Quản lý người dùng', roles: ['ADMIN', 'MANAGER'] },
+        { path: '/manage-blog', icon: FaBlog, label: 'Quản lý Blog', roles: ['ADMIN'] },
+        { path: '/manage-medical-supply', icon: FaMedkit, label: 'Quản lý vật tư y tế', roles: ['ADMIN'] },
+        { path: '/manage-health-profile', icon: FaCalendarCheck, label: 'Quản lý hồ sơ sức khỏe', roles: ['ADMIN'] }
     ];
+
+    const menuItems = allMenuItems.filter((item) => item.roles.includes(role));
 
     const isActive = (path, exact = false) => {
         if (exact) {
@@ -32,20 +31,17 @@ const Sidebar = (props) => {
         return location.pathname.startsWith(path);
     };
 
-
     return (
-        <div className={`admin-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+        <div className="admin-sidebar">
             <div className="sidebar-header">
                 <div className="logo-section">
                     <div className="logo-icon">
                         <FaChartBar />
                     </div>
-                    {!isCollapsed && (
-                        <div className="logo-text">
-                            <h3>Admin Panel</h3>
-                            <span>Hệ thống y tế</span>
-                        </div>
-                    )}
+                    <div className="logo-text">
+                        <h3>{isManager ? 'Manager Panel' : 'Admin Panel'}</h3>
+                        <span>Hệ thống y tế</span>
+                    </div>
                 </div>
             </div>
 
@@ -55,26 +51,22 @@ const Sidebar = (props) => {
                         key={index}
                         to={item.path} 
                         className={`menu-item ${isActive(item.path, item.exact) ? 'active' : ''}`}
-                        title={isCollapsed ? item.label : ''}
+                        title={item.label}
                     >
                         <item.icon className="menu-icon" />
-                        <span className={isCollapsed ? 'collapsed-text' : ''}>{item.label}</span>
+                        <span>{item.label}</span>
                     </Link>
                 ))}
             </div>
 
             <div className="sidebar-footer">
-                <Link to="/admin/settings" className="menu-item" title={isCollapsed ? 'Cài đặt' : ''}>
-                    <FaCog className="menu-icon" />
-                    <span className={isCollapsed ? 'collapsed-text' : ''}>Cài đặt</span>
-                </Link>
-                <Link to="/login" className="menu-item logout-btn" title={isCollapsed ? 'Đăng xuất' : ''}>
+                <Link to="/login" className="menu-item logout-btn" title="Đăng xuất">
                     <FaSignOutAlt className="menu-icon"/>
-                    <span className={isCollapsed ? 'collapsed-text' : ''}>Đăng xuất</span>
+                    <span>Đăng xuất</span>
                 </Link>
             </div>
         </div>
     );
 };
 
-export default Sidebar; 
+export default Sidebar;
