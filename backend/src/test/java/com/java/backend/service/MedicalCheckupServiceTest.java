@@ -162,4 +162,110 @@ class MedicalCheckupServiceTest {
         List<MedicalCheckupResult> list = service.getResultsByParent(1L);
         assertEquals(0, list.size());
     }
+
+    // --- Validation Tests ---
+
+    @Test
+    void validateNotification_StudentIdNull() {
+        notification.setStudentId(null);
+        assertThrows(IllegalArgumentException.class, () -> service.validateNotification(notification));
+    }
+
+    @Test
+    void validateNotification_ParentIdNull() {
+        notification.setParentId(null);
+        assertThrows(IllegalArgumentException.class, () -> service.validateNotification(notification));
+    }
+
+    @Test
+    void validateNotification_ScheduledDateNull() {
+        notification.setScheduledDate(null);
+        assertThrows(IllegalArgumentException.class, () -> service.validateNotification(notification));
+    }
+
+    @Test
+    void validateNotification_ContentEmpty() {
+        notification.setContent("  ");
+        assertThrows(IllegalArgumentException.class, () -> service.validateNotification(notification));
+    }
+
+    @Test
+    void validateNotification_StudentNotFound() {
+        when(studentRepo.existsById(1L)).thenReturn(false);
+        assertThrows(com.java.backend.exception.StudentNotFoundException.class, () -> service.validateNotification(notification));
+    }
+
+    @Test
+    void validateNotification_ParentNotFound() {
+        when(studentRepo.existsById(1L)).thenReturn(true);
+        when(parentRepository.existsById(1L)).thenReturn(false);
+        assertThrows(com.java.backend.exception.ParentNotFoundException.class, () -> service.validateNotification(notification));
+    }
+
+    @Test
+    void validateConsentStatus_NullOrEmpty() {
+        assertThrows(IllegalArgumentException.class, () -> service.validateConsentStatus(null));
+        assertThrows(IllegalArgumentException.class, () -> service.validateConsentStatus("   "));
+    }
+
+    @Test
+    void validateConsentStatus_Invalid() {
+        assertThrows(IllegalArgumentException.class, () -> service.validateConsentStatus("INVALID"));
+    }
+
+    @Test
+    void validateConsentStatus_Valid() {
+        assertDoesNotThrow(() -> service.validateConsentStatus("approved"));
+        assertDoesNotThrow(() -> service.validateConsentStatus("REJECTED"));
+    }
+
+    @Test
+    void validateResult_StudentIdNull() {
+        result.setStudentId(null);
+        assertThrows(IllegalArgumentException.class, () -> service.validateResult(result));
+    }
+
+    @Test
+    void validateResult_CheckupDateNull() {
+        result.setCheckupDate(null);
+        assertThrows(IllegalArgumentException.class, () -> service.validateResult(result));
+    }
+
+    @Test
+    void validateResult_ResultEmpty() {
+        result.setResult("   ");
+        assertThrows(IllegalArgumentException.class, () -> service.validateResult(result));
+    }
+
+    @Test
+    void validateResult_StudentNotFound() {
+        when(studentRepo.existsById(1L)).thenReturn(false);
+        assertThrows(com.java.backend.exception.StudentNotFoundException.class, () -> service.validateResult(result));
+    }
+
+    @Test
+    void getNotificationOrThrow_Found() {
+        when(notificationRepo.findById(1L)).thenReturn(Optional.of(notification));
+        MedicalCheckupNotification found = service.getNotificationOrThrow(1L);
+        assertNotNull(found);
+    }
+
+    @Test
+    void getNotificationOrThrow_NotFound() {
+        when(notificationRepo.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(com.java.backend.exception.MedicalCheckupNotificationNotFoundException.class, () -> service.getNotificationOrThrow(1L));
+    }
+
+    @Test
+    void getResultOrThrow_Found() {
+        when(resultRepo.findById(1L)).thenReturn(Optional.of(result));
+        MedicalCheckupResult found = service.getResultOrThrow(1L);
+        assertNotNull(found);
+    }
+
+    @Test
+    void getResultOrThrow_NotFound() {
+        when(resultRepo.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(com.java.backend.exception.MedicalCheckupResultNotFoundException.class, () -> service.getResultOrThrow(1L));
+    }
 }

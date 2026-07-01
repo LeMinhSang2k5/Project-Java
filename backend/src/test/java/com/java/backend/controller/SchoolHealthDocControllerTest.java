@@ -85,4 +85,72 @@ class SchoolHealthDocControllerTest {
         mockMvc.perform(delete("/api/school-health-docs/1"))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    void getSchoolHealthDocById_NotFound() throws Exception {
+        when(schoolHealthDocService.getSchoolHealthDocById(1L))
+            .thenThrow(new com.java.backend.exception.SchoolHealthDocNotFoundException(1L));
+        mockMvc.perform(get("/api/school-health-docs/1"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").exists());
+    }
+
+    @Test
+    void createSchoolHealthDoc_ValidationError_TitleEmpty() throws Exception {
+        doc.setTitle("");
+        mockMvc.perform(post("/api/school-health-docs")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(doc)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Tiêu đề không được để trống"));
+    }
+
+    @Test
+    void createSchoolHealthDoc_ValidationError_ContentEmpty() throws Exception {
+        doc.setContent("");
+        mockMvc.perform(post("/api/school-health-docs")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(doc)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Nội dung không được để trống"));
+    }
+
+    @Test
+    void createSchoolHealthDoc_ValidationError_UrlEmpty() throws Exception {
+        doc.setUrl("");
+        mockMvc.perform(post("/api/school-health-docs")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(doc)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("URL không được để trống"));
+    }
+
+    @Test
+    void updateSchoolHealthDoc_NotFound() throws Exception {
+        when(schoolHealthDocService.updateSchoolHealthDoc(eq(1L), any(SchoolHealthDoc.class)))
+            .thenThrow(new com.java.backend.exception.SchoolHealthDocNotFoundException(1L));
+        mockMvc.perform(put("/api/school-health-docs/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(doc)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").exists());
+    }
+
+    @Test
+    void updateSchoolHealthDoc_ValidationError() throws Exception {
+        doc.setTitle(null);
+        mockMvc.perform(put("/api/school-health-docs/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(doc)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void deleteSchoolHealthDoc_NotFound() throws Exception {
+        doThrow(new com.java.backend.exception.SchoolHealthDocNotFoundException(1L))
+            .when(schoolHealthDocService).deleteSchoolHealthDoc(1L);
+        mockMvc.perform(delete("/api/school-health-docs/1"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").exists());
+    }
 }

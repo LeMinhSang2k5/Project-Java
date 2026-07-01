@@ -140,4 +140,65 @@ class HealthProfileControllerTest {
         mockMvc.perform(delete("/api/health-profiles/1"))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    void createHealthProfile_IllegalArgumentException() throws Exception {
+        when(healthProfileService.saveHealthProfile(any(HealthProfile.class)))
+            .thenThrow(new IllegalArgumentException("Invalid input"));
+        mockMvc.perform(post("/api/health-profiles")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(healthProfile)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Invalid input"));
+    }
+
+    @Test
+    void createHealthProfile_StudentNotFoundException() throws Exception {
+        when(healthProfileService.saveHealthProfile(any(HealthProfile.class)))
+            .thenThrow(new com.java.backend.exception.StudentNotFoundException(1L));
+        mockMvc.perform(post("/api/health-profiles")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(healthProfile)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void createHealthProfile_Exception() throws Exception {
+        when(healthProfileService.saveHealthProfile(any(HealthProfile.class)))
+            .thenThrow(new RuntimeException("DB error"));
+        mockMvc.perform(post("/api/health-profiles")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(healthProfile)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").exists());
+    }
+
+    @Test
+    void getStudentIdByParentId_ParentNotFoundException() throws Exception {
+        when(studentService.getStudentsByParent(1L))
+            .thenThrow(new com.java.backend.exception.ParentNotFoundException(1L));
+        mockMvc.perform(get("/api/health-profiles/by-parent/1/student"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").exists());
+    }
+
+    @Test
+    void updateHealthProfile_NotFoundException() throws Exception {
+        when(healthProfileService.updateHealthProfile(any(HealthProfile.class)))
+            .thenThrow(new com.java.backend.exception.HealthProfileNotFoundException(1L, false));
+        mockMvc.perform(put("/api/health-profiles/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(healthProfile)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").exists());
+    }
+
+    @Test
+    void deleteHealthProfile_NotFoundException() throws Exception {
+        doThrow(new com.java.backend.exception.HealthProfileNotFoundException(1L, false))
+            .when(healthProfileService).deleteHealthProfile(1L);
+        mockMvc.perform(delete("/api/health-profiles/1"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").exists());
+    }
 }

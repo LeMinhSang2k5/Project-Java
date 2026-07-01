@@ -76,4 +76,20 @@ class AuthControllerTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Email")));
     }
+
+    @Test
+    void loginResponse_GettersAndSetters() {
+        AuthController.LoginResponse response = new AuthController.LoginResponse(null, null, null, null, null);
+        response.setId(2L);
+        response.setEmail("new@gmail.com");
+        response.setFullName("New Name");
+        response.setRole("ADMIN");
+        response.setAccessToken("new_token");
+        
+        org.junit.jupiter.api.Assertions.assertEquals(2L, response.getId());
+        org.junit.jupiter.api.Assertions.assertEquals("new@gmail.com", response.getEmail());
+        org.junit.jupiter.api.Assertions.assertEquals("New Name", response.getFullName());
+        org.junit.jupiter.api.Assertions.assertEquals("ADMIN", response.getRole());
+        org.junit.jupiter.api.Assertions.assertEquals("new_token", response.getAccessToken());
+    }
 }
