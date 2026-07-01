@@ -2,18 +2,36 @@
   "info": {
     "_postman_id": "6c49ab6f-4fd4-41ab-9b4a-c5c78d2703cb",
     "name": "School Health Backend - Full API",
-    "description": "Collection bao gom day du endpoint hien co trong backend Spring Boot (controller package).",
+    "description": "Collection bao gom day du endpoint hien co trong backend Spring Boot (91 requests, 13 modules).\n\nHUONG DAN IMPORT:\n1. Postman > Import > SchoolHealth_Backend.postman_collection.json (Replace neu da co)\n2. Import environment: backend/postman/SchoolHealth_Backend.postman_environment.json\n3. Chon environment 'School Health Backend - Full API (Local)'\n4. Khoi dong backend Spring Boot + MySQL\n5. Collection Runner — chay theo thu tu folder\n\nTHU TU CHAY:\nAuth > Users > Parents (parentId) > Students (studentId) > Nurses (nurseId, reportedById) > ...\n\nSCRIPT TESTS:\n- Moi request co script UTC-* san\n- POST tao moi tu dong luu ID vao environment\n- HTTP 200: user/parent/student/nurse/manager/doc/profile\n- HTTP 201: blog/supply/incident/checkup/vaccination",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const token = pm.environment.get('accessToken');",
+          "if (token) {",
+          "  pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
+          "}"
+        ]
+      }
+    },
     {
       "listen": "test",
       "script": {
         "type": "text/javascript",
         "exec": [
-          "pm.test('status code is valid', function () {",
-          "  pm.expect([200, 201, 204, 400, 401, 404, 500]).to.include(pm.response.code);",
-          "});"
+          "const contentType = pm.response.headers.get('Content-Type') || '';",
+          "if (pm.response.text() && contentType.includes('application/json')) {",
+          "  pm.test('[UTC] Response is valid JSON', function () {",
+          "    pm.expect(function () { pm.response.json(); }).to.not.throw();",
+          "  });",
+          "}",
+          "if (pm.response.code >= 400) {",
+          "  console.log('[UTC ERROR]', pm.info.requestName, pm.response.code, pm.response.text());",
+          "}"
         ]
       }
     }
@@ -30,10 +48,26 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
+                  "const tc = 'UTC-AUTH-01';",
+                  "const email = pm.environment.get('loginEmail');",
+                  "console.log(`[${tc}] Login`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
                   "if (pm.response.code === 200) {",
+                  "  pm.test(`[${tc}] Response co accessToken`, function () {",
+                  "    const data = pm.response.json();",
+                  "    pm.expect(data.accessToken).to.be.a('string').and.not.empty;",
+                  "    pm.expect(data.email).to.eql(email);",
+                  "  });",
                   "  const data = pm.response.json();",
                   "  if (data.accessToken) pm.environment.set('accessToken', data.accessToken);",
-                  "  if (data.id) pm.environment.set('userId', data.id);",
+                  "  if (data.id) pm.environment.set('userId', String(data.id));",
+                  "  console.log(`[${tc}] PASS - accessToken saved, userId=${data.id}`);",
+                  "} else {",
+                  "  console.log(`[${tc}] FAIL:`, pm.response.code, pm.response.text());",
                   "}"
                 ]
               }
@@ -76,17 +110,69 @@
             },
             "url": "{{baseUrl}}/api/user"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-USR-01';",
+                  "console.log(`[${tc}] Create User`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response co id`, function () {",
+                  "  pm.expect(pm.response.json().id).to.be.a('number');",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "  pm.environment.set('userId', String(pm.response.json().id));",
+                  "}",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
-        
-          {
-            "name": "Get All Users",
-            "request": {
-              "method": "GET",
-              "header": [],
-              "url": "{{baseUrl}}/api/users"
-            },
-          "response": []
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/users"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-USR-02';",
+                  "console.log(`[${tc}] Get All Users`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response co cau truc phan trang`, function () {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body).to.be.an('object');",
+                  "  pm.expect(body).to.have.property('content').that.is.an('array');",
+                  "  pm.expect(body).to.have.property('totalItems');",
+                  "  pm.expect(body).to.have.property('currentPage');",
+                  "  pm.expect(body).to.have.property('isLast');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().content.length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get User By ID",
@@ -95,7 +181,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/user/{{userId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-USR-03';",
+                  "console.log(`[${tc}] Get User By ID`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response co id`, function () {",
+                  "  pm.expect(pm.response.json()).to.have.property('id');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Update User",
@@ -113,7 +221,25 @@
             },
             "url": "{{baseUrl}}/api/user/{{userId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-USR-04';",
+                  "console.log(`[${tc}] Update User`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Delete User",
@@ -122,84 +248,25 @@
             "header": [],
             "url": "{{baseUrl}}/api/user/{{userId}}"
           },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Students",
-      "item": [
-        {
-          "name": "Create Student",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-USR-05';",
+                  "console.log(`[${tc}] Delete User`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "  pm.expect([200, 204]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
               }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"email\":\"student{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"Student Postman\",\"role\":\"STUDENT\",\"code\":\"ST{{$timestamp}}\",\"studentClass\":\"5A\",\"gender\":\"MALE\",\"dateOfBirth\":\"2014-01-01\",\"parentId\":{{parentId}}}"
-            },
-            "url": "{{baseUrl}}/api/students"
-          },
-          "response": []
-        },
-        {
-          "name": "Get All Students",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/api/students"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Student By ID",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/api/students/{{studentId}}"
-          },
-          "response": []
-        },
-        {
-          "name": "Update Student",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"id\":{{studentId}},\"email\":\"student{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"Student Updated\",\"role\":\"STUDENT\",\"code\":\"STU001\",\"dateOfBirth\":\"2014-01-01\",\"gender\":\"MALE\",\"studentClass\":\"6A\",\"city\":\"HCM\",\"district\":\"District 1\",\"grade\":\"6\",\"active\":true}"
-            },
-            "url": "{{baseUrl}}/api/students/{{studentId}}"
-          },
-          "response": []
-        },
-        {
-          "name": "Delete Student",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": "{{baseUrl}}/api/students/{{studentId}}"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Students By Parent",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/api/students/by-parent/{{parentId}}"
-          },
-          "response": []
+            }
+          ]
         }
       ]
     },
@@ -222,7 +289,36 @@
             },
             "url": "{{baseUrl}}/api/parent"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-PAR-01';",
+                  "console.log(`[${tc}] Create Parent`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] role PARENT, SDT 10 so`, function () {",
+                  "  const d = pm.response.json();",
+                  "  pm.expect(d.id).to.be.a('number');",
+                  "  pm.expect(d.role).to.eql('PARENT');",
+                  "  pm.expect(d.phoneNumber).to.eql('0900000000');",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "  pm.environment.set('parentId', String(pm.response.json().id));",
+                  "}",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- parentId=', pm.environment.get('parentId'));"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Parent By ID",
@@ -231,7 +327,31 @@
             "header": [],
             "url": "{{baseUrl}}/api/parent/{{parentId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-PAR-02';",
+                  "console.log(`[${tc}] Get Parent By ID`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la phu huynh hop le`, function () {",
+                  "  const d = pm.response.json();",
+                  "  pm.expect(d).to.have.property('id');",
+                  "  pm.expect(d.role).to.eql('PARENT');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Parent Students",
@@ -240,16 +360,42 @@
             "header": [],
             "url": "{{baseUrl}}/api/parent/{{parentId}}/students"
           },
-          "response": []
-        },
-        {
-          "name": "Link Student To Parent",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "url": "{{baseUrl}}/api/parent/link-student?parentId={{parentId}}&studentId={{studentId}}"
-          },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-PAR-03';",
+                  "const emptyMsg = 'Phụ huynh chưa có học sinh nào được liên kết.';",
+                  "console.log(`[${tc}] Get Parent Students`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response hop le`, function () {",
+                  "  const text = pm.response.text();",
+                  "  let body;",
+                  "  try { body = pm.response.json(); } catch (e) { body = text; }",
+                  "  if (Array.isArray(body)) {",
+                  "    pm.expect(body).to.be.an('array');",
+                  "  } else {",
+                  "    pm.expect(body).to.eql(emptyMsg);",
+                  "  }",
+                  "});",
+                  "",
+                  "let count = 0;",
+                  "try {",
+                  "  const parsed = pm.response.json();",
+                  "  if (Array.isArray(parsed)) count = parsed.length;",
+                  "} catch (e) { /* plain text empty list */ }",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', count);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Confirm Parent Form",
@@ -258,16 +404,243 @@
             "header": [],
             "url": "{{baseUrl}}/api/parent/confirm/{{formId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-PAR-04';",
+                  "console.log(`[${tc}] Confirm Parent Form`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "  pm.expect([200, 404]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao phu hop`, function () {",
+                  "  const body = pm.response.json();",
+                  "  if (pm.response.code === 200) {",
+                  "    pm.expect(body.message).to.include('Xác nhận thành công');",
+                  "  } else {",
+                  "    pm.expect(body.message).to.include('Không tìm thấy phiếu');",
+                  "  }",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Students",
+      "item": [
+        {
+          "name": "Create Student",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"student{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"Student Postman\",\"role\":\"STUDENT\",\"code\":\"ST{{$timestamp}}\",\"studentClass\":\"5A\",\"gender\":\"MALE\",\"dateOfBirth\":\"2014-01-01\",\"parentId\":{{parentId}}}"
+            },
+            "url": "{{baseUrl}}/api/students"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-STU-01';",
+                  "console.log(`[${tc}] Create Student`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response co id`, function () {",
+                  "  pm.expect(pm.response.json().id).to.be.a('number');",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "  pm.environment.set('studentId', String(pm.response.json().id));",
+                  "}",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Delete Parent",
+          "name": "Get All Students",
           "request": {
-            "method": "DELETE",
+            "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/parent/{{parentId}}"
+            "url": "{{baseUrl}}/api/students"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-STU-02';",
+                  "console.log(`[${tc}] Get All Students`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Student By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/students/{{studentId}}"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-STU-03';",
+                  "console.log(`[${tc}] Get Student By ID`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response co id`, function () {",
+                  "  pm.expect(pm.response.json()).to.have.property('id');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Student",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"id\":{{studentId}},\"email\":\"student{{$timestamp}}@school.com\",\"password\":\"123456\",\"fullName\":\"Student Updated\",\"role\":\"STUDENT\",\"code\":\"STU001\",\"dateOfBirth\":\"2014-01-01\",\"gender\":\"MALE\",\"studentClass\":\"6A\",\"city\":\"HCM\",\"district\":\"District 1\",\"grade\":\"6\",\"active\":true}"
+            },
+            "url": "{{baseUrl}}/api/students/{{studentId}}"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-STU-04';",
+                  "console.log(`[${tc}] Update Student`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Students By Parent",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/students/by-parent/{{parentId}}"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-STU-05';",
+                  "console.log(`[${tc}] Get Students By Parent`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Link Student To Parent",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": "{{baseUrl}}/api/parent/link-student?parentId={{parentId}}&studentId={{studentId}}"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-STU-06';",
+                  "console.log(`[${tc}] Link Student To Parent`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao thanh cong`, function () {",
+                  "  pm.expect(pm.response.text()).to.eql('Liên kết học sinh với phụ huynh thành công');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '-', pm.response.text());"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -290,7 +663,34 @@
             },
             "url": "{{baseUrl}}/api/nurses"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-NUR-01';",
+                  "console.log(`[${tc}] Create Nurse`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response co id`, function () {",
+                  "  pm.expect(pm.response.json().id).to.be.a('number');",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "  pm.environment.set('nurseId', String(pm.response.json().id));",
+                  "  pm.environment.set('reportedById', String(pm.response.json().id));",
+                  "}",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get All Nurses",
@@ -299,7 +699,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/nurses"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-NUR-02';",
+                  "console.log(`[${tc}] Get All Nurses`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Nurse By ID",
@@ -308,7 +730,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/nurses/{{nurseId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-NUR-03';",
+                  "console.log(`[${tc}] Get Nurse By ID`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response co id`, function () {",
+                  "  pm.expect(pm.response.json()).to.have.property('id');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Update Nurse",
@@ -326,7 +770,25 @@
             },
             "url": "{{baseUrl}}/api/nurses/{{nurseId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-NUR-04';",
+                  "console.log(`[${tc}] Update Nurse`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Delete Nurse",
@@ -335,7 +797,25 @@
             "header": [],
             "url": "{{baseUrl}}/api/nurses/{{nurseId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-NUR-05';",
+                  "console.log(`[${tc}] Delete Nurse`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "  pm.expect([200, 204]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -358,7 +838,33 @@
             },
             "url": "{{baseUrl}}/api/managers"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-MGR-01';",
+                  "console.log(`[${tc}] Create Manager`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response co id`, function () {",
+                  "  pm.expect(pm.response.json().id).to.be.a('number');",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "  pm.environment.set('managerId', String(pm.response.json().id));",
+                  "}",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get All Managers",
@@ -367,7 +873,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/managers"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-MGR-02';",
+                  "console.log(`[${tc}] Get All Managers`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Manager By ID",
@@ -376,7 +904,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/managers/{{managerId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-MGR-03';",
+                  "console.log(`[${tc}] Get Manager By ID`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response co id`, function () {",
+                  "  pm.expect(pm.response.json()).to.have.property('id');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Update Manager",
@@ -394,7 +944,25 @@
             },
             "url": "{{baseUrl}}/api/managers/{{managerId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-MGR-04';",
+                  "console.log(`[${tc}] Update Manager`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Delete Manager",
@@ -403,7 +971,25 @@
             "header": [],
             "url": "{{baseUrl}}/api/managers/{{managerId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-MGR-05';",
+                  "console.log(`[${tc}] Delete Manager`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "  pm.expect([200, 204]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -426,7 +1012,33 @@
             },
             "url": "{{baseUrl}}/api/blogs"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-BLOG-01';",
+                  "console.log(`[${tc}] Create Blog`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 201`, function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response co id`, function () {",
+                  "  pm.expect(pm.response.json().id).to.be.a('number');",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "  pm.environment.set('blogId', String(pm.response.json().id));",
+                  "}",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get All Blogs",
@@ -435,7 +1047,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/blogs"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-BLOG-02';",
+                  "console.log(`[${tc}] Get All Blogs`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Blog By ID",
@@ -444,7 +1078,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/blogs/{{blogId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-BLOG-03';",
+                  "console.log(`[${tc}] Get Blog By ID`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response co id`, function () {",
+                  "  pm.expect(pm.response.json()).to.have.property('id');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Update Blog",
@@ -462,7 +1118,25 @@
             },
             "url": "{{baseUrl}}/api/blogs/{{blogId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-BLOG-04';",
+                  "console.log(`[${tc}] Update Blog`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Delete Blog",
@@ -471,7 +1145,25 @@
             "header": [],
             "url": "{{baseUrl}}/api/blogs/{{blogId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-BLOG-05';",
+                  "console.log(`[${tc}] Delete Blog`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "  pm.expect([200, 204]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -494,7 +1186,33 @@
             },
             "url": "{{baseUrl}}/api/school-health-docs"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-DOC-01';",
+                  "console.log(`[${tc}] Create School Health Doc`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response co id`, function () {",
+                  "  pm.expect(pm.response.json().id).to.be.a('number');",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "  pm.environment.set('schoolHealthDocId', String(pm.response.json().id));",
+                  "}",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get All School Health Docs",
@@ -503,7 +1221,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/school-health-docs"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-DOC-02';",
+                  "console.log(`[${tc}] Get All School Health Docs`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get School Health Doc By ID",
@@ -512,7 +1252,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/school-health-docs/{{schoolHealthDocId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-DOC-03';",
+                  "console.log(`[${tc}] Get School Health Doc By ID`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response co id`, function () {",
+                  "  pm.expect(pm.response.json()).to.have.property('id');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Update School Health Doc",
@@ -530,7 +1292,25 @@
             },
             "url": "{{baseUrl}}/api/school-health-docs/{{schoolHealthDocId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-DOC-04';",
+                  "console.log(`[${tc}] Update School Health Doc`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Delete School Health Doc",
@@ -539,7 +1319,25 @@
             "header": [],
             "url": "{{baseUrl}}/api/school-health-docs/{{schoolHealthDocId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-DOC-05';",
+                  "console.log(`[${tc}] Delete School Health Doc`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "  pm.expect([200, 204]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -562,7 +1360,33 @@
             },
             "url": "{{baseUrl}}/api/medical-supplies"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-MS-01';",
+                  "console.log(`[${tc}] Create Medical Supply`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 201`, function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response co id`, function () {",
+                  "  pm.expect(pm.response.json().id).to.be.a('number');",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "  pm.environment.set('medicalSupplyId', String(pm.response.json().id));",
+                  "}",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get All Medical Supplies",
@@ -571,7 +1395,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/medical-supplies"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-MS-02';",
+                  "console.log(`[${tc}] Get All Medical Supplies`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Medical Supply By ID",
@@ -580,7 +1426,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/medical-supplies/{{medicalSupplyId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-MS-03';",
+                  "console.log(`[${tc}] Get Medical Supply By ID`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response co id`, function () {",
+                  "  pm.expect(pm.response.json()).to.have.property('id');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Update Medical Supply",
@@ -598,7 +1466,25 @@
             },
             "url": "{{baseUrl}}/api/medical-supplies/{{medicalSupplyId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-MS-04';",
+                  "console.log(`[${tc}] Update Medical Supply`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Delete Medical Supply",
@@ -607,7 +1493,25 @@
             "header": [],
             "url": "{{baseUrl}}/api/medical-supplies/{{medicalSupplyId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-MS-05';",
+                  "console.log(`[${tc}] Delete Medical Supply`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "  pm.expect([200, 204]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Medical Supplies By Category",
@@ -616,7 +1520,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/medical-supplies/category/Thuoc"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-MS-06';",
+                  "console.log(`[${tc}] Get Medical Supplies By Category`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -639,7 +1565,33 @@
             },
             "url": "{{baseUrl}}/api/health-profiles"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-HP-01';",
+                  "console.log(`[${tc}] Create Health Profile`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response co id`, function () {",
+                  "  pm.expect(pm.response.json().id).to.be.a('number');",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "  pm.environment.set('healthProfileId', String(pm.response.json().id));",
+                  "}",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get All Health Profiles",
@@ -648,7 +1600,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/health-profiles"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-HP-02';",
+                  "console.log(`[${tc}] Get All Health Profiles`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Health Profile By Student",
@@ -657,7 +1631,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/health-profiles/student/{{studentId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-HP-03';",
+                  "console.log(`[${tc}] Get Health Profile By Student`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response co id`, function () {",
+                  "  pm.expect(pm.response.json()).to.have.property('id');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Student ID By Parent",
@@ -666,7 +1662,31 @@
             "header": [],
             "url": "{{baseUrl}}/api/health-profiles/by-parent/{{parentId}}/student"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-HP-04';",
+                  "console.log(`[${tc}] Get Student ID By Parent`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la studentId (so nguyen)`, function () {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body).to.be.a('number');",
+                  "  pm.expect(body).to.be.above(0);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- studentId:', pm.response.json());"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Update Health Profile",
@@ -684,7 +1704,25 @@
             },
             "url": "{{baseUrl}}/api/health-profiles/{{healthProfileId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-HP-05';",
+                  "console.log(`[${tc}] Update Health Profile`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Delete Health Profile",
@@ -693,7 +1731,25 @@
             "header": [],
             "url": "{{baseUrl}}/api/health-profiles/{{healthProfileId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-HP-06';",
+                  "console.log(`[${tc}] Delete Health Profile`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "  pm.expect([200, 204]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -716,7 +1772,35 @@
             },
             "url": "{{baseUrl}}/api/health-incidents"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-HI-01';",
+                  "console.log(`[${tc}] Create Health Incident`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 201`, function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response co id`, function () {",
+                  "  pm.expect(pm.response.json().id).to.be.a('number');",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "  pm.environment.set('healthIncidentId', String(pm.response.json().id));",
+                  "  const d = pm.response.json();",
+                  "  if (d.incidentTime) pm.environment.set('incidentTime', d.incidentTime);",
+                  "}",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get All Health Incidents",
@@ -725,7 +1809,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/health-incidents"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-HI-02';",
+                  "console.log(`[${tc}] Get All Health Incidents`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Health Incident By ID",
@@ -734,7 +1840,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/health-incidents/{{healthIncidentId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-HI-03';",
+                  "console.log(`[${tc}] Get Health Incident By ID`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response co id`, function () {",
+                  "  pm.expect(pm.response.json()).to.have.property('id');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Update Health Incident",
@@ -752,7 +1880,25 @@
             },
             "url": "{{baseUrl}}/api/health-incidents/{{healthIncidentId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-HI-04';",
+                  "console.log(`[${tc}] Update Health Incident`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Delete Health Incident",
@@ -761,7 +1907,25 @@
             "header": [],
             "url": "{{baseUrl}}/api/health-incidents/{{healthIncidentId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-HI-05';",
+                  "console.log(`[${tc}] Delete Health Incident`);",
+                  "",
+                  "pm.test(`[${tc}] Status code hop le`, function () {",
+                  "  pm.expect([200, 204]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Health Incidents By Student",
@@ -770,7 +1934,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/health-incidents/student/{{studentId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-HI-06';",
+                  "console.log(`[${tc}] Get Health Incidents By Student`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Health Incidents By Reported By",
@@ -779,7 +1965,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/health-incidents/reported-by/{{reportedById}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-HI-07';",
+                  "console.log(`[${tc}] Get Health Incidents By Reported By`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Health Incidents By Incident Time",
@@ -788,7 +1996,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/health-incidents/incident-time/{{incidentTime}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-HI-08';",
+                  "console.log(`[${tc}] Get Health Incidents By Incident Time`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Health Incidents By Status",
@@ -797,7 +2027,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/health-incidents/status/REPORTED"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-HI-09';",
+                  "console.log(`[${tc}] Get Health Incidents By Status`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Health Incidents By Incident Type",
@@ -806,7 +2058,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/health-incidents/incident-type/FALL"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-HI-10';",
+                  "console.log(`[${tc}] Get Health Incidents By Incident Type`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Health Incidents By Incident Time And Status",
@@ -815,7 +2089,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/health-incidents/incident-time-and-status/{{incidentTime}}/REPORTED"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-HI-11';",
+                  "console.log(`[${tc}] Get Health Incidents By Incident Time And Status`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Health Incidents By Student And Incident Time",
@@ -824,7 +2120,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/health-incidents/student-and-incident-time/{{studentId}}/{{incidentTime}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-HI-12';",
+                  "console.log(`[${tc}] Get Health Incidents By Student And Incident Time`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -847,7 +2165,33 @@
             },
             "url": "{{baseUrl}}/api/medical-checkup/notify"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-MC-01';",
+                  "console.log(`[${tc}] Create Notification`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 201`, function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response co id`, function () {",
+                  "  pm.expect(pm.response.json().id).to.be.a('number');",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "  pm.environment.set('medicalCheckupNotificationId', String(pm.response.json().id));",
+                  "}",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Create Notification Bulk",
@@ -865,7 +2209,31 @@
             },
             "url": "{{baseUrl}}/api/medical-checkup/notify/bulk"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-MC-02';",
+                  "console.log(`[${tc}] Create Notification Bulk`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 201`, function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang co phan tu`, function () {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body).to.be.an('array').and.not.empty;",
+                  "});",
+                  "",
+                  "const body = pm.response.json();",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', body.length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get All Notifications",
@@ -874,7 +2242,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/medical-checkup/notifications"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-MC-03';",
+                  "console.log(`[${tc}] Get All Notifications`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Notifications By Parent",
@@ -883,7 +2273,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/medical-checkup/notifications?parentId={{parentId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-MC-04';",
+                  "console.log(`[${tc}] Get Notifications By Parent`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Notifications By Student",
@@ -892,7 +2304,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/medical-checkup/notifications?studentId={{studentId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-MC-05';",
+                  "console.log(`[${tc}] Get Notifications By Student`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Notifications By Status",
@@ -901,7 +2335,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/medical-checkup/notifications?status=PENDING"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-MC-06';",
+                  "console.log(`[${tc}] Get Notifications By Status`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Update Notification Consent",
@@ -919,7 +2375,25 @@
             },
             "url": "{{baseUrl}}/api/medical-checkup/notification/{{medicalCheckupNotificationId}}/consent"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-MC-07';",
+                  "console.log(`[${tc}] Update Notification Consent`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Create Result",
@@ -937,7 +2411,33 @@
             },
             "url": "{{baseUrl}}/api/medical-checkup/result"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-MC-08';",
+                  "console.log(`[${tc}] Create Result`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 201`, function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response co id`, function () {",
+                  "  pm.expect(pm.response.json().id).to.be.a('number');",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "  pm.environment.set('medicalCheckupResultId', String(pm.response.json().id));",
+                  "}",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Results By Student",
@@ -946,7 +2446,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/medical-checkup/results?studentId={{studentId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-MC-09';",
+                  "console.log(`[${tc}] Get Results By Student`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Results By Parent",
@@ -955,7 +2477,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/medical-checkup/results?parentId={{parentId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-MC-10';",
+                  "console.log(`[${tc}] Get Results By Parent`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Update Result",
@@ -973,7 +2517,25 @@
             },
             "url": "{{baseUrl}}/api/medical-checkup/result/{{medicalCheckupResultId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-MC-11';",
+                  "console.log(`[${tc}] Update Result`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Student Confirm Result",
@@ -982,7 +2544,25 @@
             "header": [],
             "url": "{{baseUrl}}/api/medical-checkup/result/{{medicalCheckupResultId}}/student-confirm"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-MC-12';",
+                  "console.log(`[${tc}] Student Confirm Result`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -1005,7 +2585,33 @@
             },
             "url": "{{baseUrl}}/api/vaccination-schedules"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-VAC-01';",
+                  "console.log(`[${tc}] Create Vaccination Schedule`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 201`, function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response co id`, function () {",
+                  "  pm.expect(pm.response.json().id).to.be.a('number');",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "  pm.environment.set('vaccinationScheduleId', String(pm.response.json().id));",
+                  "}",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Create Vaccination Schedules Bulk",
@@ -1023,7 +2629,31 @@
             },
             "url": "{{baseUrl}}/api/vaccination-schedules/bulk"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-VAC-02';",
+                  "console.log(`[${tc}] Create Vaccination Schedules Bulk`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 201`, function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang co phan tu`, function () {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body).to.be.an('array').and.not.empty;",
+                  "  pm.expect(body[0].id).to.be.a('number');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get All Vaccination Schedules",
@@ -1032,7 +2662,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/vaccination-schedules"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-VAC-03';",
+                  "console.log(`[${tc}] Get All Vaccination Schedules`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Vaccination Schedule By ID",
@@ -1041,7 +2693,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/vaccination-schedules/{{vaccinationScheduleId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-VAC-04';",
+                  "console.log(`[${tc}] Get Vaccination Schedule By ID`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response co id`, function () {",
+                  "  pm.expect(pm.response.json()).to.have.property('id');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Update Vaccination Schedule",
@@ -1059,16 +2733,25 @@
             },
             "url": "{{baseUrl}}/api/vaccination-schedules/{{vaccinationScheduleId}}"
           },
-          "response": []
-        },
-        {
-          "name": "Delete Vaccination Schedule",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": "{{baseUrl}}/api/vaccination-schedules/{{vaccinationScheduleId}}"
-          },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-VAC-05';",
+                  "console.log(`[${tc}] Update Vaccination Schedule`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Vaccination Schedules By Student",
@@ -1077,7 +2760,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/vaccination-schedules/student/{{studentId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-VAC-06';",
+                  "console.log(`[${tc}] Get Vaccination Schedules By Student`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Pending Parent Consent",
@@ -1086,7 +2791,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/vaccination-schedules/pending-parent-consent"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-VAC-07';",
+                  "console.log(`[${tc}] Get Pending Parent Consent`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Pending Parent Consent By Parent",
@@ -1095,7 +2822,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/vaccination-schedules/pending-parent-consent/{{parentId}}"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-VAC-08';",
+                  "console.log(`[${tc}] Get Pending Parent Consent By Parent`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Pending Student Confirmation",
@@ -1104,7 +2853,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/vaccination-schedules/pending-student-confirmation"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-VAC-09';",
+                  "console.log(`[${tc}] Get Pending Student Confirmation`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Vaccination Schedules By Parent Consent",
@@ -1113,7 +2884,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/vaccination-schedules/parent-consent/PENDING"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-VAC-10';",
+                  "console.log(`[${tc}] Get Vaccination Schedules By Parent Consent`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Not Vaccinated",
@@ -1122,7 +2915,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/vaccination-schedules/not-vaccinated"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-VAC-11';",
+                  "console.log(`[${tc}] Get Not Vaccinated`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Vaccinated",
@@ -1131,7 +2946,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/vaccination-schedules/vaccinated"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-VAC-12';",
+                  "console.log(`[${tc}] Get Vaccinated`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Vaccination Date Range",
@@ -1140,7 +2977,29 @@
             "header": [],
             "url": "{{baseUrl}}/api/vaccination-schedules/date-range?startDate=2026-01-01T00:00:00&endDate=2026-12-31T23:59:59"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-VAC-13';",
+                  "console.log(`[${tc}] Get Vaccination Date Range`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Response la mang`, function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code, '- count:', pm.response.json().length);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Update Parent Consent",
@@ -1158,7 +3017,29 @@
             },
             "url": "{{baseUrl}}/api/vaccination-schedules/{{vaccinationScheduleId}}/parent-consent"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-VAC-14';",
+                  "console.log(`[${tc}] Update Parent Consent`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] parentConsent la APPROVED`, function () {",
+                  "  pm.expect(pm.response.json().parentConsent).to.eql('APPROVED');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Update Student Confirmation",
@@ -1176,7 +3057,29 @@
             },
             "url": "{{baseUrl}}/api/vaccination-schedules/{{vaccinationScheduleId}}/student-confirmation"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-VAC-15';",
+                  "console.log(`[${tc}] Update Student Confirmation`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] studentConfirmation la true`, function () {",
+                  "  pm.expect(pm.response.json().studentConfirmation).to.eql(true);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Update Vaccination Status",
@@ -1194,7 +3097,124 @@
             },
             "url": "{{baseUrl}}/api/vaccination-schedules/{{vaccinationScheduleId}}/vaccination-status"
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-VAC-16';",
+                  "console.log(`[${tc}] Update Vaccination Status`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Da tiem thanh cong`, function () {",
+                  "  const d = pm.response.json();",
+                  "  const vaccinated = d.isVaccinated !== undefined ? d.isVaccinated : d.vaccinated;",
+                  "  pm.expect(vaccinated).to.eql(true);",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Vaccination Schedule",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/vaccination-schedules/{{vaccinationScheduleId}}"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-VAC-17';",
+                  "console.log(`[${tc}] Delete Vaccination Schedule`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao xoa thanh cong`, function () {",
+                  "  pm.expect(pm.response.json().message).to.include('Xóa lịch tiêm chủng thành công');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Student",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/students/{{studentId}}"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-VAC-18';",
+                  "console.log(`[${tc}] Delete Student`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao xoa thanh cong`, function () {",
+                  "  pm.expect(pm.response.json().message).to.include('Xóa học sinh thành công');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Parent",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/parent/{{parentId}}"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tc = 'UTC-VAC-19';",
+                  "console.log(`[${tc}] Delete Parent`);",
+                  "",
+                  "pm.test(`[${tc}] Status code la 200`, function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(`[${tc}] Thong bao xoa thanh cong`, function () {",
+                  "  pm.expect(pm.response.text()).to.eql('Xóa thành công');",
+                  "});",
+                  "",
+                  "console.log(`[${tc}] Ket qua:`, pm.response.code);"
+                ]
+              }
+            }
+          ]
         }
       ]
     }
